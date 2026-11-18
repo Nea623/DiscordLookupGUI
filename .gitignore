@@ -1,0 +1,13 @@
+# ビルド出力
+bin/
+obj/
+
+# Visual Studio / ユーザー設定
+*.user
+*.suo
+.vs/
+
+# 環境変数・シークレット
+.env
+*.local.json
+Properties/launchSettings.json

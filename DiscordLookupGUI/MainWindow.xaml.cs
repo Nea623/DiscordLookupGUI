@@ -1,0 +1,324 @@
+﻿using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using DiscordLookup.Models;
+using DiscordLookup.Services;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace DiscordLookup;
+
+public partial class MainWindow : Window
+{
+    private readonly DiscordApiService _apiService = new();
+    private string _currentAvatarUrl = string.Empty;
+    private string _currentBannerUrl = string.Empty;
+    private string _botToken = string.Empty;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        Loaded += MainWindow_Loaded;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        // 1. 環境変数 DISCORD_BOT_TOKEN から初期トークンを読み込む
+        var envToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+        if (!string.IsNullOrWhiteSpace(envToken))
+        {
+            _botToken = envToken;
+            InputBotToken.Password = envToken;
+            SetStatus("READY (TOKEN LOADED FROM ENV)", true);
+        }
+        else
+        {
+            SetStatus("WARNING: BOT TOKEN NOT SET (CHECK SETTINGS)", false);
+        }
+
+        // プレースホルダーの初期状態
+        UpdatePlaceholder();
+        UserIdInput.TextChanged += (s, ev) => UpdatePlaceholder();
+    }
+
+    private void UpdatePlaceholder()
+    {
+        if (UserIdPlaceholder != null)
+        {
+            UserIdPlaceholder.Visibility = string.IsNullOrEmpty(UserIdInput.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // タイトルバー & ウィンドウ操作
+    // ─────────────────────────────────────────────
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+    }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    // ─────────────────────────────────────────────
+    // タブ切り替え
+    // ─────────────────────────────────────────────
+    private void Tab_Checked(object sender, RoutedEventArgs e)
+    {
+        if (ViewMain == null || ViewRaw == null || ViewSettings == null) return;
+
+        ViewMain.Visibility = TabMain.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        ViewRaw.Visibility = TabRaw.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        ViewSettings.Visibility = TabSettings.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // ─────────────────────────────────────────────
+    // 設定保存
+    // ─────────────────────────────────────────────
+    private void SaveToken_Click(object sender, RoutedEventArgs e)
+    {
+        _botToken = InputBotToken.Password.Trim();
+        if (!string.IsNullOrWhiteSpace(_botToken))
+        {
+            _apiService.SetToken(_botToken);
+            SetStatus("TOKEN SAVED", true);
+            MessageBox.Show("Bot トークンを保存しました。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else
+        {
+            SetStatus("TOKEN CLEARED", false);
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // ユーザー検索処理
+    // ─────────────────────────────────────────────
+    private async void SearchButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ExecuteLookupAsync();
+    }
+
+    private async void UserIdInput_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            await ExecuteLookupAsync();
+        }
+    }
+
+    private async Task ExecuteLookupAsync()
+    {
+        var rawInput = UserIdInput.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(rawInput))
+        {
+            MessageBox.Show("ユーザーIDを入力してください。", "入力エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (!ulong.TryParse(rawInput, out var userId))
+        {
+            MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        // トークン確認
+        var token = !string.IsNullOrWhiteSpace(_botToken) ? _botToken : InputBotToken.Password.Trim();
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            MessageBox.Show("Discord Bot トークンが設定されていません。\n右上の「Settings」タブから設定してください。", "トークン未設定", MessageBoxButton.OK, MessageBoxImage.Warning);
+            TabSettings.IsChecked = true;
+            return;
+        }
+
+        _apiService.SetToken(token);
+
+        try
+        {
+            SearchButton.IsEnabled = false;
+            SetStatus("LOOKING UP USER...", true);
+
+            // API リクエスト
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", token);
+
+            var response = await client.GetAsync($"https://discord.com/api/v10/users/{userId}");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                SetStatus($"API ERROR: {(int)response.StatusCode}", false);
+                MessageBox.Show($"Discord API エラー:\n{(int)response.StatusCode} {response.ReasonPhrase}\n\n{content}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Raw JSON をインデントして整形表示
+            var parsedJson = JToken.Parse(content);
+            TxtRawJson.Text = parsedJson.ToString(Formatting.Indented);
+
+            // モデルへデシリアライズ
+            var user = JsonConvert.DeserializeObject<DiscordUser>(content);
+            if (user != null)
+            {
+                user.Id = userId.ToString();
+                DisplayUser(user, userId);
+                SetStatus("USER LOADED SUCCESSFULLY", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStatus("ERROR OCCURRED", false);
+            MessageBox.Show($"エラーが発生しました:\n{ex.Message}", "例外エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            SearchButton.IsEnabled = true;
+        }
+    }
+
+    private void DisplayUser(DiscordUser user, ulong rawId)
+    {
+        // プロフィール情報
+        TxtGlobalName.Text = string.IsNullOrWhiteSpace(user.GlobalName) ? user.Username : user.GlobalName;
+        TxtUsername.Text = $"@{user.Username}";
+        TxtUserId.Text = user.Id;
+
+        // クランタグ
+        if (!string.IsNullOrEmpty(user.ClanTag))
+        {
+            TxtClanTag.Text = user.ClanTag;
+            BadgeClan.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            BadgeClan.Visibility = Visibility.Collapsed;
+        }
+
+        // アクセントカラー
+        if (user.AccentColor.HasValue)
+        {
+            var hex = $"#{user.AccentColor.Value:X6}";
+            TxtAccentColor.Text = hex;
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(hex);
+                RectAccentColor.Background = new SolidColorBrush(color);
+            }
+            catch
+            {
+                RectAccentColor.Background = Brushes.Transparent;
+            }
+        }
+        else
+        {
+            TxtAccentColor.Text = "なし";
+            RectAccentColor.Background = Brushes.Transparent;
+        }
+
+        // アバター読み込み
+        _currentAvatarUrl = user.AvatarUrl;
+        BtnOpenAvatar.IsEnabled = !string.IsNullOrEmpty(_currentAvatarUrl);
+        LoadImage(AvatarImage, _currentAvatarUrl);
+
+        // バナー読み込み
+        _currentBannerUrl = user.BannerUrl ?? string.Empty;
+        BtnOpenBanner.IsEnabled = !string.IsNullOrEmpty(_currentBannerUrl);
+        if (!string.IsNullOrEmpty(_currentBannerUrl))
+        {
+            LoadImage(BannerImage, _currentBannerUrl);
+        }
+        else
+        {
+            BannerImage.Source = null;
+        }
+
+        // タイムライン / Snowflake 解析
+        TxtCreatedAtJst.Text = user.CreatedAtJst.ToString("yyyy年M月d日 HH:mm:ss");
+        TxtCreatedAtUtc.Text = $"UTC: {user.CreatedAt:yyyy-MM-dd HH:mm:ss}";
+
+        TxtElapsedBadge.Text = $"{user.ElapsedYears:F1} yrs";
+        TxtElapsedDays.Text = $"{user.ElapsedDays:N0} 日経過";
+        ProgAccountAge.Value = Math.Min(10.0, user.ElapsedYears);
+
+        // Snowflake 内部ID
+        var workerId = (rawId & 0x3E0000) >> 17;
+        var processId = (rawId & 0x1F000) >> 12;
+        TxtWorkerId.Text = $"{workerId}";
+        TxtProcessId.Text = $"{processId}";
+    }
+
+    private static void LoadImage(Image targetImage, string url)
+    {
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(url, UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            targetImage.Source = bitmap;
+        }
+        catch
+        {
+            targetImage.Source = null;
+        }
+    }
+
+    private void BtnOpenAvatar_Click(object sender, RoutedEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(_currentAvatarUrl))
+        {
+            OpenInBrowser(_currentAvatarUrl);
+        }
+    }
+
+    private void BtnOpenBanner_Click(object sender, RoutedEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(_currentBannerUrl))
+        {
+            OpenInBrowser(_currentBannerUrl);
+        }
+    }
+
+    private static void OpenInBrowser(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"ブラウザを開けませんでした: {ex.Message}");
+        }
+    }
+
+    private void SetStatus(string message, bool isSuccess)
+    {
+        TxtStatus.Text = message;
+        StatusDot.Fill = isSuccess
+            ? (SolidColorBrush)FindResource("SuccessGreenBrush")
+            : (SolidColorBrush)FindResource("DangerRedBrush");
+    }
+}
