@@ -252,7 +252,7 @@ public partial class MainWindow : Window
         TxtCreatedAtJst.Text = user.CreatedAtJst.ToString("yyyy年M月d日 HH:mm:ss");
         TxtCreatedAtUtc.Text = $"UTC: {user.CreatedAt:yyyy-MM-dd HH:mm:ss}";
 
-        TxtElapsedBadge.Text = $"{user.ElapsedYears:F1} yrs";
+        TxtElapsedBadge.Text = $"{user.ElapsedYears:F1} years";
         TxtElapsedDays.Text = $"{user.ElapsedDays:N0} 日経過";
         ProgAccountAge.Value = Math.Min(10.0, user.ElapsedYears);
 
