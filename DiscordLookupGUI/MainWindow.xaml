@@ -1,4 +1,4 @@
-﻿<Window x:Class="DiscordLookup.MainWindow"
+<Window x:Class="DiscordLookup.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -135,9 +135,9 @@
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
-                                        <!-- バナー画像 (中央揃え + 角丸クリップ) -->
-                                        <Border x:Name="BannerContainer" Height="120" CornerRadius="12" Background="#161F2E" BorderThickness="1" BorderBrush="#253550" SizeChanged="BannerContainer_SizeChanged">
-                                            <Image x:Name="BannerImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <!-- バナー画像 (枠全体を満たす UniformToFill + 角丸クリップ) -->
+                                        <Border x:Name="BannerContainer" Height="130" CornerRadius="12" Background="#161F2E" BorderThickness="1" BorderBrush="#253550" ClipToBounds="True" SizeChanged="BannerContainer_SizeChanged">
+                                            <Image x:Name="BannerImage" Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                                         </Border>
 
                                         <!-- アバター画像 (真円クリップ + 発光シアン外枠で絶対にはみ出さない設計) -->

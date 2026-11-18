@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Windows;
@@ -263,6 +263,9 @@ public partial class MainWindow : Window
     {
         if (BannerImage != null && e.NewSize.Width > 0 && e.NewSize.Height > 0)
         {
+            // バナー画像が枠全体を隙間なく埋め尽くすように幅と高さを枠サイズに完全一致させる
+            BannerImage.Width = e.NewSize.Width;
+            BannerImage.Height = e.NewSize.Height;
             BannerImage.Clip = new RectangleGeometry(
                 new Rect(0, 0, e.NewSize.Width, e.NewSize.Height),
                 12, 12);
