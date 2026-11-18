@@ -197,6 +197,10 @@ public partial class MainWindow : Window
 
     private void DisplayUser(DiscordUser user, ulong rawId)
     {
+        // 検索結果表示に切り替え
+        EmptyStateView.Visibility = Visibility.Collapsed;
+        SearchResultGrid.Visibility = Visibility.Visible;
+
         // プロフィール情報
         TxtGlobalName.Text = string.IsNullOrWhiteSpace(user.GlobalName) ? user.Username : user.GlobalName;
         TxtUsername.Text = $"@{user.Username}";

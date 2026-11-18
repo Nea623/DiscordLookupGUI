@@ -110,28 +110,52 @@
                 
                 <!-- 【タブ1: MAIN 画面 (プロフィール & 分析)】 -->
                 <Grid x:Name="ViewMain" Visibility="Visible">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.1*" />
-                        <ColumnDefinition Width="1.2*" />
-                    </Grid.ColumnDefinitions>
 
-                    <!-- ── 左カード: User Profile ── -->
-                    <Border Grid.Column="0" Margin="0,0,10,0" Background="{StaticResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{StaticResource CardBorderBrush}" ClipToBounds="True">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
+                    <!-- 未検索時のウェルカム・案内画面 (初期表示) -->
+                    <Border x:Name="EmptyStateView" Visibility="Visible" Background="{StaticResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{StaticResource CardBorderBrush}" Padding="30">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- アイコン発光サークル -->
+                            <Border Width="72" Height="72" CornerRadius="36" Background="#154DF2D3" BorderBrush="#504DF2D3" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,18">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#4DF2D3" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+                                </Border.Effect>
+                                <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
 
-                            <!-- カードヘッダー -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
-                                <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentCyanBrush}" Margin="0,0,8,0" />
-                                <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" />
-                            </StackPanel>
+                            <TextBlock Text="AWAITING USER LOOKUP" FontWeight="ExtraBold" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                            <TextBlock Text="上部の入力欄に Discord ユーザーID (Snowflake) を入力し、Enterキーを押してください。" 
+                                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,16" />
 
-                            <!-- プロフィール詳細 -->
-                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="16,0,16,16">
+                            <Border Background="{StaticResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#203A6B9B">
+                                <TextBlock Text="💡 ヒント: Discordでユーザーを右クリック ➔ 「ユーザーIDをコピー」で取得できます" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 検索結果表示グリッド (初期状態は非表示) -->
+                    <Grid x:Name="SearchResultGrid" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.1*" />
+                            <ColumnDefinition Width="1.2*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ── 左カード: User Profile ── -->
+                        <Border Grid.Column="0" Margin="0,0,10,0" Background="{StaticResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{StaticResource CardBorderBrush}" ClipToBounds="True">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- カードヘッダー -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
+                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentCyanBrush}" Margin="0,0,8,0" />
+                                    <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" />
+                                </StackPanel>
+
+                                <!-- プロフィール詳細 -->
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="16,0,16,16">
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
@@ -282,7 +306,8 @@
                             </ScrollViewer>
                         </Grid>
                     </Border>
-                </Grid>
+                    </Grid> <!-- SearchResultGrid 終了 -->
+                </Grid> <!-- ViewMain 終了 -->
 
                 <!-- 【タブ2: RAW DATA 画面】 -->
                 <Grid x:Name="ViewRaw" Visibility="Collapsed">
