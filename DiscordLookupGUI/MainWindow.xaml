@@ -135,9 +135,11 @@
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
-                                        <!-- バナー画像 (枠全体を満たす UniformToFill + 角丸クリップ) -->
-                                        <Border x:Name="BannerContainer" Height="130" CornerRadius="12" Background="#161F2E" BorderThickness="1" BorderBrush="#253550" ClipToBounds="True" SizeChanged="BannerContainer_SizeChanged">
-                                            <Image x:Name="BannerImage" Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                                        <!-- バナー画像 (枠全体を満たし、完全中央配置 + 角丸クリップ) -->
+                                        <Border x:Name="BannerContainer" Height="130" CornerRadius="12" Background="#161F2E" BorderThickness="1" BorderBrush="#253550" SizeChanged="BannerContainer_SizeChanged">
+                                            <Grid>
+                                                <Image x:Name="BannerImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Grid>
                                         </Border>
 
                                         <!-- アバター画像 (真円クリップ + 発光シアン外枠で絶対にはみ出さない設計) -->

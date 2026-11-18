@@ -263,10 +263,14 @@ public partial class MainWindow : Window
     {
         if (BannerImage != null && e.NewSize.Width > 0 && e.NewSize.Height > 0)
         {
-            // バナー画像が枠全体を隙間なく埋め尽くすように幅と高さを枠サイズに完全一致させる
-            BannerImage.Width = e.NewSize.Width;
-            BannerImage.Height = e.NewSize.Height;
-            BannerImage.Clip = new RectangleGeometry(
+            // 枠全体を満たしつつ、上下左右の重心が完全に中央に来るように MinWidth/MinHeight を設定
+            BannerImage.MinWidth = e.NewSize.Width;
+            BannerImage.MinHeight = e.NewSize.Height;
+            BannerImage.Width = double.NaN;
+            BannerImage.Height = double.NaN;
+
+            // コンテナ枠全体を角丸(12px)でクリップ
+            BannerContainer.Clip = new RectangleGeometry(
                 new Rect(0, 0, e.NewSize.Width, e.NewSize.Height),
                 12, 12);
         }
