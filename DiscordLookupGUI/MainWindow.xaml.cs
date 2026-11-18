@@ -10,6 +10,7 @@ using DiscordLookup.Models;
 using DiscordLookup.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using XamlAnimatedGif;
 
 namespace DiscordLookup;
 
@@ -241,14 +242,7 @@ public partial class MainWindow : Window
         // バナー読み込み
         _currentBannerUrl = user.BannerUrl ?? string.Empty;
         BtnOpenBanner.IsEnabled = !string.IsNullOrEmpty(_currentBannerUrl);
-        if (!string.IsNullOrEmpty(_currentBannerUrl))
-        {
-            LoadImage(BannerImage, _currentBannerUrl);
-        }
-        else
-        {
-            BannerImage.Source = null;
-        }
+        LoadImage(BannerImage, _currentBannerUrl);
 
         // タイムライン / Snowflake 解析
         TxtCreatedAtJst.Text = user.CreatedAtJst.ToString("yyyy年M月d日 HH:mm:ss");
@@ -265,20 +259,39 @@ public partial class MainWindow : Window
         TxtProcessId.Text = $"{processId}";
     }
 
+    private void BannerContainer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (BannerImage != null && e.NewSize.Width > 0 && e.NewSize.Height > 0)
+        {
+            BannerImage.Clip = new RectangleGeometry(
+                new Rect(0, 0, e.NewSize.Width, e.NewSize.Height),
+                12, 12);
+        }
+    }
+
     private static void LoadImage(Image targetImage, string url)
     {
         try
         {
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(url, UriKind.Absolute);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            targetImage.Source = bitmap;
+            if (string.IsNullOrEmpty(url))
+            {
+                AnimationBehavior.SetSourceUri(targetImage, null);
+                targetImage.Source = null;
+                return;
+            }
+
+            var uri = new Uri(url, UriKind.Absolute);
+            // XamlAnimatedGif を使用して GIF アニメーションを滑らかにループ再生
+            AnimationBehavior.SetSourceUri(targetImage, uri);
         }
         catch
         {
-            targetImage.Source = null;
+            try
+            {
+                AnimationBehavior.SetSourceUri(targetImage, null);
+                targetImage.Source = null;
+            }
+            catch { }
         }
     }
 

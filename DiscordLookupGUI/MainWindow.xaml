@@ -135,21 +135,24 @@
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
-                                        <!-- バナー画像 -->
-                                        <Border Height="110" CornerRadius="10" Background="#1A2436" BorderThickness="1" BorderBrush="#253550" ClipToBounds="True">
-                                            <Image x:Name="BannerImage" Stretch="UniformToFill" />
+                                        <!-- バナー画像 (中央揃え + 角丸クリップ) -->
+                                        <Border x:Name="BannerContainer" Height="120" CornerRadius="12" Background="#161F2E" BorderThickness="1" BorderBrush="#253550" SizeChanged="BannerContainer_SizeChanged">
+                                            <Image x:Name="BannerImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
 
-                                        <!-- アバター画像 (円形 + 発光ボーダー) -->
-                                        <Border Width="76" Height="76" CornerRadius="38" Background="#0C1420" BorderThickness="3" BorderBrush="{StaticResource AccentCyanBrush}"
-                                                HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="14,0,0,-24">
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="#4DF2D3" BlurRadius="12" ShadowDepth="0" Opacity="0.6" />
-                                            </Border.Effect>
-                                            <Border CornerRadius="35" ClipToBounds="True">
-                                                <Image x:Name="AvatarImage" Stretch="UniformToFill" />
-                                            </Border>
-                                        </Border>
+                                        <!-- アバター画像 (真円クリップ + 発光シアン外枠で絶対にはみ出さない設計) -->
+                                        <Grid Width="80" Height="80" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="14,0,0,-26">
+                                            <Ellipse Width="80" Height="80" Stroke="{StaticResource AccentCyanBrush}" StrokeThickness="3" Fill="#0C1420">
+                                                <Ellipse.Effect>
+                                                    <DropShadowEffect Color="#4DF2D3" BlurRadius="14" ShadowDepth="0" Opacity="0.65" />
+                                                </Ellipse.Effect>
+                                            </Ellipse>
+                                            <Image x:Name="AvatarImage" Width="74" Height="74" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Image.Clip>
+                                                    <EllipseGeometry Center="37,37" RadiusX="37" RadiusY="37" />
+                                                </Image.Clip>
+                                            </Image>
+                                        </Grid>
                                     </Grid>
 
                                     <!-- ユーザー名など (アバター下に余白調整) -->
