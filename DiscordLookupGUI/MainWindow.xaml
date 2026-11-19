@@ -166,7 +166,14 @@
 
                     <!-- 右側: ウィンドウ操作ボタン -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource WindowCircleButton}" x:Name="BtnThemeToggle" Content="🌙" Click="BtnThemeToggle_Click" Margin="0,0,8,0" ToolTip="テーマ切り替え (Dark / Light)" />
+                        <Button Style="{StaticResource WindowCircleButton}" x:Name="BtnThemeToggle" Content="🌙" Click="BtnThemeToggle_Click" Margin="0,0,8,0" ToolTip="テーマ選択 (Light / Dark)">
+                            <Button.ContextMenu>
+                                <ContextMenu Style="{StaticResource CyberContextMenu}">
+                                    <MenuItem Header="☀️  Light Mode" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌙  Dark Mode" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                         <Button Style="{StaticResource WindowCircleButton}" Content="─" Click="MinimizeButton_Click" Margin="0,0,8,0" ToolTip="最小化" />
                         <Button Style="{StaticResource WindowCloseCircleButton}" Content="✕" Click="CloseButton_Click" ToolTip="閉じる" />
                     </StackPanel>
@@ -450,14 +457,20 @@
 
                             <Button Style="{StaticResource GlowButton}" Content="Save Bot Token" Width="150" HorizontalAlignment="Left" Click="SaveToken_Click" />
 
-                            <!-- テーマ設定 -->
+                            <!-- テーマ設定 (ボタン押下でリスト表示) -->
                             <TextBlock Text="Theme Preference" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="12" Padding="4" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
-                                <StackPanel Orientation="Horizontal">
-                                    <RadioButton Style="{StaticResource PillTabButton}" Content="🌙 Dark Mode" x:Name="RadioThemeDark" Checked="ThemeRadio_Checked" Margin="2,0" />
-                                    <RadioButton Style="{StaticResource PillTabButton}" Content="☀️ Light Mode" x:Name="RadioThemeLight" Checked="ThemeRadio_Checked" Margin="2,0" />
+                            <Button x:Name="BtnSettingsThemeSelect" Style="{StaticResource GlowButton}" Click="BtnSettingsThemeSelect_Click" HorizontalAlignment="Left" MinWidth="180">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock x:Name="TxtSettingsThemeCurrent" Text="🌙  Dark Mode" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock Text=" ▾" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" Margin="10,0,0,0" />
                                 </StackPanel>
-                            </Border>
+                                <Button.ContextMenu>
+                                    <ContextMenu Style="{StaticResource CyberContextMenu}">
+                                        <MenuItem Header="☀️  Light Mode" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
+                                        <MenuItem Header="🌙  Dark Mode" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
                         </StackPanel>
                     </Border>
 

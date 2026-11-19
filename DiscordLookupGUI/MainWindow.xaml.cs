@@ -74,22 +74,38 @@ public partial class MainWindow : Window
     }
 
     // ─────────────────────────────────────────────
-    // テーマ切り替え処理
+    // テーマ切り替え処理 (ボタン押下で横方向にリスト表示)
     // ─────────────────────────────────────────────
     private void BtnThemeToggle_Click(object sender, RoutedEventArgs e)
     {
-        var nextTheme = ThemeManager.CurrentTheme == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark;
-        ThemeManager.ApplyTheme(nextTheme);
+        // タイトルバーボタンは左横にスッと展開
+        OpenThemeContextMenu(BtnThemeToggle, System.Windows.Controls.Primitives.PlacementMode.Left);
     }
 
-    private void ThemeRadio_Checked(object sender, RoutedEventArgs e)
+    private void BtnSettingsThemeSelect_Click(object sender, RoutedEventArgs e)
     {
-        if (RadioThemeDark == null || RadioThemeLight == null) return;
-        var selectedTheme = RadioThemeLight.IsChecked == true ? AppTheme.Light : AppTheme.Dark;
-        if (selectedTheme != ThemeManager.CurrentTheme)
+        // Settings 画面のボタンは右横にスッと展開
+        OpenThemeContextMenu(BtnSettingsThemeSelect, System.Windows.Controls.Primitives.PlacementMode.Right);
+    }
+
+    private void OpenThemeContextMenu(Button? button, System.Windows.Controls.Primitives.PlacementMode placement)
+    {
+        if (button?.ContextMenu != null)
         {
-            ThemeManager.ApplyTheme(selectedTheme);
+            button.ContextMenu.PlacementTarget = button;
+            button.ContextMenu.Placement = placement;
+            button.ContextMenu.IsOpen = true;
         }
+    }
+
+    private void SelectThemeLight_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.ApplyTheme(AppTheme.Light);
+    }
+
+    private void SelectThemeDark_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.ApplyTheme(AppTheme.Dark);
     }
 
     private void OnThemeChanged(AppTheme theme)
@@ -103,10 +119,9 @@ public partial class MainWindow : Window
         {
             BtnThemeToggle.Content = theme == AppTheme.Dark ? "🌙" : "☀️";
         }
-        if (RadioThemeDark != null && RadioThemeLight != null)
+        if (TxtSettingsThemeCurrent != null)
         {
-            RadioThemeDark.IsChecked = theme == AppTheme.Dark;
-            RadioThemeLight.IsChecked = theme == AppTheme.Light;
+            TxtSettingsThemeCurrent.Text = theme == AppTheme.Dark ? "🌙  Dark Mode" : "☀️  Light Mode";
         }
     }
 
