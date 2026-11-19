@@ -462,7 +462,7 @@
                             <Button x:Name="BtnSettingsThemeSelect" Style="{StaticResource GlowButton}" Click="BtnSettingsThemeSelect_Click" HorizontalAlignment="Left" MinWidth="180">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock x:Name="TxtSettingsThemeCurrent" Text="🌙  Dark Mode" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    <TextBlock Text=" ▾" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" Margin="10,0,0,0" />
+                                    <TextBlock Text=" ▸" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" Margin="10,0,0,0" />
                                 </StackPanel>
                                 <Button.ContextMenu>
                                     <ContextMenu Style="{StaticResource CyberContextMenu}">
