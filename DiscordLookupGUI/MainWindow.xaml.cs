@@ -331,6 +331,11 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnOpenGitHub_Click(object sender, RoutedEventArgs e)
+    {
+        OpenInBrowser("https://github.com/Nea623/DiscordLookupGUI");
+    }
+
     private static void OpenInBrowser(string url)
     {
         try
