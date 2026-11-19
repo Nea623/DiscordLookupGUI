@@ -29,6 +29,11 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        // テーマ機能の初期化
+        ThemeManager.ThemeChanged += OnThemeChanged;
+        ThemeManager.Initialize();
+        UpdateThemeUi(ThemeManager.CurrentTheme);
+
         // 1. 環境変数 DISCORD_BOT_TOKEN から初期トークンを読み込む
         var envToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
         if (!string.IsNullOrWhiteSpace(envToken))
@@ -65,6 +70,43 @@ public partial class MainWindow : Window
         if (e.ButtonState == MouseButtonState.Pressed)
         {
             DragMove();
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // テーマ切り替え処理
+    // ─────────────────────────────────────────────
+    private void BtnThemeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        var nextTheme = ThemeManager.CurrentTheme == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark;
+        ThemeManager.ApplyTheme(nextTheme);
+    }
+
+    private void ThemeRadio_Checked(object sender, RoutedEventArgs e)
+    {
+        if (RadioThemeDark == null || RadioThemeLight == null) return;
+        var selectedTheme = RadioThemeLight.IsChecked == true ? AppTheme.Light : AppTheme.Dark;
+        if (selectedTheme != ThemeManager.CurrentTheme)
+        {
+            ThemeManager.ApplyTheme(selectedTheme);
+        }
+    }
+
+    private void OnThemeChanged(AppTheme theme)
+    {
+        UpdateThemeUi(theme);
+    }
+
+    private void UpdateThemeUi(AppTheme theme)
+    {
+        if (BtnThemeToggle != null)
+        {
+            BtnThemeToggle.Content = theme == AppTheme.Dark ? "🌙" : "☀️";
+        }
+        if (RadioThemeDark != null && RadioThemeLight != null)
+        {
+            RadioThemeDark.IsChecked = theme == AppTheme.Dark;
+            RadioThemeLight.IsChecked = theme == AppTheme.Light;
         }
     }
 

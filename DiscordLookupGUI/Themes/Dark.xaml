@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ══════════════════════════════════════════
-         テーマ: Dark Cyan (デフォルト・サイバーネイビー)
+         テーマ: Dark (サイバーネイビー ＆ ネオンシアン)
          ══════════════════════════════════════════ -->
     <Color x:Key="WindowBgColor">#FF070B12</Color>
     <Color x:Key="HeaderBgColor">#CC0B111D</Color>
@@ -16,6 +16,7 @@
     <Color x:Key="AccentBlue">#FF3B82F6</Color>
     <Color x:Key="AccentPurple">#FF8B5CF6</Color>
 
+    <!-- テキストカラー -->
     <Color x:Key="TextPrimary">#FFF1F5F9</Color>
     <Color x:Key="TextSecondary">#FF94A3B8</Color>
     <Color x:Key="TextMuted">#FF475569</Color>
@@ -37,5 +38,11 @@
     <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
     <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
     <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
+
+    <!-- コントロール固有背景 -->
+    <SolidColorBrush x:Key="InputBgBrush" Color="#80080E18" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#333A6B9B" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#80060A12" />
+    <SolidColorBrush x:Key="BannerBgBrush" Color="#161F2E" />
 
 </ResourceDictionary>
