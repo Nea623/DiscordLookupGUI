@@ -206,10 +206,19 @@ public partial class MainWindow : Window
         TxtUsername.Text = $"@{user.Username}";
         TxtUserId.Text = user.Id;
 
-        // クランタグ
+        // クランタグ & クランバッジ
         if (!string.IsNullOrEmpty(user.ClanTag))
         {
             TxtClanTag.Text = user.ClanTag;
+            if (!string.IsNullOrEmpty(user.ClanBadgeUrl))
+            {
+                LoadImage(ImgClanBadge, user.ClanBadgeUrl);
+                ImgClanBadge.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ImgClanBadge.Visibility = Visibility.Collapsed;
+            }
             BadgeClan.Visibility = Visibility.Visible;
         }
         else

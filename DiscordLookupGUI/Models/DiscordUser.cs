@@ -65,9 +65,26 @@ public class DiscordUser
 
     /// <summary>クランタグ（なし → null）</summary>
     public string? ClanTag => Clan?.Tag;
+
+    /// <summary>クランバッジ画像URL（なし → null）</summary>
+    public string? ClanBadgeUrl => Clan?.BadgeUrl;
 }
 
 public class ClanInfo
 {
+    [Newtonsoft.Json.JsonProperty("identity_guild_id")]
+    public string? IdentityGuildId { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("identity_enabled")]
+    public bool IdentityEnabled { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("tag")]
     public string? Tag { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("badge")]
+    public string? Badge { get; set; }
+
+    public string? BadgeUrl => !string.IsNullOrEmpty(IdentityGuildId) && !string.IsNullOrEmpty(Badge)
+        ? $"https://cdn.discordapp.com/clan-badges/{IdentityGuildId}/{Badge}.png"
+        : null;
 }
