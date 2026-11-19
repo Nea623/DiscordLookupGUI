@@ -75,7 +75,29 @@ public partial class MainWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        Close();
+        // 終了時もスムーズに縮小＆フェードアウトして自然に閉じる
+        var sb = new System.Windows.Media.Animation.Storyboard();
+        var duration = TimeSpan.FromMilliseconds(180);
+        var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseIn };
+
+        var animOpacity = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.0, duration) { EasingFunction = easing };
+        var animScaleX = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.95, duration) { EasingFunction = easing };
+        var animScaleY = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.95, duration) { EasingFunction = easing };
+
+        System.Windows.Media.Animation.Storyboard.SetTarget(animOpacity, RootBorder);
+        System.Windows.Media.Animation.Storyboard.SetTargetProperty(animOpacity, new PropertyPath("Opacity"));
+
+        System.Windows.Media.Animation.Storyboard.SetTarget(animScaleX, RootBorder);
+        System.Windows.Media.Animation.Storyboard.SetTargetProperty(animScaleX, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
+
+        System.Windows.Media.Animation.Storyboard.SetTarget(animScaleY, RootBorder);
+        System.Windows.Media.Animation.Storyboard.SetTargetProperty(animScaleY, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
+
+        sb.Children.Add(animOpacity);
+        sb.Children.Add(animScaleX);
+        sb.Children.Add(animScaleY);
+        sb.Completed += (s, ev) => Close();
+        sb.Begin();
     }
 
     // ─────────────────────────────────────────────
