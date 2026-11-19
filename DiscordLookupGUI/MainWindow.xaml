@@ -259,7 +259,7 @@
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
                                         <!-- バナー画像 (枠全体を満たし、完全中央配置 + 角丸クリップ) -->
-                                        <Border x:Name="BannerContainer" Height="130" CornerRadius="12" Background="#161F2E" BorderThickness="1" BorderBrush="#253550" SizeChanged="BannerContainer_SizeChanged">
+                                        <Border x:Name="BannerContainer" Height="130" CornerRadius="12" Background="{DynamicResource BannerBgBrush}" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" SizeChanged="BannerContainer_SizeChanged">
                                             <Grid>
                                                 <Image x:Name="BannerImage" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Grid>
@@ -295,7 +295,7 @@
                                     </StackPanel>
 
                                     <!-- 各種情報リスト -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="#1F2A3F">
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
@@ -353,7 +353,7 @@
                                 <StackPanel Margin="16,0,16,16">
 
                                     <!-- メトリクス行 1: アカウント作成日 -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="#1F2A3F">
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <StackPanel>
                                             <TextBlock Text="Account Creation Date (JST)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
                                             <TextBlock x:Name="TxtCreatedAtJst" Text="-- 年 -- 月 -- 日 --:--:--" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,4,0,0" />
@@ -362,7 +362,7 @@
                                     </Border>
 
                                     <!-- メトリクス行 2: 経過年数 / 経過日数 (プログレスゲージ風デザイン) -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="#1F2A3F">
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <StackPanel>
                                             <Grid>
                                                 <TextBlock Text="Account Age (経過時間)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
@@ -385,7 +385,7 @@
                                     </Border>
 
                                     <!-- メトリクス行 3: Snowflake 解析情報 -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" BorderThickness="1" BorderBrush="#1F2A3F">
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <StackPanel>
                                             <TextBlock Text="Snowflake Decoding" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,8" />
                                             
@@ -444,7 +444,7 @@
                             <TextBlock Text="Discord Bot Token" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,8" />
                             <PasswordBox x:Name="InputBotToken" Background="{DynamicResource CardInnerBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="12,10" FontSize="14" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,0,8" />
                             
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderThickness="1" BorderBrush="#1F2A3F">
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <TextBlock Text="💡 環境変数 DISCORD_BOT_TOKEN が設定されている場合は自動的に読み込まれます。ここから手動でトークンを入力・上書きして保存することも可能です。" FontSize="11" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
                             </Border>
 
@@ -452,7 +452,7 @@
 
                             <!-- テーマ設定 -->
                             <TextBlock Text="Theme Preference" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="12" Padding="4" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="#1F2A3F">
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="12" Padding="4" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <StackPanel Orientation="Horizontal">
                                     <RadioButton Style="{StaticResource PillTabButton}" Content="🌙 Dark Mode" x:Name="RadioThemeDark" Checked="ThemeRadio_Checked" Margin="2,0" />
                                     <RadioButton Style="{StaticResource PillTabButton}" Content="☀️ Light Mode" x:Name="RadioThemeLight" Checked="ThemeRadio_Checked" Margin="2,0" />
@@ -471,7 +471,7 @@
                             </StackPanel>
 
                             <!-- アプリ情報 -->
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14" Margin="0,0,0,14" BorderThickness="1" BorderBrush="#1F2A3F">
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14" Margin="0,0,0,14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <TextBlock Text="DISCORD LOOKUP GUI" FontWeight="ExtraBold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
@@ -499,7 +499,7 @@
                             </Button>
 
                             <!-- 技術スタック / 謝辞 -->
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="#1F2A3F">
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <StackPanel>
                                     <TextBlock Text="Special Thanks / Technologies" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
                                     <TextBlock Text="• Antigravity IDE (Agentic AI Development Environment)" FontSize="11" Foreground="#A78BFA" FontWeight="SemiBold" Margin="0,2" />
@@ -518,17 +518,17 @@
             <!-- ══════════════════════════════════════════
                  4. ステータスフッター
                  ══════════════════════════════════════════ -->
-            <Border Grid.Row="3" Background="#50070B12" CornerRadius="0,0,18,18" BorderThickness="0,1,0,0" BorderBrush="#152030">
+            <Border Grid.Row="3" Background="{DynamicResource FooterBgBrush}" CornerRadius="0,0,18,18" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource FooterBorderBrush}">
                 <Grid Margin="20,0,20,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{StaticResource SuccessGreenBrush}" Margin="0,0,8,0" />
+                        <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{DynamicResource SuccessGreenBrush}" Margin="0,0,8,0" />
                         <TextBlock x:Name="TxtStatus" Text="READY" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock Text="|" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="10,0" />
-                        <TextBlock Text="API: Discord v10" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                        <TextBlock Text="|" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="10,0" />
+                        <TextBlock Text="API: Discord v10" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock Text="DISCORD LOOKUP GUI" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                        <TextBlock Text="DISCORD LOOKUP GUI" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                     </StackPanel>
                 </Grid>
             </Border>

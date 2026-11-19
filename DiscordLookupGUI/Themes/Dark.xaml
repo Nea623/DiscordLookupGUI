@@ -48,5 +48,7 @@
     <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#400A101C" />
     <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#253550" />
     <SolidColorBrush x:Key="BannerBgBrush" Color="#161F2E" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#50070B12" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#152030" />
 
 </ResourceDictionary>
