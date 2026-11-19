@@ -56,14 +56,14 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- 中央: ピルナビゲーションタブ -->
+                    <!-- 中央: ピルナビゲーションタブ (横均等幅) -->
                     <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Background="#80060A12" CornerRadius="18" Padding="4" BorderThickness="1" BorderBrush="#203A6B9B">
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton Style="{StaticResource PillTabButton}" Content="Main" IsChecked="True" x:Name="TabMain" Checked="Tab_Checked" />
-                            <RadioButton Style="{StaticResource PillTabButton}" Content="Raw Data" x:Name="TabRaw" Checked="Tab_Checked" Margin="4,0,0,0" />
-                            <RadioButton Style="{StaticResource PillTabButton}" Content="Settings" x:Name="TabSettings" Checked="Tab_Checked" Margin="4,0,0,0" />
-                        </StackPanel>
+                        <UniformGrid Rows="1" Columns="3">
+                            <RadioButton Style="{StaticResource PillTabButton}" Content="Main" IsChecked="True" x:Name="TabMain" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
+                            <RadioButton Style="{StaticResource PillTabButton}" Content="Raw Data" x:Name="TabRaw" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
+                            <RadioButton Style="{StaticResource PillTabButton}" Content="Settings" x:Name="TabSettings" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
+                        </UniformGrid>
                     </Border>
 
                     <!-- 右側: ウィンドウ操作ボタン -->
