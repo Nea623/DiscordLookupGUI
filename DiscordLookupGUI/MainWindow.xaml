@@ -56,8 +56,8 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- 中央: ピルナビゲーションタブ (横均等幅) -->
-                    <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    <!-- 中央: ピルナビゲーションタブ (ウィンドウ全体の完全中央・左右均等配置) -->
+                    <Border Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
                             Background="#80060A12" CornerRadius="18" Padding="4" BorderThickness="1" BorderBrush="#203A6B9B">
                         <UniformGrid Rows="1" Columns="3">
                             <RadioButton Style="{StaticResource PillTabButton}" Content="Main" IsChecked="True" x:Name="TabMain" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
