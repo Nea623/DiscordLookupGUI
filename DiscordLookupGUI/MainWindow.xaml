@@ -8,6 +8,7 @@
         Title="Discord Lookup" 
         Height="680" Width="1040"
         WindowStartupLocation="CenterScreen"
+        Icon="Assets/app.ico"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
