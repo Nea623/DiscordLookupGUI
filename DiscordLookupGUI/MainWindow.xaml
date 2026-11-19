@@ -380,6 +380,8 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                         <TextBlock Text="Created by: " FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
                                         <TextBlock Text="Neaneko" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AccentCyanBrush}" />
+                                        <TextBlock Text="  •  Built with: " FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
+                                        <TextBlock Text="Antigravity IDE" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AccentPurpleBrush}" />
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -396,6 +398,7 @@
                             <Border Background="{StaticResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="#1F2A3F">
                                 <StackPanel>
                                     <TextBlock Text="Special Thanks / Technologies" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                                    <TextBlock Text="• Antigravity IDE (Agentic AI Development Environment)" FontSize="11" Foreground="#A78BFA" FontWeight="SemiBold" Margin="0,2" />
                                     <TextBlock Text="• .NET 8 WPF (Windows Desktop)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
                                     <TextBlock Text="• XamlAnimatedGif (Animated GIF Engine)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
                                     <TextBlock Text="• Emoji.Wpf (DirectWrite Color Emoji Support)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
