@@ -495,10 +495,12 @@
                                     <TextBlock Text="Cyberpunk-themed Discord User OSINT / Lookup Client" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8" />
                                     
                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="Created by: " FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
-                                        <TextBlock Text="Neaneko" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AccentCyanBrush}" />
-                                        <TextBlock Text="  •  Built with: " FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
-                                        <TextBlock Text="Antigravity IDE" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AccentPurpleBrush}" />
+                                        <TextBlock Text="Created by: " FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="Neaneko" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" />
+                                        <TextBlock Text="  •  Built with: " FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="Visual Studio" FontWeight="Bold" FontSize="12" Foreground="#C084FC" />
+                                        <TextBlock Text=" &amp; " FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="Antigravity IDE" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentPurpleBrush}" />
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -515,6 +517,7 @@
                             <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <StackPanel>
                                     <TextBlock Text="Special Thanks / Technologies" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                                    <TextBlock Text="• Microsoft Visual Studio (C# / .NET Tooling)" FontSize="11" Foreground="#60A5FA" FontWeight="SemiBold" Margin="0,2" />
                                     <TextBlock Text="• Antigravity IDE (Agentic AI Development Environment)" FontSize="11" Foreground="#A78BFA" FontWeight="SemiBold" Margin="0,2" />
                                     <TextBlock Text="• .NET 8 WPF (Windows Desktop)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
                                     <TextBlock Text="• XamlAnimatedGif (Animated GIF Engine)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
