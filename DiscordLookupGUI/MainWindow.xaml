@@ -360,7 +360,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock Text="DISCORD LOOKUP CONSOLE → GUI" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                        <TextBlock Text="DISCORD LOOKUP GUI" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
                     </StackPanel>
                 </Grid>
             </Border>
