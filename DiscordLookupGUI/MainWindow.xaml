@@ -156,7 +156,7 @@
 
                     <!-- 中央: ピルナビゲーションタブ (ウィンドウ全体の完全中央・左右均等配置) -->
                     <Border Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Background="#80060A12" CornerRadius="18" Padding="4" BorderThickness="1" BorderBrush="#203A6B9B">
+                            Background="{DynamicResource TabContainerBgBrush}" CornerRadius="18" Padding="4" BorderThickness="1" BorderBrush="{DynamicResource TabBorderBrush}">
                         <UniformGrid Rows="1" Columns="3">
                             <RadioButton Style="{StaticResource PillTabButton}" Content="Main" IsChecked="True" x:Name="TabMain" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
                             <RadioButton Style="{StaticResource PillTabButton}" Content="Raw Data" x:Name="TabRaw" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
@@ -176,7 +176,7 @@
             <!-- ══════════════════════════════════════════
                  2. 検索バー & クイックアクション
                  ══════════════════════════════════════════ -->
-            <Border Grid.Row="1" Margin="20,4,20,12" Background="#400A101C" CornerRadius="12" Padding="14,10" BorderThickness="1" BorderBrush="#253550">
+            <Border Grid.Row="1" Margin="20,4,20,12" Background="{DynamicResource SearchContainerBgBrush}" CornerRadius="12" Padding="14,10" BorderThickness="1" BorderBrush="{DynamicResource SearchContainerBorderBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

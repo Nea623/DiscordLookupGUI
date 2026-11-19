@@ -39,10 +39,14 @@
     <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
     <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
 
-    <!-- コントロール固有背景 -->
+    <!-- コントロール固有背景 ＆ 視認性の高いパーツ配色 -->
     <SolidColorBrush x:Key="InputBgBrush" Color="#80080E18" />
     <SolidColorBrush x:Key="ControlBorderBrush" Color="#333A6B9B" />
-    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#80060A12" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#B3060A12" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="#4D3A6B9B" />
+    <SolidColorBrush x:Key="TabTextBrush" Color="#FFCBD5E1" />
+    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#400A101C" />
+    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#253550" />
     <SolidColorBrush x:Key="BannerBgBrush" Color="#161F2E" />
 
 </ResourceDictionary>
