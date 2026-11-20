@@ -1,0 +1,59 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════
+         テーマ: Sunset (夕暮れトワイライトパープル ＆ サンセットオレンジ)
+         ══════════════════════════════════════════ -->
+    <Color x:Key="WindowBgColor">#FF120824</Color>
+    <Color x:Key="HeaderBgColor">#CC16082A</Color>
+    <Color x:Key="CardBgColor">#CC1C0D33</Color>
+    <Color x:Key="CardInnerBgColor">#80100620</Color>
+    <Color x:Key="CardBorderColor">#33F97316</Color>
+
+    <!-- メインアクセントカラー (鮮やかなサンセットオレンジ ＆ トワイライトパープル) -->
+    <Color x:Key="AccentColor">#FFF97316</Color>
+    <Color x:Key="AccentCyan">#FFF97316</Color>
+    <Color x:Key="AccentBlue">#FF818CF8</Color>
+    <Color x:Key="AccentPurple">#FFC084FC</Color>
+
+    <!-- テキストカラー (夕焼けの温もりと高いコントラスト) -->
+    <Color x:Key="TextPrimary">#FFFFFAF5</Color>
+    <Color x:Key="TextSecondary">#FFE2D4E8</Color>
+    <Color x:Key="TextMuted">#FF9D82AC</Color>
+    <Color x:Key="DangerRed">#FFF43F5E</Color>
+    <Color x:Key="SuccessGreen">#FF10B981</Color>
+
+    <!-- ブラシ定義: ウィンドウ背景は息をのむ紫〜オレンジの夕暮れグラデーション -->
+    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FF120824" Offset="0.0" />
+        <GradientStop Color="#FF1D0B2E" Offset="0.5" />
+        <GradientStop Color="#FF2D0F24" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
+    <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBgColor}" />
+    <SolidColorBrush x:Key="CardInnerBgBrush" Color="{StaticResource CardInnerBgColor}" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource CardBorderColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource AccentCyan}" />
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}" />
+    <SolidColorBrush x:Key="AccentPurpleBrush" Color="{StaticResource AccentPurple}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+    <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
+    <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
+
+    <!-- コントロール固有背景 ＆ 夕暮れ調パーツ配色 -->
+    <SolidColorBrush x:Key="InputBgBrush" Color="#80100620" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#33F97316" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#B3100622" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="#4DF97316" />
+    <SolidColorBrush x:Key="TabTextBrush" Color="#FFF0E4F5" />
+    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#40240E38" />
+    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#40F97316" />
+    <SolidColorBrush x:Key="BannerBgBrush" Color="#1E0C30" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#50100622" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#20F97316" />
+
+</ResourceDictionary>

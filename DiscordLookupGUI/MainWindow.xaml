@@ -169,8 +169,9 @@
                         <Button Style="{StaticResource WindowCircleButton}" x:Name="BtnThemeToggle" Content="🌙" Click="BtnThemeToggle_Click" Margin="0,0,8,0" ToolTip="テーマ選択 (Light / Dark)">
                             <Button.ContextMenu>
                                 <ContextMenu Style="{StaticResource CyberContextMenu}">
-                                    <MenuItem Header="☀️  Light Mode" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
-                                    <MenuItem Header="🌙  Dark Mode" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -461,13 +462,14 @@
                             <TextBlock Text="Theme Preference" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
                             <Button x:Name="BtnSettingsThemeSelect" Style="{StaticResource GlowButton}" Click="BtnSettingsThemeSelect_Click" HorizontalAlignment="Left" MinWidth="180">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock x:Name="TxtSettingsThemeCurrent" Text="🌙  Dark Mode" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock x:Name="TxtSettingsThemeCurrent" Text="🌙  Dark Theme" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
                                     <TextBlock Text=" ▸" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" Margin="10,0,0,0" />
                                 </StackPanel>
                                 <Button.ContextMenu>
                                     <ContextMenu Style="{StaticResource CyberContextMenu}">
-                                        <MenuItem Header="☀️  Light Mode" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
-                                        <MenuItem Header="🌙  Dark Mode" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                        <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
+                                        <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                        <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>

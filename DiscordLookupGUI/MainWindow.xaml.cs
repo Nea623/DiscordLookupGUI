@@ -108,6 +108,11 @@ public partial class MainWindow : Window
         ThemeManager.ApplyTheme(AppTheme.Dark);
     }
 
+    private void SelectThemeSunset_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.ApplyTheme(AppTheme.Sunset);
+    }
+
     private void OnThemeChanged(AppTheme theme)
     {
         UpdateThemeUi(theme);
@@ -117,11 +122,21 @@ public partial class MainWindow : Window
     {
         if (BtnThemeToggle != null)
         {
-            BtnThemeToggle.Content = theme == AppTheme.Dark ? "🌙" : "☀️";
+            BtnThemeToggle.Content = theme switch
+            {
+                AppTheme.Light => "☀️",
+                AppTheme.Sunset => "🌆",
+                _ => "🌙"
+            };
         }
         if (TxtSettingsThemeCurrent != null)
         {
-            TxtSettingsThemeCurrent.Text = theme == AppTheme.Dark ? "🌙  Dark Mode" : "☀️  Light Mode";
+            TxtSettingsThemeCurrent.Text = theme switch
+            {
+                AppTheme.Light => "☀️  Light Theme",
+                AppTheme.Sunset => "🌆  Sunset Theme",
+                _ => "🌙  Dark Theme"
+            };
         }
     }
 

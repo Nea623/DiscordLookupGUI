@@ -7,7 +7,8 @@ namespace DiscordLookup.Services;
 public enum AppTheme
 {
     Dark,
-    Light
+    Light,
+    Sunset
 }
 
 /// <summary>
@@ -56,10 +57,12 @@ public static class ThemeManager
     public static void ApplyTheme(AppTheme theme, bool save = true)
     {
         CurrentTheme = theme;
-        var themeUri = new Uri(
-            theme == AppTheme.Light ? "Themes/Light.xaml" : "Themes/Dark.xaml",
-            UriKind.Relative
-        );
+        var themeUri = theme switch
+        {
+            AppTheme.Light => new Uri("Themes/Light.xaml", UriKind.Relative),
+            AppTheme.Sunset => new Uri("Themes/Sunset.xaml", UriKind.Relative),
+            _ => new Uri("Themes/Dark.xaml", UriKind.Relative)
+        };
 
         var newDict = new ResourceDictionary { Source = themeUri };
 
@@ -69,7 +72,10 @@ public static class ThemeManager
 
         foreach (var dict in appResources.MergedDictionaries)
         {
-            if (dict.Source != null && (dict.Source.OriginalString.Contains("Dark.xaml") || dict.Source.OriginalString.Contains("Light.xaml")))
+            if (dict.Source != null && (
+                dict.Source.OriginalString.Contains("Dark.xaml") || 
+                dict.Source.OriginalString.Contains("Light.xaml") || 
+                dict.Source.OriginalString.Contains("Sunset.xaml")))
             {
                 oldDict = dict;
                 break;
