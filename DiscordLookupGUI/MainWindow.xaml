@@ -199,16 +199,7 @@
                         </UniformGrid>
                     </Border>
 
-                    <!-- タイトルバー内装飾: ピルタブと操作ボタンの間の安全な余白 (ボタンや枠線に絶対に被らない) -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" 
-                                Margin="0,0,16,0" Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
-                        <Image Source="Assets/StarryNight/constellation_cassiopeia.png" Height="20" Stretch="Uniform" Opacity="0.8" VerticalAlignment="Center" />
-                        <Image Source="Assets/StarryNight/moon_crescent_mid.png" Height="24" Stretch="Uniform" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <Image.Effect>
-                                <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.85" />
-                            </Image.Effect>
-                        </Image>
-                    </StackPanel>
+
 
                     <!-- 右側: ウィンドウ操作ボタン -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -307,15 +298,7 @@
                                         <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentCyanBrush}" Margin="0,0,8,0" />
                                         <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.9" IsHitTestVisible="False">
-                                        <Image Source="Assets/StarryNight/constellation_ursa.png" Height="22" Stretch="Uniform" VerticalAlignment="Center" Opacity="0.85" />
-                                        <Image Source="Assets/StarryNight/star_sparkle_large.png" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="6,0,0,0" Opacity="0.9">
-                                            <Image.Effect>
-                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
-                                            </Image.Effect>
-                                        </Image>
-                                    </StackPanel>
+
                                 </Grid>
 
                                 <!-- プロフィール詳細 -->
@@ -414,15 +397,7 @@
                                     <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBlueBrush}" Margin="0,0,8,0" />
                                     <TextBlock Text="Timeline &amp; Account Analytics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.95" IsHitTestVisible="False">
-                                    <Image Source="Assets/StarryNight/constellation_swan.png" Height="22" Stretch="Uniform" VerticalAlignment="Center" Opacity="0.85" />
-                                    <Image Source="Assets/StarryNight/moon_mini.png" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.95">
-                                        <Image.Effect>
-                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.9" />
-                                        </Image.Effect>
-                                    </Image>
-                                </StackPanel>
+
                             </Grid>
 
                             <!-- メトリクス詳細 -->
