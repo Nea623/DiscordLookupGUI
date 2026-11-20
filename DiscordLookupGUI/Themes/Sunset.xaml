@@ -25,7 +25,7 @@
 
     <!-- 背景画像 & すりガラスオーバーレイ (トワイライト街並み + 半透明ティント) -->
     <SolidColorBrush x:Key="WindowBgBrush" Color="#FF140722" />
-    <BitmapImage x:Key="ThemeBackgroundImage" UriSource="pack://application:,,,/DiscordLookup;component/Assets/sunset_bg.jpg" />
+    <BitmapImage x:Key="ThemeBackgroundImage" UriSource="pack://application:,,,/DiscordLookupGUI;component/Assets/sunset_bg.jpg" />
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#66140724" />
 
     <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
