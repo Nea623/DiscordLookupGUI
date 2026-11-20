@@ -151,6 +151,32 @@
             </Border>
 
             <!-- ══════════════════════════════════════════
+                 星空 ＆ 三日月・星座フレームオーナメント (StarryNight専用)
+                 ══════════════════════════════════════════ -->
+            <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
+                <!-- 左上: 星座ライン飾り -->
+                <StackPanel Orientation="Horizontal" Canvas.Left="26" Canvas.Top="16" Opacity="0.8">
+                    <TextBlock Text="✦" FontSize="11" Foreground="{DynamicResource AccentCyanBrush}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text=" ── ⋆ ── " FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Opacity="0.6" />
+                    <TextBlock Text="✧" FontSize="9" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- 右上: 三日月 ＆ 瞬く星 -->
+                <StackPanel Orientation="Horizontal" Canvas.Right="145" Canvas.Top="15" Opacity="0.9">
+                    <TextBlock Text="☾" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.95" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text=" ⋆ ✦" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Top" Margin="4,-2,0,0" />
+                </StackPanel>
+            </Canvas>
+
+            <!-- ══════════════════════════════════════════
                  メイン操作UIコンテナ (スプラッシュ演出中は完全非表示、1.5秒後にフェードイン)
                  ══════════════════════════════════════════ -->
             <Grid x:Name="MainContentContainer" Opacity="0" RenderTransformOrigin="0.5,0.5">
@@ -289,10 +315,20 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- カードヘッダー -->
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
-                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentCyanBrush}" Margin="0,0,8,0" />
-                                    <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                </StackPanel>
+                                <Grid Grid.Row="0" Margin="16,14,16,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentCyanBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.85" IsHitTestVisible="False">
+                                        <TextBlock Text="✦ ⋆ ✧" FontSize="11" Foreground="{DynamicResource AccentCyanBrush}">
+                                            <TextBlock.Effect>
+                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
+                                            </TextBlock.Effect>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
 
                                 <!-- プロフィール詳細 -->
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -385,10 +421,20 @@
                             </Grid.RowDefinitions>
 
                             <!-- カードヘッダー -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
-                                <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBlueBrush}" Margin="0,0,8,0" />
-                                <TextBlock Text="Timeline &amp; Account Analytics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
-                            </StackPanel>
+                            <Grid Grid.Row="0" Margin="16,14,16,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBlueBrush}" Margin="0,0,8,0" />
+                                    <TextBlock Text="Timeline &amp; Account Analytics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.9" IsHitTestVisible="False">
+                                    <TextBlock Text="☾ ⋆ ✦" FontSize="13" Foreground="{DynamicResource AccentCyanBrush}">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.9" />
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
 
                             <!-- メトリクス詳細 -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">

@@ -55,5 +55,6 @@
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#594DF2D3" />
     <x:Null x:Key="ThemeBackgroundImage" />
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#FF070B12" />
+    <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
 
 </ResourceDictionary>
