@@ -247,7 +247,7 @@
                         <TextBlock Text="DISCORD" FontWeight="ExtraBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         <Border Margin="10,0,0,0" VerticalAlignment="Center" Background="#1A3B82F6" CornerRadius="8" Padding="7,2">
-                            <TextBlock Text="v2.2" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
+                            <TextBlock Text="v2.3" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
                         </Border>
                     </StackPanel>
 
@@ -719,7 +719,7 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                         <TextBlock Text="DISCORD LOOKUP GUI" FontWeight="ExtraBold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
                                         <Border Margin="10,0,0,0" Background="#204DF2D3" CornerRadius="6" Padding="6,1" VerticalAlignment="Center">
-                                            <TextBlock Text="v2.2" FontSize="10" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
+                                            <TextBlock Text="v2.3" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
                                         </Border>
                                     </StackPanel>
                                     <TextBlock Text="Cyberpunk-themed Discord User OSINT / Lookup Client" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8" />
@@ -836,8 +836,8 @@
                             <!-- サブタイトル & ローディングプログレス演出 -->
                             <Border Margin="0,16,0,0" Background="#153B82F6" CornerRadius="10" Padding="14,6" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#254DF2D3">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="INITIALIZING CLIENT" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
-                                    <TextBlock Text=" • v2.2" FontSize="11" Foreground="#60A5FA" FontWeight="SemiBold" />
+                                    <TextBlock Text="INITIALIZING CLIENT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
+                                    <TextBlock Text=" • v2.3" FontSize="11" Foreground="#60A5FA" FontWeight="SemiBold" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

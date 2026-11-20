@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v2.2-4DF2D3?style=for-the-badge&logo=discord&logoColor=black)
+![Version](https://img.shields.io/badge/version-v2.3-4DF2D3?style=for-the-badge&logo=discord&logoColor=black)
 ![.NET 8](https://img.shields.io/badge/.NET-8.0_WPF-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D4?style=for-the-badge&logo=windows&logoColor=white)
 ![Single File](https://img.shields.io/badge/Release-Single--File_exe-10B981?style=for-the-badge)
@@ -24,11 +24,15 @@
 ## ✨ 主な機能
 
 - 🌌 **近未来・サイバーパンク UI (AETHER)**
-  - 発光ネオンシアンアクセント、真円アバタークリップ、センター配置バナー、角丸ウィンドウ
+  - 発光ネオンアクセント、真円アバタークリップ、センター配置バナー、角丸ウィンドウ
   - 起動時の 1.5 秒ネオンロゴスプラッシュ演出 ＆ スムーズなフェードインアニメーション
-- 🌗 **ダークテーマ & ライトテーマの動的切り替え**
-  - **Dark Theme**: サイバーネイビー ＆ ネオンシアンの近未来ダークUI
-  - **Light Theme**: 洗練されたフロストホワイト ＆ エレクトリックティールのクリーンUI
+  - ユーザー検索完了時の 0.5 秒優雅なフェードイン表示 ＆ 入力欄クリア時の自動フェードアウト復帰
+- 🎨 **多彩な 5 つのテーマをリアルタイム動的切り替え**
+  - 🌙 **Dark Theme**: サイバーネイビー ＆ ネオンシアンの近未来王道ダークUI
+  - ☀️ **Light Theme**: 洗練されたフロストホワイト ＆ エレクトリックティールのクリーンUI
+  - 🌆 **Sunset Theme**: 情緒あふれる美しい夕暮れグラデーション（ローズ＆バイオレット）
+  - 🌠 **Starry Night Theme**: 満天の星空・星座アート・吊り下げ星オーナメントがきらめく幻想的UI
+  - 🎮 **Gaming RGB Theme**: 漆黒のピュアブラック ＆ 外枠・虫眼鏡の無限レインボーサイクル ＆ 鮮烈なネオングリーン
   - タイトルバー右上のボタン、または Settings 画面から横方向にスッと展開するスマートなメニュー
   - 選択したテーマはローカル（`theme_settings.json`）に自動保存され、次回起動時もシームレスに復元
 - 🎞️ **Nitro アニメーション GIF の完全ループ再生**
@@ -50,7 +54,7 @@
 ## 🚀 使い方
 
 ### 1. ダウンロード
-[GitHub Releases (v2.2)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookup.exe`** をダウンロードします。
+[GitHub Releases (v2.3)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookup.exe`** をダウンロードします。
 
 ### 2. Discord Bot トークンの設定
 ユーザー情報の取得には Discord Bot のトークンが必要です。以下のいずれかの方法で設定できます：
@@ -63,7 +67,8 @@
 ### 3. ユーザー検索
 1. 上部の検索バーに調べたいユーザーの **Discord ユーザーID (Snowflake)** を入力
 2. `Enter` キーを押すか、`LOOKUP USER` ボタンをクリック
-3. アバター、バナー、クラン情報、アカウント作成日、アナリティクスが美しく表示されます！
+3. アバター、バナー、クラン情報、アカウント作成日、アナリティクスが美しくフェードイン表示されます！
+4. 検索バーを空欄にすると、スムーズにフェードアウトして初期画面に戻ります。
 
 ---
 
