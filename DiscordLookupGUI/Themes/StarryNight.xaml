@@ -23,12 +23,10 @@
     <Color x:Key="DangerRed">#FFF43F5E</Color>
     <Color x:Key="SuccessGreen">#FF10B981</Color>
 
-    <!-- ブラシ定義: 漆黒の星空から深遠なミッドナイトパープルへのグラデーション -->
-    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="0.8,1">
-        <GradientStop Color="#FF0B0617" Offset="0.0" />
-        <GradientStop Color="#FF140B2B" Offset="0.4" />
-        <GradientStop Color="#FF1F113E" Offset="0.8" />
-        <GradientStop Color="#FF29154F" Offset="1.0" />
+    <!-- ブラシ定義: 上から下に向けて #342567 から #8472DC へのグラデーション -->
+    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF342567" Offset="0.0" />
+        <GradientStop Color="#FF8472DC" Offset="1.0" />
     </LinearGradientBrush>
 
     <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
