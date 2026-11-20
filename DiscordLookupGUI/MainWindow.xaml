@@ -441,6 +441,22 @@
                                         <Button Grid.Column="2" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="12" Padding="6,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
                                     </Grid>
 
+                                    <!-- 🌟 ユーザー要望: Open Avatar/Banner 下のちょい大きめ星座アート 🌟 -->
+                                    <Grid Margin="0,14,0,4" HorizontalAlignment="Center"
+                                          Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                                        <Image Source="Assets/StarryNight/constellation_ursa.png" Width="155" Height="88" Stretch="Uniform" Opacity="0.85">
+                                            <Image.Effect>
+                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="14" ShadowDepth="0" Opacity="0.85" />
+                                            </Image.Effect>
+                                        </Image>
+                                        <!-- 星座の端でキラリと光る星屑アクセント -->
+                                        <Image Source="Assets/StarryNight/star_sparkle_large.png" Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-2,-6,0" Opacity="0.85">
+                                            <Image.Effect>
+                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
+                                            </Image.Effect>
+                                        </Image>
+                                    </Grid>
+
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
