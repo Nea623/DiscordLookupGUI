@@ -2,32 +2,34 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ══════════════════════════════════════════
-         テーマ: Sunset (夕暮れトワイライトパープル ＆ サンセットオレンジ)
+         テーマ: Sunset (夕暮れトワイライトパープル ＆ 鮮烈なサンセットオレンジ)
          ══════════════════════════════════════════ -->
-    <Color x:Key="WindowBgColor">#FF120824</Color>
-    <Color x:Key="HeaderBgColor">#CC16082A</Color>
-    <Color x:Key="CardBgColor">#CC1C0D33</Color>
-    <Color x:Key="CardInnerBgColor">#80100620</Color>
-    <Color x:Key="CardBorderColor">#33F97316</Color>
+    <Color x:Key="WindowBgColor">#FF1A0B2E</Color>
+    <Color x:Key="HeaderBgColor">#E6180A28</Color>
+    <Color x:Key="CardBgColor">#D9230E2E</Color>
+    <Color x:Key="CardInnerBgColor">#80140722</Color>
+    <Color x:Key="CardBorderColor">#66F97316</Color>
 
-    <!-- メインアクセントカラー (鮮やかなサンセットオレンジ ＆ トワイライトパープル) -->
+    <!-- メインアクセントカラー (燃えるような夕日オレンジ ＆ 宵の明星ゴールド/パープル) -->
     <Color x:Key="AccentColor">#FFF97316</Color>
     <Color x:Key="AccentCyan">#FFF97316</Color>
-    <Color x:Key="AccentBlue">#FF818CF8</Color>
+    <Color x:Key="AccentBlue">#FFF59E0B</Color>
     <Color x:Key="AccentPurple">#FFC084FC</Color>
 
-    <!-- テキストカラー (夕焼けの温もりと高いコントラスト) -->
+    <!-- テキストカラー (夕焼けの光と抜群の視認性) -->
     <Color x:Key="TextPrimary">#FFFFFAF5</Color>
-    <Color x:Key="TextSecondary">#FFE2D4E8</Color>
-    <Color x:Key="TextMuted">#FF9D82AC</Color>
+    <Color x:Key="TextSecondary">#FFF3E5F5</Color>
+    <Color x:Key="TextMuted">#FFB092BC</Color>
     <Color x:Key="DangerRed">#FFF43F5E</Color>
     <Color x:Key="SuccessGreen">#FF10B981</Color>
 
-    <!-- ブラシ定義: ウィンドウ背景は息をのむ紫〜オレンジの夕暮れグラデーション -->
-    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#FF120824" Offset="0.0" />
-        <GradientStop Color="#FF1D0B2E" Offset="0.5" />
-        <GradientStop Color="#FF2D0F24" Offset="1.0" />
+    <!-- ブラシ定義: 上空のディープパープルから地平線の燃えるオレンジへのドラマチックな夕焼け空 -->
+    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="0.9,1">
+        <GradientStop Color="#FF18092B" Offset="0.0" />
+        <GradientStop Color="#FF330B44" Offset="0.3" />
+        <GradientStop Color="#FF581438" Offset="0.6" />
+        <GradientStop Color="#FF84251B" Offset="0.82" />
+        <GradientStop Color="#FFAC3C15" Offset="1.0" />
     </LinearGradientBrush>
 
     <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
@@ -44,16 +46,19 @@
     <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
     <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
 
-    <!-- コントロール固有背景 ＆ 夕暮れ調パーツ配色 -->
-    <SolidColorBrush x:Key="InputBgBrush" Color="#80100620" />
-    <SolidColorBrush x:Key="ControlBorderBrush" Color="#33F97316" />
-    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#B3100622" />
-    <SolidColorBrush x:Key="TabBorderBrush" Color="#4DF97316" />
-    <SolidColorBrush x:Key="TabTextBrush" Color="#FFF0E4F5" />
-    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#40240E38" />
-    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#40F97316" />
-    <SolidColorBrush x:Key="BannerBgBrush" Color="#1E0C30" />
-    <SolidColorBrush x:Key="FooterBgBrush" Color="#50100622" />
-    <SolidColorBrush x:Key="FooterBorderBrush" Color="#20F97316" />
+    <!-- コントロール固有背景 ＆ オレンジが美しく映える配色 -->
+    <SolidColorBrush x:Key="InputBgBrush" Color="#80140722" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#66F97316" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#CC140726" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="#80F97316" />
+    <SolidColorBrush x:Key="TabTextBrush" Color="#FFF7EDF9" />
+    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#502D0F38" />
+    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#80F97316" />
+    <SolidColorBrush x:Key="BannerBgBrush" Color="#250F28" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#66140724" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#4DF97316" />
+    <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#26F97316" />
+    <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4DF97316" />
+    <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#80F97316" />
 
 </ResourceDictionary>

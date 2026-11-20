@@ -50,5 +50,8 @@
     <SolidColorBrush x:Key="BannerBgBrush" Color="#FFE2E8F0" />
     <SolidColorBrush x:Key="FooterBgBrush" Color="#E6FFFFFF" />
     <SolidColorBrush x:Key="FooterBorderBrush" Color="#FFE2E8F0" />
+    <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#1F0D9488" />
+    <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#2E0D9488" />
+    <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#4D0D9488" />
 
 </ResourceDictionary>

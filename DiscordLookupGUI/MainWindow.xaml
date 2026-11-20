@@ -144,11 +144,11 @@
 
                     <!-- 左側: ブランドロゴ -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="28" Height="28" CornerRadius="7" Background="#204DF2D3" BorderBrush="#804DF2D3" BorderThickness="1" Margin="0,0,10,0">
-                            <TextBlock Text="⚡" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource AccentCyanBrush}" />
+                        <Border Width="28" Height="28" CornerRadius="7" Background="{DynamicResource AccentGlowMidBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="1" Margin="0,0,10,0">
+                            <TextBlock Text="⚡" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AccentCyanBrush}" />
                         </Border>
                         <TextBlock Text="DISCORD" FontWeight="ExtraBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                        <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="16" Foreground="{StaticResource AccentCyanBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         <Border Margin="10,0,0,0" VerticalAlignment="Center" Background="#1A3B82F6" CornerRadius="8" Padding="7,2">
                             <TextBlock Text="v2.2" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
                         </Border>
@@ -222,9 +222,9 @@
                     <Border x:Name="EmptyStateView" Visibility="Visible" Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="30">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- アイコン発光サークル -->
-                            <Border Width="72" Height="72" CornerRadius="36" Background="#154DF2D3" BorderBrush="#504DF2D3" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,18">
+                            <Border Width="72" Height="72" CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,18">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#4DF2D3" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+                                    <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
                                 </Border.Effect>
                                 <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
@@ -256,7 +256,7 @@
 
                                 <!-- カードヘッダー -->
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
-                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentCyanBrush}" Margin="0,0,8,0" />
+                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentCyanBrush}" Margin="0,0,8,0" />
                                     <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                                 </StackPanel>
 
@@ -275,9 +275,9 @@
 
                                         <!-- アバター画像 (真円クリップ + 発光シアン外枠で絶対にはみ出さない設計) -->
                                         <Grid Width="80" Height="80" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="14,0,0,-26">
-                                            <Ellipse Width="80" Height="80" Stroke="{StaticResource AccentCyanBrush}" StrokeThickness="3" Fill="#0C1420">
+                                            <Ellipse Width="80" Height="80" Stroke="{DynamicResource AccentCyanBrush}" StrokeThickness="3" Fill="{DynamicResource CardInnerBgBrush}">
                                                 <Ellipse.Effect>
-                                                    <DropShadowEffect Color="#4DF2D3" BlurRadius="14" ShadowDepth="0" Opacity="0.65" />
+                                                    <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.65" />
                                                 </Ellipse.Effect>
                                             </Ellipse>
                                             <Image x:Name="AvatarImage" Width="74" Height="74" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -352,7 +352,7 @@
 
                             <!-- カードヘッダー -->
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
-                                <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentBlueBrush}" Margin="0,0,8,0" />
+                                <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBlueBrush}" Margin="0,0,8,0" />
                                 <TextBlock Text="Timeline &amp; Account Analytics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                             </StackPanel>
 
@@ -374,14 +374,14 @@
                                         <StackPanel>
                                             <Grid>
                                                 <TextBlock Text="Account Age (経過時間)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
-                                                <Border HorizontalAlignment="Right" Background="#204DF2D3" CornerRadius="8" Padding="8,2">
-                                                    <TextBlock x:Name="TxtElapsedBadge" Text="0.0 yrs" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
+                                                <Border HorizontalAlignment="Right" Background="{DynamicResource AccentGlowMidBrush}" CornerRadius="8" Padding="8,2">
+                                                    <TextBlock x:Name="TxtElapsedBadge" Text="0.0 yrs" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
                                                 </Border>
                                             </Grid>
 
                                             <!-- バーゲージ -->
-                                            <Border Height="8" CornerRadius="4" Background="#162235" Margin="0,12,0,8">
-                                                <ProgressBar x:Name="ProgAccountAge" Value="0" Maximum="10" Height="8" Background="Transparent" Foreground="{StaticResource AccentCyanBrush}" BorderThickness="0" />
+                                            <Border Height="8" CornerRadius="4" Background="{DynamicResource CardInnerBgBrush}" Margin="0,12,0,8">
+                                                <ProgressBar x:Name="ProgAccountAge" Value="0" Maximum="10" Height="8" Background="Transparent" Foreground="{DynamicResource AccentCyanBrush}" BorderThickness="0" />
                                             </Border>
 
                                             <Grid>

@@ -32,16 +32,16 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#150D9488" />
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentGlowLowBrush}" />
                                     <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#250D9488" />
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentGlowMidBrush}" />
                                     <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
                                     <Setter Property="Foreground" Value="{DynamicResource AccentCyanBrush}" />
                                     <Setter TargetName="border" Property="Effect">
                                         <Setter.Value>
-                                            <DropShadowEffect Color="#FF0D9488" BlurRadius="12" ShadowDepth="0" Opacity="0.4" />
+                                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.5" />
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -53,7 +53,7 @@
 
             <!-- ネオン風ボタン -->
             <Style x:Key="GlowButton" TargetType="Button">
-                <Setter Property="Background" Value="#200D9488" />
+                <Setter Property="Background" Value="{DynamicResource AccentGlowMidBrush}" />
                 <Setter Property="Foreground" Value="{DynamicResource AccentCyanBrush}" />
                 <Setter Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
@@ -73,10 +73,10 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#350D9488" />
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentGlowHighBrush}" />
                                     <Setter TargetName="border" Property="Effect">
                                         <Setter.Value>
-                                            <DropShadowEffect Color="#FF0D9488" BlurRadius="14" ShadowDepth="0" Opacity="0.5" />
+                                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.6" />
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -113,7 +113,7 @@
                                     <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
                                     <Setter TargetName="border" Property="Effect">
                                         <Setter.Value>
-                                            <DropShadowEffect Color="#FF0D9488" BlurRadius="8" ShadowDepth="0" Opacity="0.4" />
+                                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.5" />
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
@@ -215,7 +215,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsHighlighted" Value="True">
-                                    <Setter TargetName="ItemBorder" Property="Background" Value="#250D9488" />
+                                    <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AccentGlowMidBrush}" />
                                     <Setter Property="Foreground" Value="{DynamicResource AccentCyanBrush}" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
