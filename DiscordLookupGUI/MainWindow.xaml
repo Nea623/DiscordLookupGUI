@@ -345,15 +345,15 @@
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- アイコン発光サークル (Gaming RGB テーマ時はレインボーサイクル回転発光) -->
                             <Grid Width="72" Height="72" HorizontalAlignment="Center" Margin="0,0,0,18">
-                                <!-- 通常テーマ用サークル (Dark, Light, Sunset, StarryNight) -->
-                                <Border CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
+                                <!-- 背景ベース (澄んだクリアな背景 / 濁りを排除) -->
+                                <Border CornerRadius="36" Background="{DynamicResource CardInnerBgBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
                                     <Border.Effect>
                                         <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
                                     </Border.Effect>
                                 </Border>
 
-                                <!-- 🎮 Gaming RGB 専用: レインボーサイクル回転ボーダー & シャドウ -->
-                                <Border CornerRadius="36" BorderThickness="2.5" Visibility="{DynamicResource GamingRgbVisibility}">
+                                <!-- 🎮 Gaming RGB 専用: レインボーサイクル回転ボーダー & シャドウ (枠線とグローのみを上乗せ) -->
+                                <Border CornerRadius="36" BorderThickness="2.5" Background="Transparent" Visibility="{DynamicResource GamingRgbVisibility}">
                                     <Border.BorderBrush>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                             <LinearGradientBrush.RelativeTransform>
