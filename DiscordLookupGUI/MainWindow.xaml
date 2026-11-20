@@ -6,7 +6,7 @@
         xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
         mc:Ignorable="d"
         Title="Discord Lookup" 
-        Height="680" Width="1040"
+        Height="720" Width="1060"
         WindowStartupLocation="CenterScreen"
         Icon="Assets/app.ico"
         WindowStyle="None"
@@ -104,117 +104,54 @@
         </EventTrigger>
     </Window.Triggers>
 
-    <!-- 外枠とシャドウ (中央基準でスケールアニメーション適用、テーマ動的追従) -->
-    <Border x:Name="RootBorder" Margin="12" CornerRadius="18" BorderThickness="1" 
-            BorderBrush="{DynamicResource CardBorderBrush}"
-            Background="{DynamicResource WindowBgBrush}"
-            RenderTransformOrigin="0.5,0.5" Opacity="0">
-        <Border.RenderTransform>
-            <ScaleTransform ScaleX="0.94" ScaleY="0.94" />
-        </Border.RenderTransform>
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="4" Direction="270" Color="#000000" Opacity="0.6" />
-        </Border.Effect>
+    <Grid>
+        <!-- 外枠とシャドウ (中央基準でスケールアニメーション適用、テーマ動的追従) -->
+        <Border x:Name="RootBorder" Margin="20,42,20,18" CornerRadius="18" BorderThickness="1" 
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                Background="{DynamicResource WindowBgBrush}"
+                RenderTransformOrigin="0.5,0.5" Opacity="0">
+            <Border.RenderTransform>
+                <ScaleTransform ScaleX="0.94" ScaleY="0.94" />
+            </Border.RenderTransform>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="25" ShadowDepth="4" Direction="270" Color="#000000" Opacity="0.6" />
+            </Border.Effect>
 
-        <Grid>
-            <!-- ══════════════════════════════════════════
-                 すりガラス背景画像レイヤー (BlurEffectによるガラスエフェクト)
-                 ══════════════════════════════════════════ -->
-            <Border CornerRadius="18">
-                <Border.OpacityMask>
-                    <VisualBrush>
-                        <VisualBrush.Visual>
-                            <Border Width="{Binding ActualWidth, ElementName=RootBorder}"
-                                    Height="{Binding ActualHeight, ElementName=RootBorder}"
-                                    CornerRadius="18"
-                                    Background="Black" />
-                        </VisualBrush.Visual>
-                    </VisualBrush>
-                </Border.OpacityMask>
-                <Grid ClipToBounds="True">
-                    <Image x:Name="ThemeBgImage"
-                           Source="{DynamicResource ThemeBackgroundImage}"
-                           Stretch="UniformToFill"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           RenderTransformOrigin="0.5,0.5">
-                        <Image.RenderTransform>
-                            <ScaleTransform ScaleX="1.08" ScaleY="1.08" />
-                        </Image.RenderTransform>
-                        <Image.Effect>
-                            <BlurEffect Radius="24" RenderingBias="Quality" />
-                        </Image.Effect>
-                    </Image>
-                    <!-- 半透明オーバーレイティント -->
-                    <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="18" />
-                </Grid>
-            </Border>
+            <Grid>
+                <!-- ══════════════════════════════════════════
+                     すりガラス背景画像レイヤー (BlurEffectによるガラスエフェクト)
+                     ══════════════════════════════════════════ -->
+                <Border CornerRadius="18">
+                    <Border.OpacityMask>
+                        <VisualBrush>
+                            <VisualBrush.Visual>
+                                <Border Width="{Binding ActualWidth, ElementName=RootBorder}"
+                                        Height="{Binding ActualHeight, ElementName=RootBorder}"
+                                        CornerRadius="18"
+                                        Background="Black" />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Border.OpacityMask>
+                    <Grid ClipToBounds="True">
+                        <Image x:Name="ThemeBgImage"
+                               Source="{DynamicResource ThemeBackgroundImage}"
+                               Stretch="UniformToFill"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               RenderTransformOrigin="0.5,0.5">
+                            <Image.RenderTransform>
+                                <ScaleTransform ScaleX="1.08" ScaleY="1.08" />
+                            </Image.RenderTransform>
+                            <Image.Effect>
+                                <BlurEffect Radius="24" RenderingBias="Quality" />
+                            </Image.Effect>
+                        </Image>
+                        <!-- 半透明オーバーレイティント -->
+                        <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="18" />
+                    </Grid>
+                </Border>
 
-            <!-- ══════════════════════════════════════════
-                 星空 ＆ 大三日月・本物のぐねぐね星座フレームオーナメント (大迫力ベクターアート)
-                 ══════════════════════════════════════════ -->
-            <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
-                <!-- 左上: カシオペア風 ぐねぐね星座アート -->
-                <Canvas Canvas.Left="24" Canvas.Top="10" Width="160" Height="42" Opacity="0.9">
-                    <!-- ジグザグ星座ライン -->
-                    <Path Data="M 10,24 L 40,8 L 75,26 L 110,10 L 145,22" 
-                          Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1.5" StrokeDashArray="3,2" Opacity="0.65" />
-                    <!-- 星座の各星々 (大小の星とドット) -->
-                    <Path Canvas.Left="0" Canvas.Top="14" Data="M 10 0 Q 10 10 0 10 Q 10 10 10 20 Q 10 10 20 10 Q 10 10 10 0 Z" 
-                          Fill="{DynamicResource AccentCyanBrush}" Width="20" Height="20">
-                        <Path.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.9" />
-                        </Path.Effect>
-                    </Path>
-                    <Ellipse Canvas.Left="37" Canvas.Top="5" Width="6" Height="6" Fill="{DynamicResource TextPrimaryBrush}">
-                        <Ellipse.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="6" ShadowDepth="0" Opacity="0.8" />
-                        </Ellipse.Effect>
-                    </Ellipse>
-                    <Path Canvas.Left="67" Canvas.Top="18" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                          Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                        <Path.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                        </Path.Effect>
-                    </Path>
-                    <Ellipse Canvas.Left="107" Canvas.Top="7" Width="6" Height="6" Fill="{DynamicResource TextSecondaryBrush}" />
-                    <Path Canvas.Left="137" Canvas.Top="14" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                          Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                        <Path.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                        </Path.Effect>
-                    </Path>
-                </Canvas>
 
-                <!-- 右上: 大迫力の三日月 ＆ ぐねぐね星座軌跡アート -->
-                <Canvas Canvas.Right="140" Canvas.Top="8" Width="200" Height="46" Opacity="0.95">
-                    <!-- ジグザグ星座ライン -->
-                    <Path Data="M 10,26 L 45,10 L 80,30 L 115,12 L 150,24 L 175,18" 
-                          Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1.5" StrokeDashArray="3,2" Opacity="0.75" />
-                    <!-- 星座ポイント -->
-                    <Path Canvas.Left="0" Canvas.Top="16" Data="M 10 0 Q 10 10 0 10 Q 10 10 10 20 Q 10 10 20 10 Q 10 10 10 0 Z" 
-                          Fill="{DynamicResource AccentCyanBrush}" Width="20" Height="20">
-                        <Path.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.9" />
-                        </Path.Effect>
-                    </Path>
-                    <Ellipse Canvas.Left="42" Canvas.Top="7" Width="6" Height="6" Fill="{DynamicResource TextPrimaryBrush}" />
-                    <Path Canvas.Left="72" Canvas.Top="22" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                          Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                        <Path.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                        </Path.Effect>
-                    </Path>
-                    <Ellipse Canvas.Left="112" Canvas.Top="9" Width="6" Height="6" Fill="{DynamicResource TextSecondaryBrush}" />
-                    <!-- 大きな三日月 (存在感抜群の30px！) -->
-                    <Path Canvas.Left="155" Canvas.Top="2" Data="M 24 3 A 14 14 0 1 0 28 24 A 18 18 0 0 1 24 3 Z" 
-                          Fill="{DynamicResource AccentCyanBrush}" Width="30" Height="30" Stretch="Uniform">
-                        <Path.Effect>
-                            <DropShadowEffect Color="#C4B5FD" BlurRadius="16" ShadowDepth="0" Opacity="0.95" />
-                        </Path.Effect>
-                    </Path>
-                </Canvas>
-            </Canvas>
 
             <!-- ══════════════════════════════════════════
                  メイン操作UIコンテナ (スプラッシュ演出中は完全非表示、1.5秒後にフェードイン)
@@ -360,27 +297,15 @@
                                         <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentCyanBrush}" Margin="0,0,8,0" />
                                         <TextBlock Text="User Profile" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                                     </StackPanel>
-                                    <Canvas HorizontalAlignment="Right" Width="110" Height="26"
-                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.95" IsHitTestVisible="False">
-                                        <!-- ジグザグ星座ライン -->
-                                        <Path Data="M 8,18 L 36,6 L 68,20 L 98,8" 
-                                              Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1.2" StrokeDashArray="2.5,2" Opacity="0.7" />
-                                        <!-- 星座ポイント -->
-                                        <Ellipse Canvas.Left="5" Canvas.Top="15" Width="6" Height="6" Fill="{DynamicResource TextPrimaryBrush}" />
-                                        <Path Canvas.Left="28" Canvas.Top="-1" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                                              Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                                            <Path.Effect>
-                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                                            </Path.Effect>
-                                        </Path>
-                                        <Ellipse Canvas.Left="65" Canvas.Top="17" Width="6" Height="6" Fill="{DynamicResource TextSecondaryBrush}" />
-                                        <Path Canvas.Left="90" Canvas.Top="0" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                                              Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                                            <Path.Effect>
-                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                                            </Path.Effect>
-                                        </Path>
-                                    </Canvas>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.9" IsHitTestVisible="False">
+                                        <Image Source="Assets/StarryNight/constellation_ursa.png" Height="22" Stretch="Uniform" VerticalAlignment="Center" Opacity="0.85" />
+                                        <Image Source="Assets/StarryNight/star_sparkle_large.png" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="6,0,0,0" Opacity="0.9">
+                                            <Image.Effect>
+                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
+                                            </Image.Effect>
+                                        </Image>
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- プロフィール詳細 -->
@@ -479,34 +404,15 @@
                                     <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBlueBrush}" Margin="0,0,8,0" />
                                     <TextBlock Text="Timeline &amp; Account Analytics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                                 </StackPanel>
-                                <Canvas HorizontalAlignment="Right" Width="140" Height="28"
-                                        Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.95" IsHitTestVisible="False">
-                                    <!-- ジグザグ星座ライン -->
-                                    <Path Data="M 10,20 L 38,6 L 70,22 L 95,8 L 122,14" 
-                                          Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1.2" StrokeDashArray="2.5,2" Opacity="0.75" />
-                                    <!-- 星座ポイント & 大きな三日月 -->
-                                    <Path Canvas.Left="2" Canvas.Top="12" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                                          Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                                        <Path.Effect>
-                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                                        </Path.Effect>
-                                    </Path>
-                                    <Ellipse Canvas.Left="35" Canvas.Top="3" Width="6" Height="6" Fill="{DynamicResource TextPrimaryBrush}" />
-                                    <Path Canvas.Left="62" Canvas.Top="14" Data="M 8 0 Q 8 8 0 8 Q 8 8 8 16 Q 8 8 16 8 Q 8 8 8 0 Z" 
-                                          Fill="{DynamicResource AccentCyanBrush}" Width="16" Height="16">
-                                        <Path.Effect>
-                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.85" />
-                                        </Path.Effect>
-                                    </Path>
-                                    <Ellipse Canvas.Left="92" Canvas.Top="5" Width="6" Height="6" Fill="{DynamicResource TextSecondaryBrush}" />
-                                    <!-- 優美な三日月 (22px) -->
-                                    <Path Canvas.Left="112" Canvas.Top="2" Data="M 18 2 A 10 10 0 1 0 20 18 A 13 13 0 0 1 18 2 Z" 
-                                          Fill="{DynamicResource AccentCyanBrush}" Width="22" Height="22" Stretch="Uniform">
-                                        <Path.Effect>
-                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.95" />
-                                        </Path.Effect>
-                                    </Path>
-                                </Canvas>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.95" IsHitTestVisible="False">
+                                    <Image Source="Assets/StarryNight/constellation_swan.png" Height="22" Stretch="Uniform" VerticalAlignment="Center" Opacity="0.85" />
+                                    <Image Source="Assets/StarryNight/moon_mini.png" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.95">
+                                        <Image.Effect>
+                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.9" />
+                                        </Image.Effect>
+                                    </Image>
+                                </StackPanel>
                             </Grid>
 
                             <!-- メトリクス詳細 -->
@@ -749,4 +655,34 @@
 
         </Grid>
     </Border>
+
+    <!-- ══════════════════════════════════════════
+         ウィンドウ外枠をはみ出して飛び出す立体三日月＆星空レイヤー
+         ══════════════════════════════════════════ -->
+    <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
+        <!-- 右上: アプリの枠線(Y=42)から外側へ堂々と飛び出す大迫力リアル三日月！ -->
+        <Image Canvas.Right="125" Canvas.Top="6" Source="Assets/StarryNight/moon_crescent_large.png"
+               Width="88" Height="88" Stretch="Uniform">
+            <Image.Effect>
+                <DropShadowEffect Color="#C4B5FD" BlurRadius="22" ShadowDepth="0" Opacity="0.9" />
+            </Image.Effect>
+        </Image>
+
+        <!-- 右上: 枠外から内側へ尾を引いて飛び込む流れ星！ -->
+        <Image Canvas.Right="220" Canvas.Top="18" Source="Assets/StarryNight/shooting_star.png"
+               Width="120" Height="75" Stretch="Uniform" Opacity="0.85">
+            <Image.Effect>
+                <DropShadowEffect Color="#C4B5FD" BlurRadius="14" ShadowDepth="0" Opacity="0.75" />
+            </Image.Effect>
+        </Image>
+
+        <!-- タイトルバー中央: 優美な星座アート (タイトル文字と絶対に被らない特等席) -->
+        <Image Canvas.Left="330" Canvas.Top="48" Source="Assets/StarryNight/constellation_cassiopeia.png"
+               Width="105" Height="42" Stretch="Uniform" Opacity="0.75" />
+
+        <!-- ウィンドウ右上隅: 惑星の軌道リングが枠の外側をほんのり包む幻想的なアクセント -->
+        <Image Canvas.Right="12" Canvas.Top="12" Source="Assets/StarryNight/orbit_ring.png"
+               Width="140" Height="80" Stretch="Uniform" Opacity="0.45" />
+    </Canvas>
+</Grid>
 </Window>

@@ -15,6 +15,7 @@
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
     <Resource Include="Assets\sunset_bg.jpg" />
+    <Resource Include="Assets\StarryNight\*.png" />
   </ItemGroup>
 
   <ItemGroup>
