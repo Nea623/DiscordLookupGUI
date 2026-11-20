@@ -676,14 +676,20 @@
                                 <TextBlock Text="Bot Configuration" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
                             </StackPanel>
 
-                            <TextBlock Text="Discord Bot Token" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,8" />
+                            <TextBlock Text="Discord Bot Token (カスタム設定)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,8" />
                             <PasswordBox x:Name="InputBotToken" Background="{DynamicResource CardInnerBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="12,10" FontSize="14" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,0,8" />
                             
                             <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
-                                <TextBlock Text="💡 環境変数 DISCORD_BOT_TOKEN が設定されている場合は自動的に読み込まれます。ここから手動でトークンを入力・上書きして保存することも可能です。" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
+                                <StackPanel>
+                                    <TextBlock Text="✨ 共有Botトークン内蔵中！設定不要でそのまま検索可能です" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="💡 独自の Bot トークンを使用したい場合のみ、ここに入力して保存してください。空欄で保存またはクリアすると共有トークンに戻ります。" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
                             </Border>
 
-                            <Button Style="{StaticResource GlowButton}" Content="Save Bot Token" Width="150" HorizontalAlignment="Left" Click="SaveToken_Click" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button Style="{StaticResource GlowButton}" Content="Save Token" Width="130" HorizontalAlignment="Left" Click="SaveToken_Click" Margin="0,0,10,0" />
+                                <Button Style="{StaticResource GlowButton}" Content="Reset to Shared" Width="140" HorizontalAlignment="Left" Click="ResetToken_Click" Opacity="0.85" />
+                            </StackPanel>
 
                             <!-- テーマ設定 (ボタン押下でリスト表示) -->
                             <TextBlock Text="Theme Preference" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
