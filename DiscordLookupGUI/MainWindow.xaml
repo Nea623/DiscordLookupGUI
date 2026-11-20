@@ -151,28 +151,33 @@
             </Border>
 
             <!-- ══════════════════════════════════════════
-                 星空 ＆ 三日月・星座フレームオーナメント (StarryNight専用)
+                 星空 ＆ 三日月・星座フレームオーナメント (ベクターイラストアート)
                  ══════════════════════════════════════════ -->
             <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
-                <!-- 左上: 星座ライン飾り -->
-                <StackPanel Orientation="Horizontal" Canvas.Left="26" Canvas.Top="16" Opacity="0.8">
-                    <TextBlock Text="✦" FontSize="11" Foreground="{DynamicResource AccentCyanBrush}">
-                        <TextBlock.Effect>
+                <!-- 左上: 星座ライン ＆ 星イラスト -->
+                <StackPanel Orientation="Horizontal" Canvas.Left="26" Canvas.Top="18" Opacity="0.85">
+                    <Path Data="M 6 0 Q 6 6 0 6 Q 6 6 6 12 Q 6 6 12 6 Q 6 6 6 0 Z" Fill="{DynamicResource AccentCyanBrush}" Width="12" Height="12" VerticalAlignment="Center">
+                        <Path.Effect>
                             <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
-                        </TextBlock.Effect>
-                    </TextBlock>
-                    <TextBlock Text=" ── ⋆ ── " FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Opacity="0.6" />
-                    <TextBlock Text="✧" FontSize="9" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
+                        </Path.Effect>
+                    </Path>
+                    <Line X1="0" Y1="0" X2="24" Y2="0" Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1" StrokeDashArray="3,2" VerticalAlignment="Center" Opacity="0.6" Margin="6,0,6,0" />
+                    <Path Data="M 4 0 Q 4 4 0 4 Q 4 4 4 8 Q 4 4 8 4 Q 4 4 4 0 Z" Fill="{DynamicResource AccentCyanBrush}" Width="8" Height="8" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <!-- 右上: 三日月 ＆ 瞬く星 -->
-                <StackPanel Orientation="Horizontal" Canvas.Right="145" Canvas.Top="15" Opacity="0.9">
-                    <TextBlock Text="☾" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}">
-                        <TextBlock.Effect>
+                <!-- 右上: 三日月 ＆ 瞬く星イラスト -->
+                <StackPanel Orientation="Horizontal" Canvas.Right="145" Canvas.Top="16" Opacity="0.92">
+                    <Path Data="M 15 2 A 9 9 0 1 0 17 15 A 11 11 0 0 1 15 2 Z" Fill="{DynamicResource AccentCyanBrush}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center">
+                        <Path.Effect>
                             <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.95" />
-                        </TextBlock.Effect>
-                    </TextBlock>
-                    <TextBlock Text=" ⋆ ✦" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Top" Margin="4,-2,0,0" />
+                        </Path.Effect>
+                    </Path>
+                    <Line X1="0" Y1="0" X2="18" Y2="0" Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1" StrokeDashArray="2,2" VerticalAlignment="Center" Opacity="0.7" Margin="8,0,8,0" />
+                    <Path Data="M 7 0 Q 7 7 0 7 Q 7 7 7 14 Q 7 7 14 7 Q 7 7 7 0 Z" Fill="{DynamicResource AccentCyanBrush}" Width="14" Height="14" VerticalAlignment="Center">
+                        <Path.Effect>
+                            <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.9" />
+                        </Path.Effect>
+                    </Path>
                 </StackPanel>
             </Canvas>
 
@@ -322,11 +327,13 @@
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                                                 Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.85" IsHitTestVisible="False">
-                                        <TextBlock Text="✦ ⋆ ✧" FontSize="11" Foreground="{DynamicResource AccentCyanBrush}">
-                                            <TextBlock.Effect>
-                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
-                                            </TextBlock.Effect>
-                                        </TextBlock>
+                                        <Path Data="M 5 0 Q 5 5 0 5 Q 5 5 5 10 Q 5 5 10 5 Q 5 5 5 0 Z" Fill="{DynamicResource AccentCyanBrush}" Width="10" Height="10" VerticalAlignment="Center">
+                                            <Path.Effect>
+                                                <DropShadowEffect Color="#C4B5FD" BlurRadius="6" ShadowDepth="0" Opacity="0.8" />
+                                            </Path.Effect>
+                                        </Path>
+                                        <Line X1="0" Y1="0" X2="14" Y2="0" Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1" StrokeDashArray="2,2" VerticalAlignment="Center" Opacity="0.6" Margin="4,0,4,0" />
+                                        <Path Data="M 3 0 Q 3 3 0 3 Q 3 3 3 6 Q 3 3 6 3 Q 3 3 3 0 Z" Fill="{DynamicResource AccentCyanBrush}" Width="6" Height="6" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Grid>
 
@@ -427,12 +434,18 @@
                                     <TextBlock Text="Timeline &amp; Account Analytics" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.9" IsHitTestVisible="False">
-                                    <TextBlock Text="☾ ⋆ ✦" FontSize="13" Foreground="{DynamicResource AccentCyanBrush}">
-                                        <TextBlock.Effect>
+                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.92" IsHitTestVisible="False">
+                                    <Path Data="M 12 2 A 7 7 0 1 0 14 12 A 9 9 0 0 1 12 2 Z" Fill="{DynamicResource AccentCyanBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center">
+                                        <Path.Effect>
                                             <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.9" />
-                                        </TextBlock.Effect>
-                                    </TextBlock>
+                                        </Path.Effect>
+                                    </Path>
+                                    <Line X1="0" Y1="0" X2="14" Y2="0" Stroke="{DynamicResource AccentPurpleBrush}" StrokeThickness="1" StrokeDashArray="2,2" VerticalAlignment="Center" Opacity="0.7" Margin="6,0,6,0" />
+                                    <Path Data="M 5 0 Q 5 5 0 5 Q 5 5 5 10 Q 5 5 10 5 Q 5 5 5 0 Z" Fill="{DynamicResource AccentCyanBrush}" Width="10" Height="10" VerticalAlignment="Center">
+                                        <Path.Effect>
+                                            <DropShadowEffect Color="#C4B5FD" BlurRadius="8" ShadowDepth="0" Opacity="0.85" />
+                                        </Path.Effect>
+                                    </Path>
                                 </StackPanel>
                             </Grid>
 
