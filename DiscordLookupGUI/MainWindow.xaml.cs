@@ -113,6 +113,11 @@ public partial class MainWindow : Window
         ThemeManager.ApplyTheme(AppTheme.Sunset);
     }
 
+    private void SelectThemeStarryNight_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.ApplyTheme(AppTheme.StarryNight);
+    }
+
     private void OnThemeChanged(AppTheme theme)
     {
         UpdateThemeUi(theme);
@@ -126,6 +131,7 @@ public partial class MainWindow : Window
             {
                 AppTheme.Light => "☀️",
                 AppTheme.Sunset => "🌆",
+                AppTheme.StarryNight => "✨",
                 _ => "🌙"
             };
         }
@@ -135,6 +141,7 @@ public partial class MainWindow : Window
             {
                 AppTheme.Light => "☀️  Light Theme",
                 AppTheme.Sunset => "🌆  Sunset Theme",
+                AppTheme.StarryNight => "✨  Starry Night Theme",
                 _ => "🌙  Dark Theme"
             };
         }

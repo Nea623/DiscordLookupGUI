@@ -8,7 +8,8 @@ public enum AppTheme
 {
     Dark,
     Light,
-    Sunset
+    Sunset,
+    StarryNight
 }
 
 /// <summary>
@@ -61,6 +62,7 @@ public static class ThemeManager
         {
             AppTheme.Light => new Uri("Themes/Light.xaml", UriKind.Relative),
             AppTheme.Sunset => new Uri("Themes/Sunset.xaml", UriKind.Relative),
+            AppTheme.StarryNight => new Uri("Themes/StarryNight.xaml", UriKind.Relative),
             _ => new Uri("Themes/Dark.xaml", UriKind.Relative)
         };
 
@@ -75,7 +77,8 @@ public static class ThemeManager
             if (dict.Source != null && (
                 dict.Source.OriginalString.Contains("Dark.xaml") || 
                 dict.Source.OriginalString.Contains("Light.xaml") || 
-                dict.Source.OriginalString.Contains("Sunset.xaml")))
+                dict.Source.OriginalString.Contains("Sunset.xaml") ||
+                dict.Source.OriginalString.Contains("StarryNight.xaml")))
             {
                 oldDict = dict;
                 break;
