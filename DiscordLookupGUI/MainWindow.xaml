@@ -442,7 +442,7 @@
                                     </Grid>
 
                                     <!-- 🌟 ユーザー要望: Open Avatar/Banner 下の星座アート (さらに左寄せ & スクロールが出ないジャストサイズ) 🌟 -->
-                                    <Grid Margin="-2,6,0,0" HorizontalAlignment="Left"
+                                    <Grid Margin="0,6,0,0" HorizontalAlignment="Left"
                                           Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
                                         <Image Source="Assets/StarryNight/constellation_ursa.png" Width="130" Height="64" Stretch="Uniform" Opacity="0.85">
                                             <Image.Effect>
@@ -541,6 +541,16 @@
 
                                 </StackPanel>
                             </ScrollViewer>
+
+                            <!-- 🌟 ユーザー調整用: part_18_35x157.png (吊り下げ星) 🌟 -->
+                            <Image Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                   Source="Assets/StarryNight/part_18_35x157.png" Width="28" Height="110"
+                                   Margin="0,0,70,10" Stretch="Uniform" Opacity="0.85"
+                                   Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                                <Image.Effect>
+                                    <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.8" />
+                                </Image.Effect>
+                            </Image>
 
                             <!-- 🌟 ユーザー考案: 右下の優美な三日月 ＋ 星ガーランド (追加アクセント) 🌟 -->
                             <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"
