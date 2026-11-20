@@ -47,14 +47,14 @@
   - 生の JSON データをインデント整形して閲覧できる `Raw Data` タブ
 - 🚀 **単一実行ファイル (Single-File) 自己完結型配布**
   - .NET 8 ランタイム同梱のため、面倒なインストール作業は一切不要
-  - 配布された `DiscordLookup.exe` 1つをクリックするだけで即座に起動可能
+  - 配布された `DiscordLookupGUI.exe` 1つをクリックするだけで即座に起動可能
 
 ---
 
 ## 🚀 使い方
 
 ### 1. ダウンロード
-[GitHub Releases (v2.3)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookup.exe`** をダウンロードします。
+[GitHub Releases (v2.3)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookupGUI.exe`** をダウンロードします。
 
 ### 2. Discord Bot トークンの設定
 ユーザー情報の取得には Discord Bot のトークンが必要です。以下のいずれかの方法で設定できます：
