@@ -171,32 +171,6 @@
                 </Border>
 
             <!-- ══════════════════════════════════════════
-                 ゲーミング RGB ネオン発光ボーダー (GamingRGB テーマ時のみ表示 ＆ 無限レインボーサイクル)
-                 ══════════════════════════════════════════ -->
-            <Border x:Name="GamingRgbBorder" CornerRadius="18" BorderThickness="2"
-                    Visibility="{DynamicResource GamingRgbVisibility}" IsHitTestVisible="False">
-                <Border.BorderBrush>
-                    <LinearGradientBrush x:Name="RgbGradientBrush" StartPoint="0,0" EndPoint="1,1">
-                        <LinearGradientBrush.RelativeTransform>
-                            <RotateTransform x:Name="RgbRotate" CenterX="0.5" CenterY="0.5" Angle="0" />
-                        </LinearGradientBrush.RelativeTransform>
-                        <GradientStop Color="#FFFF0055" Offset="0.0" />
-                        <GradientStop Color="#FFFF7700" Offset="0.16" />
-                        <GradientStop Color="#FFFFDD00" Offset="0.33" />
-                        <GradientStop Color="#FF00FF66" Offset="0.50" />
-                        <GradientStop Color="#FF00DDFF" Offset="0.66" />
-                        <GradientStop Color="#FF0055FF" Offset="0.83" />
-                        <GradientStop Color="#FFAA00FF" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Border.BorderBrush>
-                <Border.Effect>
-                    <DropShadowEffect x:Name="RgbShadow" BlurRadius="22" ShadowDepth="0" Color="#FF00FFCC" Opacity="0.85" />
-                </Border.Effect>
-            </Border>
-
-
-
-            <!-- ══════════════════════════════════════════
                  ウィンドウ枠線のキラリ星オーナメント (ユーザー考案 + 対称アクセント)
                  ══════════════════════════════════════════ -->
             <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
@@ -749,6 +723,30 @@
                 </Grid>
             </Border>
             </Grid> <!-- MainContentContainer 終了 -->
+
+            <!-- ══════════════════════════════════════════
+                 ゲーミング RGB ネオン発光ボーダー (前面レイヤー配置: フッターに遮られず全周囲が均一発光)
+                 ══════════════════════════════════════════ -->
+            <Border x:Name="GamingRgbBorder" CornerRadius="18" BorderThickness="2"
+                    Visibility="{DynamicResource GamingRgbVisibility}" IsHitTestVisible="False">
+                <Border.BorderBrush>
+                    <LinearGradientBrush x:Name="RgbGradientBrush" StartPoint="0,0" EndPoint="1,1">
+                        <LinearGradientBrush.RelativeTransform>
+                            <RotateTransform x:Name="RgbRotate" CenterX="0.5" CenterY="0.5" Angle="0" />
+                        </LinearGradientBrush.RelativeTransform>
+                        <GradientStop Color="#FFFF0055" Offset="0.0" />
+                        <GradientStop Color="#FFFF7700" Offset="0.16" />
+                        <GradientStop Color="#FFFFDD00" Offset="0.33" />
+                        <GradientStop Color="#FF00FF66" Offset="0.50" />
+                        <GradientStop Color="#FF00DDFF" Offset="0.66" />
+                        <GradientStop Color="#FF0055FF" Offset="0.83" />
+                        <GradientStop Color="#FFAA00FF" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+                <Border.Effect>
+                    <DropShadowEffect x:Name="RgbShadow" BlurRadius="22" ShadowDepth="0" Color="#FF00FFCC" Opacity="0.85" />
+                </Border.Effect>
+            </Border>
 
             <!-- ══════════════════════════════════════════
                  起動時スプラッシュ画面 (1.5秒間前面を完全カバーし、背後の操作画面を一切隠す)

@@ -53,8 +53,8 @@
     <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#8014141E" />
     <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#663B82F6" />
     <SolidColorBrush x:Key="BannerBgBrush" Color="#FF12121A" />
-    <SolidColorBrush x:Key="FooterBgBrush" Color="#B309090D" />
-    <SolidColorBrush x:Key="FooterBorderBrush" Color="#333B82F6" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#00000000" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#1A3B82F6" />
     <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#2600FFCC" />
     <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4D00FFCC" />
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#8000FFCC" />
