@@ -345,14 +345,14 @@
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- アイコン発光サークル (Gaming RGB テーマ時はレインボーサイクル回転発光) -->
                             <Grid Width="72" Height="72" HorizontalAlignment="Center" Margin="0,0,0,18">
-                                <!-- 背景ベース (虫眼鏡アイコンがクッキリ見えやすいコントラスト背景) -->
-                                <Border CornerRadius="36" Background="#242832" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
+                                <!-- ベースサークル (全テーマ共通: DynamicResourceにより各テーマ本来のカラーと世界観に完全追従) -->
+                                <Border CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
                                     <Border.Effect>
                                         <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
                                     </Border.Effect>
                                 </Border>
 
-                                <!-- 🎮 Gaming RGB 専用: レインボーサイクル回転ボーダー & シャドウ -->
+                                <!-- 🎮 Gaming RGB 専用: レインボーサイクル回転ボーダー & シャドウ (GamingRGB時のみ前面で発光) -->
                                 <Border CornerRadius="36" BorderThickness="2.5" Background="Transparent" Visibility="{DynamicResource GamingRgbVisibility}">
                                     <Border.BorderBrush>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -373,11 +373,7 @@
                                     </Border.Effect>
                                 </Border>
 
-                                <TextBlock Text="🔍" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock.Effect>
-                                        <DropShadowEffect Color="#00FF66" BlurRadius="12" ShadowDepth="0" Opacity="0.75" />
-                                    </TextBlock.Effect>
-                                </TextBlock>
+                                <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Grid>
 
                             <TextBlock Text="AWAITING USER LOOKUP" FontWeight="ExtraBold" FontSize="18" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
