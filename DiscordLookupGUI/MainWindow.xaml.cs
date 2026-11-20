@@ -131,7 +131,7 @@ public partial class MainWindow : Window
             {
                 AppTheme.Light => "☀️",
                 AppTheme.Sunset => "🌆",
-                AppTheme.StarryNight => "✨",
+                AppTheme.StarryNight => "🌠",
                 _ => "🌙"
             };
         }
@@ -141,7 +141,7 @@ public partial class MainWindow : Window
             {
                 AppTheme.Light => "☀️  Light Theme",
                 AppTheme.Sunset => "🌆  Sunset Theme",
-                AppTheme.StarryNight => "✨  Starry Night Theme",
+                AppTheme.StarryNight => "🌠  Starry Night Theme",
                 _ => "🌙  Dark Theme"
             };
         }

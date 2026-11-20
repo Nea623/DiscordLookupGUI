@@ -248,13 +248,13 @@
 
                     <!-- 右側: ウィンドウ操作ボタン -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource WindowCircleButton}" x:Name="BtnThemeToggle" Content="🌙" Click="BtnThemeToggle_Click" Margin="0,0,8,0" ToolTip="テーマ選択 (Light / Dark)">
+                        <Button Style="{StaticResource WindowCircleButton}" x:Name="BtnThemeToggle" Content="🌙" Click="BtnThemeToggle_Click" Margin="0,0,8,0" ToolTip="テーマ選択">
                             <Button.ContextMenu>
                                 <ContextMenu Style="{StaticResource CyberContextMenu}">
                                     <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
-                                    <MenuItem Header="✨  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -621,7 +621,7 @@
                                         <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
                                         <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
                                         <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
-                                    <MenuItem Header="✨  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
+                                        <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
