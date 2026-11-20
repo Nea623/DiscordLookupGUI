@@ -6,7 +6,7 @@
         xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
         mc:Ignorable="d"
         Title="Discord Lookup" 
-        Height="720" Width="1060"
+        Height="680" Width="1040"
         WindowStartupLocation="CenterScreen"
         Icon="Assets/app.ico"
         WindowStyle="None"
@@ -104,12 +104,11 @@
         </EventTrigger>
     </Window.Triggers>
 
-    <Grid>
-        <!-- 外枠とシャドウ (中央基準でスケールアニメーション適用、テーマ動的追従) -->
-        <Border x:Name="RootBorder" Margin="20,42,20,18" CornerRadius="18" BorderThickness="1" 
-                BorderBrush="{DynamicResource CardBorderBrush}"
-                Background="{DynamicResource WindowBgBrush}"
-                RenderTransformOrigin="0.5,0.5" Opacity="0">
+    <!-- 外枠とシャドウ (中央基準でスケールアニメーション適用、テーマ動的追従) -->
+    <Border x:Name="RootBorder" Margin="12" CornerRadius="18" BorderThickness="1" 
+            BorderBrush="{DynamicResource CardBorderBrush}"
+            Background="{DynamicResource WindowBgBrush}"
+            RenderTransformOrigin="0.5,0.5" Opacity="0">
             <Border.RenderTransform>
                 <ScaleTransform ScaleX="0.94" ScaleY="0.94" />
             </Border.RenderTransform>
@@ -199,6 +198,17 @@
                             <RadioButton Style="{StaticResource PillTabButton}" Content="Settings" x:Name="TabSettings" Checked="Tab_Checked" MinWidth="92" Margin="2,0" />
                         </UniformGrid>
                     </Border>
+
+                    <!-- タイトルバー内装飾: ピルタブと操作ボタンの間の安全な余白 (ボタンや枠線に絶対に被らない) -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                Margin="0,0,16,0" Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                        <Image Source="Assets/StarryNight/constellation_cassiopeia.png" Height="20" Stretch="Uniform" Opacity="0.8" VerticalAlignment="Center" />
+                        <Image Source="Assets/StarryNight/moon_crescent_mid.png" Height="24" Stretch="Uniform" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <Image.Effect>
+                                <DropShadowEffect Color="#C4B5FD" BlurRadius="12" ShadowDepth="0" Opacity="0.85" />
+                            </Image.Effect>
+                        </Image>
+                    </StackPanel>
 
                     <!-- 右側: ウィンドウ操作ボタン -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -655,34 +665,4 @@
 
         </Grid>
     </Border>
-
-    <!-- ══════════════════════════════════════════
-         ウィンドウ外枠をはみ出して飛び出す立体三日月＆星空レイヤー
-         ══════════════════════════════════════════ -->
-    <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
-        <!-- 右上: アプリの枠線(Y=42)から外側へ堂々と飛び出す大迫力リアル三日月！ -->
-        <Image Canvas.Right="125" Canvas.Top="6" Source="Assets/StarryNight/moon_crescent_large.png"
-               Width="88" Height="88" Stretch="Uniform">
-            <Image.Effect>
-                <DropShadowEffect Color="#C4B5FD" BlurRadius="22" ShadowDepth="0" Opacity="0.9" />
-            </Image.Effect>
-        </Image>
-
-        <!-- 右上: 枠外から内側へ尾を引いて飛び込む流れ星！ -->
-        <Image Canvas.Right="220" Canvas.Top="18" Source="Assets/StarryNight/shooting_star.png"
-               Width="120" Height="75" Stretch="Uniform" Opacity="0.85">
-            <Image.Effect>
-                <DropShadowEffect Color="#C4B5FD" BlurRadius="14" ShadowDepth="0" Opacity="0.75" />
-            </Image.Effect>
-        </Image>
-
-        <!-- タイトルバー中央: 優美な星座アート (タイトル文字と絶対に被らない特等席) -->
-        <Image Canvas.Left="330" Canvas.Top="48" Source="Assets/StarryNight/constellation_cassiopeia.png"
-               Width="105" Height="42" Stretch="Uniform" Opacity="0.75" />
-
-        <!-- ウィンドウ右上隅: 惑星の軌道リングが枠の外側をほんのり包む幻想的なアクセント -->
-        <Image Canvas.Right="12" Canvas.Top="12" Source="Assets/StarryNight/orbit_ring.png"
-               Width="140" Height="80" Stretch="Uniform" Opacity="0.45" />
-    </Canvas>
-</Grid>
 </Window>
