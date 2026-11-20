@@ -305,14 +305,14 @@ public partial class MainWindow : Window
 
     private void DisplayUser(DiscordUser user, ulong rawId)
     {
-        // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (280ms)
+        // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (0.5秒 / 500ms)
         EmptyStateView.Visibility = Visibility.Collapsed;
         SearchResultGrid.Visibility = Visibility.Visible;
 
-        var duration = TimeSpan.FromMilliseconds(280);
+        var duration = TimeSpan.FromMilliseconds(500);
         var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
         var animOpacity = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration) { EasingFunction = easing };
-        var animTranslate = new System.Windows.Media.Animation.DoubleAnimation(8.0, 0.0, duration) { EasingFunction = easing };
+        var animTranslate = new System.Windows.Media.Animation.DoubleAnimation(12.0, 0.0, duration) { EasingFunction = easing };
 
         SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
         if (SearchResultTranslate != null)
