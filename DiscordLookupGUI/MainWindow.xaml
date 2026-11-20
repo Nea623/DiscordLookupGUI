@@ -118,6 +118,39 @@
 
         <Grid>
             <!-- ══════════════════════════════════════════
+                 すりガラス背景画像レイヤー (BlurEffectによるガラスエフェクト)
+                 ══════════════════════════════════════════ -->
+            <Border CornerRadius="18">
+                <Border.OpacityMask>
+                    <VisualBrush>
+                        <VisualBrush.Visual>
+                            <Border Width="{Binding ActualWidth, ElementName=RootBorder}"
+                                    Height="{Binding ActualHeight, ElementName=RootBorder}"
+                                    CornerRadius="18"
+                                    Background="Black" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Border.OpacityMask>
+                <Grid ClipToBounds="True">
+                    <Image x:Name="ThemeBgImage"
+                           Source="{DynamicResource ThemeBackgroundImage}"
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.08" ScaleY="1.08" />
+                        </Image.RenderTransform>
+                        <Image.Effect>
+                            <BlurEffect Radius="24" RenderingBias="Quality" />
+                        </Image.Effect>
+                    </Image>
+                    <!-- 半透明オーバーレイティント -->
+                    <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="18" />
+                </Grid>
+            </Border>
+
+            <!-- ══════════════════════════════════════════
                  メイン操作UIコンテナ (スプラッシュ演出中は完全非表示、1.5秒後にフェードイン)
                  ══════════════════════════════════════════ -->
             <Grid x:Name="MainContentContainer" Opacity="0" RenderTransformOrigin="0.5,0.5">
@@ -234,7 +267,7 @@
                                        FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,16" />
 
                             <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#203A6B9B">
-                                <TextBlock Text="💡 ヒント: Discordでユーザーを右クリック ➔ 「ユーザーIDをコピー」で取得できます" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                <TextBlock Text="💡 ヒント: Discordでユーザーを右クリック ➔ 「ユーザーIDをコピー」で取得できます" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                             </Border>
                         </StackPanel>
                     </Border>
@@ -365,7 +398,7 @@
                                         <StackPanel>
                                             <TextBlock Text="Account Creation Date (JST)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
                                             <TextBlock x:Name="TxtCreatedAtJst" Text="-- 年 -- 月 -- 日 --:--:--" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,4,0,0" />
-                                            <TextBlock x:Name="TxtCreatedAtUtc" Text="UTC: --" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                            <TextBlock x:Name="TxtCreatedAtUtc" Text="UTC: --" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
                                     </Border>
 
@@ -385,9 +418,9 @@
                                             </Border>
 
                                             <Grid>
-                                                <TextBlock Text="Day 0" FontSize="10" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Left" />
+                                                <TextBlock Text="Day 0" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Left" />
                                                 <TextBlock x:Name="TxtElapsedDays" Text="0 日経過" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
-                                                <TextBlock Text="10+ Years" FontSize="10" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Right" />
+                                                <TextBlock Text="10+ Years" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Right" />
                                             </Grid>
                                         </StackPanel>
                                     </Border>
@@ -398,15 +431,15 @@
                                             <TextBlock Text="Snowflake Decoding" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,8" />
                                             
                                             <Grid Margin="0,0,0,4">
-                                                <TextBlock Text="Epoch Offset" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                <TextBlock Text="Epoch Offset" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock Text="1420070400000 ms" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
                                             <Grid Margin="0,0,0,4">
-                                                <TextBlock Text="Internal Worker ID" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                <TextBlock Text="Internal Worker ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock x:Name="TxtWorkerId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
                                             <Grid>
-                                                <TextBlock Text="Internal Process ID" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                <TextBlock Text="Internal Process ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock x:Name="TxtProcessId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
                                         </StackPanel>
@@ -453,7 +486,7 @@
                             <PasswordBox x:Name="InputBotToken" Background="{DynamicResource CardInnerBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="12,10" FontSize="14" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,0,8" />
                             
                             <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
-                                <TextBlock Text="💡 環境変数 DISCORD_BOT_TOKEN が設定されている場合は自動的に読み込まれます。ここから手動でトークンを入力・上書きして保存することも可能です。" FontSize="11" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
+                                <TextBlock Text="💡 環境変数 DISCORD_BOT_TOKEN が設定されている場合は自動的に読み込まれます。ここから手動でトークンを入力・上書きして保存することも可能です。" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
                             </Border>
 
                             <Button Style="{StaticResource GlowButton}" Content="Save Bot Token" Width="150" HorizontalAlignment="Left" Click="SaveToken_Click" />
@@ -521,10 +554,10 @@
                                     <TextBlock Text="Special Thanks / Technologies" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
                                     <TextBlock Text="• Microsoft Visual Studio (C# / .NET Tooling)" FontSize="11" Foreground="#60A5FA" FontWeight="SemiBold" Margin="0,2" />
                                     <TextBlock Text="• Antigravity IDE (Agentic AI Development Environment)" FontSize="11" Foreground="#A78BFA" FontWeight="SemiBold" Margin="0,2" />
-                                    <TextBlock Text="• .NET 8 WPF (Windows Desktop)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
-                                    <TextBlock Text="• XamlAnimatedGif (Animated GIF Engine)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
-                                    <TextBlock Text="• Emoji.Wpf (DirectWrite Color Emoji Support)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
-                                    <TextBlock Text="• Newtonsoft.Json (Discord API v10 Parser)" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2" />
+                                    <TextBlock Text="• .NET 8 WPF (Windows Desktop)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                    <TextBlock Text="• XamlAnimatedGif (Animated GIF Engine)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                    <TextBlock Text="• Emoji.Wpf (DirectWrite Color Emoji Support)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                    <TextBlock Text="• Newtonsoft.Json (Discord API v10 Parser)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

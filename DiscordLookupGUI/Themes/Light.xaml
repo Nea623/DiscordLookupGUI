@@ -53,5 +53,7 @@
     <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#1F0D9488" />
     <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#2E0D9488" />
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#4D0D9488" />
+    <x:Null x:Key="ThemeBackgroundImage" />
+    <SolidColorBrush x:Key="WindowOverlayBrush" Color="#FFF0F4F8" />
 
 </ResourceDictionary>

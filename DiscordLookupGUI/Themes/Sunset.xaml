@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ══════════════════════════════════════════
-         テーマ: Sunset (夕暮れトワイライトパープル ＆ 鮮烈なサンセットオレンジ)
+         テーマ: Sunset (トワイライト街並み背景イラスト ＆ 鮮烈なサンセットオレンジ)
          ══════════════════════════════════════════ -->
     <Color x:Key="WindowBgColor">#FF1A0B2E</Color>
     <Color x:Key="HeaderBgColor">#E6180A28</Color>
@@ -16,21 +16,17 @@
     <Color x:Key="AccentBlue">#FFF59E0B</Color>
     <Color x:Key="AccentPurple">#FFC084FC</Color>
 
-    <!-- テキストカラー (夕焼けの光と抜群の視認性) -->
+    <!-- テキストカラー (夕焼けの光と抜群の視認性: UTCやEpochもくっきり) -->
     <Color x:Key="TextPrimary">#FFFFFAF5</Color>
-    <Color x:Key="TextSecondary">#FFF3E5F5</Color>
-    <Color x:Key="TextMuted">#FFB092BC</Color>
+    <Color x:Key="TextSecondary">#FFFDE68A</Color>
+    <Color x:Key="TextMuted">#FFE9D5FF</Color>
     <Color x:Key="DangerRed">#FFF43F5E</Color>
     <Color x:Key="SuccessGreen">#FF10B981</Color>
 
-    <!-- ブラシ定義: 上空のディープパープルから地平線の燃えるオレンジへのドラマチックな夕焼け空 -->
-    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="0.9,1">
-        <GradientStop Color="#FF18092B" Offset="0.0" />
-        <GradientStop Color="#FF330B44" Offset="0.3" />
-        <GradientStop Color="#FF581438" Offset="0.6" />
-        <GradientStop Color="#FF84251B" Offset="0.82" />
-        <GradientStop Color="#FFAC3C15" Offset="1.0" />
-    </LinearGradientBrush>
+    <!-- 背景画像 & すりガラスオーバーレイ (トワイライト街並み + 半透明ティント) -->
+    <SolidColorBrush x:Key="WindowBgBrush" Color="#FF140722" />
+    <BitmapImage x:Key="ThemeBackgroundImage" UriSource="pack://application:,,,/DiscordLookup;component/Assets/sunset_bg.jpg" />
+    <SolidColorBrush x:Key="WindowOverlayBrush" Color="#66140724" />
 
     <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
     <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBgColor}" />
