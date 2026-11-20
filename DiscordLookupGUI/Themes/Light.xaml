@@ -56,5 +56,6 @@
     <x:Null x:Key="ThemeBackgroundImage" />
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#FFF0F4F8" />
     <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
+    <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
 
 </ResourceDictionary>

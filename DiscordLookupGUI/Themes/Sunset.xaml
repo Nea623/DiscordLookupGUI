@@ -57,5 +57,6 @@
     <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4DF97316" />
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#80F97316" />
     <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
+    <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
 
 </ResourceDictionary>

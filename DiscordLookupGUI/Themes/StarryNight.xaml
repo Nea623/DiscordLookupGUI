@@ -58,6 +58,7 @@
     <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4DA78BFA" />
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#80C4B5FD" />
     <Visibility x:Key="StarryDecorationVisibility">Visible</Visibility>
+    <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
 
     <!-- 背景画像 & すりガラスオーバーレイ (StarryNightはピュアグラデーション) -->
     <x:Null x:Key="ThemeBackgroundImage" />

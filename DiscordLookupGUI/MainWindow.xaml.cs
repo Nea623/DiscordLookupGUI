@@ -118,6 +118,11 @@ public partial class MainWindow : Window
         ThemeManager.ApplyTheme(AppTheme.StarryNight);
     }
 
+    private void SelectThemeGamingRgb_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeManager.ApplyTheme(AppTheme.GamingRgb);
+    }
+
     private void OnThemeChanged(AppTheme theme)
     {
         UpdateThemeUi(theme);
@@ -132,6 +137,7 @@ public partial class MainWindow : Window
                 AppTheme.Light => "☀️",
                 AppTheme.Sunset => "🌆",
                 AppTheme.StarryNight => "🌠",
+                AppTheme.GamingRgb => "🎮",
                 _ => "🌙"
             };
         }
@@ -142,6 +148,7 @@ public partial class MainWindow : Window
                 AppTheme.Light => "☀️  Light Theme",
                 AppTheme.Sunset => "🌆  Sunset Theme",
                 AppTheme.StarryNight => "🌠  Starry Night Theme",
+                AppTheme.GamingRgb => "🎮  Gaming RGB Theme",
                 _ => "🌙  Dark Theme"
             };
         }

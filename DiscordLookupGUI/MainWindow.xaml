@@ -99,6 +99,26 @@
                         <DiscreteObjectKeyFrame KeyTime="0:0:0.0" Value="{x:Static Visibility.Visible}" />
                         <DiscreteObjectKeyFrame KeyTime="0:0:1.9" Value="{x:Static Visibility.Collapsed}" />
                     </ObjectAnimationUsingKeyFrames>
+
+                    <!-- ④ ゲーミング RGB ネオンの無限レインボー回転 ＆ グローサイクル (4秒周期で滑らかにループ) -->
+                    <DoubleAnimation Storyboard.TargetName="RgbRotate"
+                                     Storyboard.TargetProperty="Angle"
+                                     From="0" To="360"
+                                     Duration="0:0:4"
+                                     RepeatBehavior="Forever" />
+
+                    <ColorAnimationUsingKeyFrames Storyboard.TargetName="RgbShadow"
+                                                  Storyboard.TargetProperty="Color"
+                                                  Duration="0:0:4"
+                                                  RepeatBehavior="Forever">
+                        <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="#FFFF0055" />
+                        <LinearColorKeyFrame KeyTime="0:0:0.6" Value="#FFFF7700" />
+                        <LinearColorKeyFrame KeyTime="0:0:1.3" Value="#FFFFDD00" />
+                        <LinearColorKeyFrame KeyTime="0:0:2.0" Value="#FF00FF66" />
+                        <LinearColorKeyFrame KeyTime="0:0:2.6" Value="#FF00DDFF" />
+                        <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
+                        <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
+                    </ColorAnimationUsingKeyFrames>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -149,6 +169,30 @@
                         <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="18" />
                     </Grid>
                 </Border>
+
+            <!-- ══════════════════════════════════════════
+                 ゲーミング RGB ネオン発光ボーダー (GamingRGB テーマ時のみ表示 ＆ 無限レインボーサイクル)
+                 ══════════════════════════════════════════ -->
+            <Border x:Name="GamingRgbBorder" CornerRadius="18" BorderThickness="2"
+                    Visibility="{DynamicResource GamingRgbVisibility}" IsHitTestVisible="False">
+                <Border.BorderBrush>
+                    <LinearGradientBrush x:Name="RgbGradientBrush" StartPoint="0,0" EndPoint="1,1">
+                        <LinearGradientBrush.RelativeTransform>
+                            <RotateTransform x:Name="RgbRotate" CenterX="0.5" CenterY="0.5" Angle="0" />
+                        </LinearGradientBrush.RelativeTransform>
+                        <GradientStop Color="#FFFF0055" Offset="0.0" />
+                        <GradientStop Color="#FFFF7700" Offset="0.16" />
+                        <GradientStop Color="#FFFFDD00" Offset="0.33" />
+                        <GradientStop Color="#FF00FF66" Offset="0.50" />
+                        <GradientStop Color="#FF00DDFF" Offset="0.66" />
+                        <GradientStop Color="#FF0055FF" Offset="0.83" />
+                        <GradientStop Color="#FFAA00FF" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+                <Border.Effect>
+                    <DropShadowEffect x:Name="RgbShadow" BlurRadius="22" ShadowDepth="0" Color="#FF00FFCC" Opacity="0.85" />
+                </Border.Effect>
+            </Border>
 
 
 
@@ -255,6 +299,7 @@
                                     <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -622,6 +667,7 @@
                                         <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
                                         <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
                                         <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
+                                        <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>

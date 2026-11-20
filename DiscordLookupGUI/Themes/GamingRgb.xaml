@@ -1,0 +1,70 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══════════════════════════════════════════
+         テーマ: Gaming RGB (漆黒のマットブラック ＆ ネオンレインボーサイクル)
+         ══════════════════════════════════════════ -->
+    <Color x:Key="WindowBgColor">#FF0C0C11</Color>
+    <Color x:Key="HeaderBgColor">#E612121A</Color>
+    <Color x:Key="CardBgColor">#E614141E</Color>
+    <Color x:Key="CardInnerBgColor">#800D0D14</Color>
+    <Color x:Key="CardBorderColor">#403B82F6</Color>
+
+    <!-- メインアクセントカラー (RGB初期シアン ＆ ネオンスペクトラム) -->
+    <Color x:Key="AccentColor">#FF00FFCC</Color>
+    <Color x:Key="AccentCyan">#FF00FFCC</Color>
+    <Color x:Key="AccentBlue">#FF3B82F6</Color>
+    <Color x:Key="AccentPurple">#FFA855F7</Color>
+
+    <!-- テキストカラー (黒背景に映える高コントラストピュアホワイト) -->
+    <Color x:Key="TextPrimary">#FFFFFFFF</Color>
+    <Color x:Key="TextSecondary">#FFB4B4CC</Color>
+    <Color x:Key="TextMuted">#FF686882</Color>
+    <Color x:Key="DangerRed">#FFFF3366</Color>
+    <Color x:Key="SuccessGreen">#FF00FF88</Color>
+
+    <!-- ブラシ定義: 漆黒のゲーミングブラック背景 -->
+    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FF09090D" Offset="0.0" />
+        <GradientStop Color="#FF0F0F16" Offset="0.5" />
+        <GradientStop Color="#FF14141E" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
+    <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBgColor}" />
+    <SolidColorBrush x:Key="CardInnerBgBrush" Color="{StaticResource CardInnerBgColor}" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource CardBorderColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource AccentCyan}" />
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}" />
+    <SolidColorBrush x:Key="AccentPurpleBrush" Color="{StaticResource AccentPurple}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+    <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
+    <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
+
+    <!-- コントロール固有背景 ＆ ゲーミングネオン配色 -->
+    <SolidColorBrush x:Key="InputBgBrush" Color="#800D0D14" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#663B82F6" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#CC0D0D14" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="#663B82F6" />
+    <SolidColorBrush x:Key="TabTextBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#8014141E" />
+    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#663B82F6" />
+    <SolidColorBrush x:Key="BannerBgBrush" Color="#FF12121A" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#B309090D" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#333B82F6" />
+    <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#2600FFCC" />
+    <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4D00FFCC" />
+    <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#8000FFCC" />
+
+    <!-- 星空装飾は非表示、Gaming RGB エフェクトを表示 -->
+    <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
+    <Visibility x:Key="GamingRgbVisibility">Visible</Visibility>
+
+    <!-- 背景画像 & すりガラスオーバーレイ (GamingRGBは純粋な漆黒ネオン) -->
+    <x:Null x:Key="ThemeBackgroundImage" />
+    <SolidColorBrush x:Key="WindowOverlayBrush" Color="#00000000" />
+
+</ResourceDictionary>
