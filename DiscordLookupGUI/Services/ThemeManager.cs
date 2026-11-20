@@ -77,8 +77,8 @@ public static class ThemeManager
         foreach (var dict in appResources.MergedDictionaries)
         {
             if (dict.Source != null && (
-                dict.Source.OriginalString.Contains("Dark.xaml") || 
-                dict.Source.OriginalString.Contains("Light.xaml") || 
+                dict.Source.OriginalString.Contains("Dark.xaml") ||
+                dict.Source.OriginalString.Contains("Light.xaml") ||
                 dict.Source.OriginalString.Contains("Sunset.xaml") ||
                 dict.Source.OriginalString.Contains("StarryNight.xaml") ||
                 dict.Source.OriginalString.Contains("GamingRgb.xaml")))
