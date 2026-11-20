@@ -47,9 +47,16 @@ public partial class MainWindow : Window
             SetStatus("WARNING: BOT TOKEN NOT SET (CHECK SETTINGS)", false);
         }
 
-        // プレースホルダーの初期状態
+        // プレースホルダーの初期状態 & 入力空欄時の自動フェードアウト復帰
         UpdatePlaceholder();
-        UserIdInput.TextChanged += (s, ev) => UpdatePlaceholder();
+        UserIdInput.TextChanged += (s, ev) =>
+        {
+            UpdatePlaceholder();
+            if (string.IsNullOrWhiteSpace(UserIdInput.Text))
+            {
+                HideSearchResult(withAnimation: true);
+            }
+        };
     }
 
     private void UpdatePlaceholder()
@@ -232,13 +239,50 @@ public partial class MainWindow : Window
         }
     }
 
+    private void HideSearchResult(bool withAnimation = true)
+    {
+        if (SearchResultGrid.Visibility != Visibility.Visible) return;
+
+        if (withAnimation)
+        {
+            var duration = TimeSpan.FromMilliseconds(300);
+            var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseIn };
+            var animOpacity = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.0, duration) { EasingFunction = easing };
+            var animTranslate = new System.Windows.Media.Animation.DoubleAnimation(0.0, 8.0, duration) { EasingFunction = easing };
+
+            animOpacity.Completed += (s, e) =>
+            {
+                SearchResultGrid.Visibility = Visibility.Collapsed;
+                EmptyStateView.Visibility = Visibility.Visible;
+
+                var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(200));
+                EmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+            };
+
+            SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
+            if (SearchResultTranslate != null)
+            {
+                SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
+            }
+        }
+        else
+        {
+            SearchResultGrid.Visibility = Visibility.Collapsed;
+            EmptyStateView.Visibility = Visibility.Visible;
+            EmptyStateView.Opacity = 1.0;
+        }
+
+        SetStatus("READY", true);
+    }
+
     private async Task ExecuteLookupAsync()
     {
         var rawInput = UserIdInput.Text.Trim();
 
         if (string.IsNullOrWhiteSpace(rawInput))
         {
-            MessageBox.Show("ユーザーIDを入力してください。", "入力エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+            // 空欄時はエラーメッセージを出さず、メニューを滑らかにフェードアウト非表示化
+            HideSearchResult(withAnimation: true);
             return;
         }
 
