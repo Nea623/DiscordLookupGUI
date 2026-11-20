@@ -172,7 +172,7 @@
                 </Image>
 
                 <!-- 🌟 ユーザー自由配置用: 画面全体のどこへでも置ける吊り下げ星 (Canvas.Left / Canvas.Top で自由移動) 🌟 -->
-                <Image Canvas.Left="280" Canvas.Top="6" Source="Assets/StarryNight/part_18_35x157.png"
+                <Image Canvas.Left="-3.5" Canvas.Top="0" Source="Assets/StarryNight/part_18_35x157.png"
                        Width="28" Height="110" Stretch="Uniform" Opacity="0.85">
                     <Image.Effect>
                         <DropShadowEffect Color="#C4B5FD" BlurRadius="10" ShadowDepth="0" Opacity="0.8" />
