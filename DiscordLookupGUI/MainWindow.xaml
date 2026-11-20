@@ -119,6 +119,26 @@
                         <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
                         <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
                     </ColorAnimationUsingKeyFrames>
+
+                    <!-- 虫眼鏡アイコンサークルの同期レインボー回転 ＆ グローサイクル -->
+                    <DoubleAnimation Storyboard.TargetName="SearchIconRgbRotate"
+                                     Storyboard.TargetProperty="Angle"
+                                     From="0" To="360"
+                                     Duration="0:0:4"
+                                     RepeatBehavior="Forever" />
+
+                    <ColorAnimationUsingKeyFrames Storyboard.TargetName="SearchIconRgbShadow"
+                                                  Storyboard.TargetProperty="Color"
+                                                  Duration="0:0:4"
+                                                  RepeatBehavior="Forever">
+                        <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="#FFFF0055" />
+                        <LinearColorKeyFrame KeyTime="0:0:0.6" Value="#FFFF7700" />
+                        <LinearColorKeyFrame KeyTime="0:0:1.3" Value="#FFFFDD00" />
+                        <LinearColorKeyFrame KeyTime="0:0:2.0" Value="#FF00FF66" />
+                        <LinearColorKeyFrame KeyTime="0:0:2.6" Value="#FF00DDFF" />
+                        <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
+                        <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
+                    </ColorAnimationUsingKeyFrames>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -323,13 +343,38 @@
                     <!-- 未検索時のウェルカム・案内画面 (初期表示) -->
                     <Border x:Name="EmptyStateView" Visibility="Visible" Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="30">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <!-- アイコン発光サークル -->
-                            <Border Width="72" Height="72" CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,18">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
-                                </Border.Effect>
+                            <!-- アイコン発光サークル (Gaming RGB テーマ時はレインボーサイクル回転発光) -->
+                            <Grid Width="72" Height="72" HorizontalAlignment="Center" Margin="0,0,0,18">
+                                <!-- 通常テーマ用サークル (Dark, Light, Sunset, StarryNight) -->
+                                <Border CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+                                    </Border.Effect>
+                                </Border>
+
+                                <!-- 🎮 Gaming RGB 専用: レインボーサイクル回転ボーダー & シャドウ -->
+                                <Border CornerRadius="36" BorderThickness="2.5" Visibility="{DynamicResource GamingRgbVisibility}">
+                                    <Border.BorderBrush>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <RotateTransform x:Name="SearchIconRgbRotate" CenterX="0.5" CenterY="0.5" Angle="0" />
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FFFF0055" Offset="0.0" />
+                                            <GradientStop Color="#FFFF7700" Offset="0.16" />
+                                            <GradientStop Color="#FFFFDD00" Offset="0.33" />
+                                            <GradientStop Color="#FF00FF66" Offset="0.50" />
+                                            <GradientStop Color="#FF00DDFF" Offset="0.66" />
+                                            <GradientStop Color="#FF0055FF" Offset="0.83" />
+                                            <GradientStop Color="#FFAA00FF" Offset="1.0" />
+                                        </LinearGradientBrush>
+                                    </Border.BorderBrush>
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="SearchIconRgbShadow" BlurRadius="24" ShadowDepth="0" Color="#FF00FFCC" Opacity="0.9" />
+                                    </Border.Effect>
+                                </Border>
+
                                 <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
+                            </Grid>
 
                             <TextBlock Text="AWAITING USER LOOKUP" FontWeight="ExtraBold" FontSize="18" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
                             <TextBlock Text="上部の入力欄に Discord ユーザーID (Snowflake) を入力し、Enterキーを押してください。" 
