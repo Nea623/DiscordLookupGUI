@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
         mc:Ignorable="d"
-        Title="Discord Lookup" 
+        Title="DISCORD LOOKUP GUI" 
         Height="680" Width="1040"
         WindowStartupLocation="CenterScreen"
         Icon="Assets/app.ico"
@@ -246,6 +246,7 @@
                         </Border>
                         <TextBlock Text="DISCORD" FontWeight="ExtraBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text=" GUI" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         <Border Margin="10,0,0,0" VerticalAlignment="Center" Background="#1A3B82F6" CornerRadius="8" Padding="7,2">
                             <TextBlock Text="v2.3" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
                         </Border>
@@ -830,7 +831,8 @@
                             <!-- タイトル -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Text="DISCORD" FontWeight="ExtraBold" FontSize="30" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="30" Foreground="{StaticResource AccentCyanBrush}" />
+                                <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="30" Foreground="{DynamicResource AccentCyanBrush}" />
+                                <TextBlock Text=" GUI" FontWeight="Bold" FontSize="30" Foreground="{DynamicResource AccentCyanBrush}" />
                             </StackPanel>
 
                             <!-- サブタイトル & ローディングプログレス演出 -->
