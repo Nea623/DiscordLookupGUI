@@ -441,8 +441,8 @@
                                         <Button Grid.Column="2" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="12" Padding="6,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
                                     </Grid>
 
-                                    <!-- 🌟 ユーザー要望: Open Avatar/Banner 下のちょい大きめ星座アート 🌟 -->
-                                    <Grid Margin="0,14,0,4" HorizontalAlignment="Center"
+                                    <!-- 🌟 ユーザー要望: Open Avatar/Banner 下のちょい大きめ星座アート (左寄せ) 🌟 -->
+                                    <Grid Margin="10,14,0,4" HorizontalAlignment="Left"
                                           Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
                                         <Image Source="Assets/StarryNight/constellation_ursa.png" Width="155" Height="88" Stretch="Uniform" Opacity="0.85">
                                             <Image.Effect>
