@@ -555,14 +555,28 @@ public partial class MainWindow : Window
             PlateClanContainer.Visibility = Visibility.Collapsed;
         }
 
-        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映 (264x56に完全フィット)
-        if (!string.IsNullOrEmpty(user.NameplateSkuId) && !string.IsNullOrEmpty(user.NameplateStaticUrl))
+        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映 (動くアニメーションGIFループ再生)
+        if (!string.IsNullOrEmpty(user.NameplateSkuId))
         {
             PlateBackgroundStaticImage.Visibility = Visibility.Visible;
-            LoadImage(PlateBackgroundStaticImage, user.NameplateStaticUrl);
+            try
+            {
+                // 動くネームプレートアニメーションGIFを適用してループ再生
+                var animUri = new Uri("pack://application:,,,/Assets/nameplate_rocketfuel.gif", UriKind.Absolute);
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null);
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, animUri);
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(user.NameplateStaticUrl))
+                {
+                    LoadImage(PlateBackgroundStaticImage, user.NameplateStaticUrl);
+                }
+            }
         }
         else
         {
+            try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
             PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
             PlateBackgroundStaticImage.Source = null;
         }

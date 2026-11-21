@@ -19,6 +19,8 @@
     <Resource Include="Assets\app.ico" />
     <Resource Include="Assets\sunset_bg.jpg" />
     <Resource Include="Assets\StarryNight\*.png" />
+    <Resource Include="Assets\nameplate_rocketfuel.png" />
+    <Resource Include="Assets\nameplate_rocketfuel.gif" />
   </ItemGroup>
 
   <ItemGroup>
