@@ -531,48 +531,48 @@
                                         <Button Grid.Column="4" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
                                     </Grid>
 
-                                    <!-- ── Discord 公式同等ジャストサイズ ネームプレート (264x56px) ── -->
-                                    <Border x:Name="NameplateCard" Width="264" Height="56" Margin="0,12,0,0" HorizontalAlignment="Left"
-                                            CornerRadius="14" ClipToBounds="True" Background="#313338" BorderThickness="0">
+                                    <!-- ── Discord 公式メンバーリスト原寸 ネームプレート (248x42px) ── -->
+                                    <Border x:Name="NameplateCard" Width="248" Height="42" Margin="0,12,0,0" HorizontalAlignment="Left"
+                                            CornerRadius="8" ClipToBounds="True" Background="#313338" BorderThickness="0">
                                         <Grid>
-                                            <!-- ネームプレート公式装飾 背景画像 (264x56にピッタリフィット・角丸14pxクリップ) -->
-                                            <Border Width="264" Height="56" CornerRadius="14" ClipToBounds="True">
-                                                <Image x:Name="PlateBackgroundStaticImage" Width="264" Height="56"
+                                            <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・角丸8pxクリップ) -->
+                                            <Border Width="248" Height="42" CornerRadius="8" ClipToBounds="True">
+                                                <Image x:Name="PlateBackgroundStaticImage" Width="248" Height="42"
                                                        Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                        IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
                                             </Border>
 
                                             <!-- メインコンテンツ (アバター + テキスト情報) -->
-                                            <Grid Margin="7,0,8,0" VerticalAlignment="Center">
+                                            <Grid Margin="5,0,6,0" VerticalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="46" />
+                                                    <ColumnDefinition Width="38" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <!-- 1. 左側: アバター + デコレーション (直径34px真円クリップ + 44pxデコレーション) -->
-                                                <Grid Grid.Column="0" Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <!-- 円形アバター (直径34px / EllipseGeometryで真円クリップ) -->
-                                                    <Image x:Name="PlateAvatarImage" Width="34" Height="34" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
+                                                <!-- 1. 左側: アバター + デコレーション (直径32px真円クリップ + 38pxデコレーション) -->
+                                                <Grid Grid.Column="0" Width="38" Height="38" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <!-- 円形アバター (直径32px / EllipseGeometryで真円クリップ) -->
+                                                    <Image x:Name="PlateAvatarImage" Width="32" Height="32" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
                                                         <Image.Clip>
-                                                            <EllipseGeometry Center="17,17" RadiusX="17" RadiusY="17" />
+                                                            <EllipseGeometry Center="16,16" RadiusX="16" RadiusY="16" />
                                                         </Image.Clip>
                                                     </Image>
 
-                                                    <!-- アバターデコレーション (幅44px, 高さ44px - 自前APNGエンジンで同期再生) -->
-                                                    <Image x:Name="PlateAvatarDecoImage" Width="44" Height="44" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                    <!-- アバターデコレーション (幅38px, 高さ38px - 自前APNGエンジンで同期再生) -->
+                                                    <Image x:Name="PlateAvatarDecoImage" Width="38" Height="38" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality" />
                                                 </Grid>
 
                                                 <!-- 2. 右側: ユーザー情報 (表示名 + クランバッジ) -->
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
-                                                    <!-- 表示名 -->
-                                                    <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="14" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="145" TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
+                                                    <!-- 表示名 (Discord公式準拠 13px太字) -->
+                                                    <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="130" TextTrimming="CharacterEllipsis" />
 
                                                     <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
-                                                    <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="4" Padding="5,2" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                    <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center">
                                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <Image x:Name="PlateClanBadgeImage" Width="12" Height="12" Margin="0,0,3,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                            <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="10" Margin="0,0,2,0" VerticalAlignment="Center" />
-                                                            <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                                            <Image x:Name="PlateClanBadgeImage" Width="11" Height="11" Margin="0,0,2,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                            <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center" />
+                                                            <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                                                         </StackPanel>
                                                     </Border>
                                                 </StackPanel>
