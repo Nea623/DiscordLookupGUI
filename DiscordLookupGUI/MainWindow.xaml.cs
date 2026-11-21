@@ -556,38 +556,39 @@ public partial class MainWindow : Window
         {
             if (string.IsNullOrEmpty(url))
             {
-                try { AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
+                try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+                try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
                 targetImage.Source = null;
                 return;
             }
 
             var uri = new Uri(url, UriKind.Absolute);
 
-            // GIF アニメーション対応
-            if (url.Contains(".gif", StringComparison.OrdinalIgnoreCase))
-            {
-                AnimationBehavior.SetSourceUri(targetImage, uri);
-            }
-            else
-            {
-                // 静止画 / APNG / 通常 PNG
-                try { AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = uri;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                targetImage.Source = bitmap;
-            }
+            // AnimatedImage.Wpf により APNG (Discord アバターデコレーション) および GIF/PNG のアニメーションを自動ループ再生
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = uri;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+
+            AnimatedImage.Wpf.ImageBehavior.SetRepeatBehavior(targetImage, System.Windows.Media.Animation.RepeatBehavior.Forever);
+            AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, bitmap);
         }
         catch
         {
             try
             {
-                AnimationBehavior.SetSourceUri(targetImage, null);
-                targetImage.Source = null;
+                var uri = new Uri(url, UriKind.Absolute);
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, uri);
             }
-            catch { }
+            catch
+            {
+                try
+                {
+                    targetImage.Source = null;
+                }
+                catch { }
+            }
         }
     }
 
