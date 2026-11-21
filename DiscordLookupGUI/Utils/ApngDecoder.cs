@@ -250,7 +250,7 @@ public static class ApngDecoder
 /// </summary>
 public class ApngAnimationController
 {
-    private readonly System.Windows.Controls.Image _target;
+    private readonly List<System.Windows.Controls.Image> _targets;
     private readonly List<ApngFrame> _frames;
     private readonly double _totalDurationMs;
     private readonly double[] _frameStartTimes;
@@ -259,8 +259,13 @@ public class ApngAnimationController
     private bool _isRunning;
 
     public ApngAnimationController(System.Windows.Controls.Image target, List<ApngFrame> frames)
+        : this(new[] { target }, frames)
     {
-        _target = target;
+    }
+
+    public ApngAnimationController(IEnumerable<System.Windows.Controls.Image> targets, List<ApngFrame> frames)
+    {
+        _targets = targets.Where(t => t != null).ToList();
         _frames = frames;
         _frameStartTimes = new double[frames.Count];
         double current = 0;
@@ -307,7 +312,11 @@ public class ApngAnimationController
         if (frameIndex != _lastFrameIndex)
         {
             _lastFrameIndex = frameIndex;
-            _target.Source = _frames[frameIndex].Image;
+            var frameImage = _frames[frameIndex].Image;
+            foreach (var target in _targets)
+            {
+                target.Source = frameImage;
+            }
         }
     }
 }

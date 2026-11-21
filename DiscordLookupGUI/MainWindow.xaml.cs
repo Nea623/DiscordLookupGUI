@@ -506,28 +506,54 @@ public partial class MainWindow : Window
             RectAccentColor.Background = Brushes.Transparent;
         }
 
+        // ネームプレート (264x56px) への情報反映
+        PlateDisplayName.Text = user.GlobalName ?? user.Username;
+        if (!string.IsNullOrEmpty(user.ClanTag))
+        {
+            PlateClanContainer.Visibility = Visibility.Visible;
+            PlateClanTag.Text = user.ClanTag;
+            if (!string.IsNullOrEmpty(user.ClanBadgeUrl))
+            {
+                PlateClanBadgeImage.Visibility = Visibility.Visible;
+                PlateClanHeart.Visibility = Visibility.Collapsed;
+                LoadImage(PlateClanBadgeImage, user.ClanBadgeUrl);
+            }
+            else
+            {
+                PlateClanBadgeImage.Visibility = Visibility.Collapsed;
+                PlateClanHeart.Visibility = Visibility.Visible;
+            }
+        }
+        else
+        {
+            PlateClanContainer.Visibility = Visibility.Collapsed;
+        }
+
         // アバター読み込み
         _currentAvatarUrl = user.AvatarUrl;
         BtnOpenAvatar.IsEnabled = !string.IsNullOrEmpty(_currentAvatarUrl);
         LoadImage(AvatarImage, _currentAvatarUrl);
+        LoadImage(PlateAvatarImage, _currentAvatarUrl);
 
         // アバターデコレーション（飾り枠）読み込み
         _currentAvatarDecorationUrl = user.AvatarDecorationUrl ?? string.Empty;
         if (!string.IsNullOrEmpty(_currentAvatarDecorationUrl))
         {
             AvatarDecorationImage.Visibility = Visibility.Visible;
+            PlateAvatarDecoImage.Visibility = Visibility.Visible;
             BtnOpenDecoration.IsEnabled = true;
             if (AvatarRing != null) AvatarRing.StrokeThickness = 0;
             if (AvatarShadow != null) AvatarShadow.Opacity = 0;
-            LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl, isDecoration: true);
+            LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl, isDecoration: true, extraTargetImage: PlateAvatarDecoImage);
         }
         else
         {
             AvatarDecorationImage.Visibility = Visibility.Collapsed;
+            PlateAvatarDecoImage.Visibility = Visibility.Collapsed;
             BtnOpenDecoration.IsEnabled = false;
             if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
             if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
-            LoadImage(AvatarDecorationImage, string.Empty);
+            LoadImage(AvatarDecorationImage, string.Empty, extraTargetImage: PlateAvatarDecoImage);
         }
 
         // バナー読み込み
@@ -567,7 +593,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private static async void LoadImage(Image targetImage, string url, bool isDecoration = false)
+    private static async void LoadImage(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null)
     {
         try
         {
@@ -580,6 +606,11 @@ public partial class MainWindow : Window
                 }
                 try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
                 targetImage.Source = null;
+                if (extraTargetImage != null)
+                {
+                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, null); } catch { }
+                    extraTargetImage.Source = null;
+                }
                 return;
             }
 
@@ -592,6 +623,10 @@ public partial class MainWindow : Window
                 _currentApngController = null;
 
                 try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
+                if (extraTargetImage != null)
+                {
+                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, null); } catch { }
+                }
 
                 try
                 {
@@ -603,7 +638,10 @@ public partial class MainWindow : Window
                     {
                         // 60FPS 完全同期アニメーションコントローラーで再生
                         targetImage.Source = frames[0].Image;
-                        _currentApngController = new ApngAnimationController(targetImage, frames);
+                        if (extraTargetImage != null) extraTargetImage.Source = frames[0].Image;
+
+                        var targets = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
+                        _currentApngController = new ApngAnimationController(targets, frames);
                         _currentApngController.Start();
                         return;
                     }
@@ -618,11 +656,13 @@ public partial class MainWindow : Window
                     bitmap.Freeze();
 
                     targetImage.Source = bitmap;
+                    if (extraTargetImage != null) extraTargetImage.Source = bitmap;
                     return;
                 }
                 catch
                 {
                     targetImage.Source = null;
+                    if (extraTargetImage != null) extraTargetImage.Source = null;
                     return;
                 }
             }
