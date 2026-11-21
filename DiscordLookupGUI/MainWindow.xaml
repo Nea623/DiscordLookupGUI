@@ -248,7 +248,7 @@
                         <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         <TextBlock Text=" GUI" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         <Border Margin="10,0,0,0" VerticalAlignment="Center" Background="#1A3B82F6" CornerRadius="8" Padding="7,2">
-                            <TextBlock Text="v2.3" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
+                            <TextBlock Text="v2.4" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
                         </Border>
                     </StackPanel>
 

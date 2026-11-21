@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v2.3-4DF2D3?style=for-the-badge&logo=discord&logoColor=black)
+![Version](https://img.shields.io/badge/version-v2.4-4DF2D3?style=for-the-badge&logo=discord&logoColor=black)
 ![.NET 8](https://img.shields.io/badge/.NET-8.0_WPF-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D4?style=for-the-badge&logo=windows&logoColor=white)
 ![Single File](https://img.shields.io/badge/Release-Single--File_exe-10B981?style=for-the-badge)
@@ -35,6 +35,20 @@
   - 🎮 **Gaming RGB Theme**: 漆黒のピュアブラック ＆ 外枠・虫眼鏡の無限レインボーサイクル ＆ 鮮烈なネオングリーン
   - タイトルバー右上のボタン、または Settings 画面から横方向にスッと展開するスマートなメニュー
   - 選択したテーマはローカル（`theme_settings.json`）に自動保存され、次回起動時もシームレスに復元
+- 🏷️ **Discord 公式メンバーリスト原寸 ネームプレート (248x42px)**
+  - Discord 公式原寸 `248x42px` ＆ 角丸 8px クリップを忠実に再現
+  - 自作高性能 APNG エンジンによる透過アルファアニメーション（サイバーネティックの紫スモーク等）の滑らかループ再生
+  - Discord 公式フォント「**gg sans**」（Normal / Medium / SemiBold / Bold）をアプリ内完全埋め込み
+  - ネームプレート詳細メタ情報（`sku_id`, `label`, `asset`, `palette`）の常時表示 ＆ ホバー時のリッチツールチップ
+- 📋 **ワンクリック・クリップボードコピー機能**
+  - **Accent Color**: カラーコード（`#xxxxxx`）のクリックコピー
+  - **Nameplate Collectibles**: カード全体クリックによる一括コピー ＆ `label`, `palette`, `sku_id` のピンポイント個別コピー
+  - **Snowflake Decoding**: 「Copy All」による全項目一括コピー ＆ `Epoch Offset`, `Worker ID`, `Process ID` の個別コピー
+  - **Account Creation Date**: 作成日時（JST / UTC）の個別コピー
+  - **Raw Data**: ヘッダーの「Copy JSON」ボタンによるフォーマット済み生 JSON 一括コピー
+- 🔄 **シームレスな UI 連動 ＆ 視認性最適化**
+  - 入力欄クリア時に Main 画面と Raw Data 画面が完全同期して美しくフェードアウトし、未検索状態（Empty View）へ復帰
+  - 各テーマの背景に合わせて最も視認性の高い配色に自動連動する入力欄プレースホルダー説明文
 - 🎞️ **Nitro アニメーション GIF の完全ループ再生**
   - Discord Nitro などの動くアバターおよび動くバナー GIF をそのままアプリ内で滑らかにループ再生 (`XamlAnimatedGif`)
 - 🦄 **Unicode カラー絵文字 ＆ クランバッジ対応**
@@ -54,7 +68,7 @@
 ## 🚀 使い方
 
 ### 1. ダウンロード
-[GitHub Releases (v2.3)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookupGUI.exe`** をダウンロードします。
+[GitHub Releases (v2.4)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookupGUI.exe`** をダウンロードします。
 
 > [!NOTE]
 > **Windows SmartScreen の警告が表示された場合**  
