@@ -1039,22 +1039,38 @@ public partial class MainWindow : Window
             BadgeClan.Visibility = Visibility.Collapsed;
         }
 
-        // アクセントカラー
+        // アクセントカラー (accent_color 優先、未設定時は banner_color)
+        Color? resolvedAccentColor = null;
+        string resolvedAccentHex = string.Empty;
+
         if (user.AccentColor.HasValue && user.AccentColor.Value is >= 0 and <= 0xFFFFFF)
         {
-            var hex = $"#{user.AccentColor.Value:X6}";
-            TxtAccentColor.Text = hex;
+            resolvedAccentHex = $"#{user.AccentColor.Value:X6}";
             try
             {
-                var color = (Color)ColorConverter.ConvertFromString(hex);
-                var brush = new SolidColorBrush(color);
-                brush.Freeze();
-                RectAccentColor.Background = brush;
+                resolvedAccentColor = (Color)ColorConverter.ConvertFromString(resolvedAccentHex);
             }
-            catch
+            catch { }
+        }
+
+        if (!resolvedAccentColor.HasValue && !string.IsNullOrWhiteSpace(user.BannerColor))
+        {
+            var rawHex = user.BannerColor.Trim();
+            var fullHex = rawHex.StartsWith("#") ? rawHex : "#" + rawHex;
+            try
             {
-                RectAccentColor.Background = Brushes.Transparent;
+                resolvedAccentColor = (Color)ColorConverter.ConvertFromString(fullHex);
+                resolvedAccentHex = fullHex.ToUpperInvariant();
             }
+            catch { }
+        }
+
+        if (resolvedAccentColor.HasValue)
+        {
+            TxtAccentColor.Text = resolvedAccentHex;
+            var brush = new SolidColorBrush(resolvedAccentColor.Value);
+            brush.Freeze();
+            RectAccentColor.Background = brush;
         }
         else
         {
@@ -1119,20 +1135,12 @@ public partial class MainWindow : Window
             _ = LoadImageAsync(AvatarDecorationImage, string.Empty, isDecoration: true, extraTargetImage: PlateAvatarDecoImage, ct: ct);
         }
 
-        // バナー背景色・画像読み込み (未設定時はアクセントカラー ➔ 未設定ならテーマ色で塗りつぶし)
-        if (user.AccentColor.HasValue && user.AccentColor.Value is >= 0 and <= 0xFFFFFF)
+        // バナー背景色・画像読み込み (アクセントカラー/バナーカラー ➔ 未設定ならテーマ色で塗りつぶし)
+        if (resolvedAccentColor.HasValue)
         {
-            try
-            {
-                var color = (Color)ColorConverter.ConvertFromString($"#{user.AccentColor.Value:X6}");
-                var brush = new SolidColorBrush(color);
-                brush.Freeze();
-                BannerContainer.Background = brush;
-            }
-            catch
-            {
-                BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
-            }
+            var brush = new SolidColorBrush(resolvedAccentColor.Value);
+            brush.Freeze();
+            BannerContainer.Background = brush;
         }
         else
         {
