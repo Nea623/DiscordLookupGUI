@@ -629,14 +629,29 @@ public partial class MainWindow : Window
             TxtPlateAsset.Text = "なし";
             TxtPlatePalette.Text = "なし";
             PlatePaletteIndicator.Visibility = Visibility.Collapsed;
+
+            TxtTipSkuId.Text = "なし";
+            TxtTipLabel.Text = "未装備";
+            TxtTipAsset.Text = "なし";
+            TxtTipPalette.Text = "なし";
             return;
         }
 
         // ネームプレート詳細メタ情報 (sku_id, label, asset, palette) の反映
-        TxtPlateSkuId.Text = user.NameplateSkuId;
-        TxtPlateLabel.Text = !string.IsNullOrEmpty(user.NameplateLabel) ? user.NameplateLabel : "(None)";
-        TxtPlateAsset.Text = !string.IsNullOrEmpty(user.NameplateAsset) ? user.NameplateAsset : "(None)";
-        TxtPlatePalette.Text = !string.IsNullOrEmpty(user.NameplatePalette) ? user.NameplatePalette : "(None)";
+        string sku = user.NameplateSkuId;
+        string lbl = !string.IsNullOrEmpty(user.NameplateLabel) ? user.NameplateLabel : "(None)";
+        string ast = !string.IsNullOrEmpty(user.NameplateAsset) ? user.NameplateAsset : "(None)";
+        string pal = !string.IsNullOrEmpty(user.NameplatePalette) ? user.NameplatePalette : "(None)";
+
+        TxtPlateSkuId.Text = sku;
+        TxtPlateLabel.Text = lbl;
+        TxtPlateAsset.Text = ast;
+        TxtPlatePalette.Text = pal;
+
+        TxtTipSkuId.Text = sku;
+        TxtTipLabel.Text = lbl;
+        TxtTipAsset.Text = ast;
+        TxtTipPalette.Text = pal;
 
         var paletteColor = GetNameplatePaletteColor(user.NameplatePalette);
         PlatePaletteIndicator.Background = new SolidColorBrush(paletteColor);

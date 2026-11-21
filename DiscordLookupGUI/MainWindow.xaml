@@ -596,43 +596,77 @@
                                             </Border>
                                         </StackPanel>
 
-                                        <!-- 右列: ネームプレート詳細メタ情報 (sku_id, asset, label, palette) -->
-                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Top">
-                                            <TextBlock Text="Collectibles Data" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,0,0,4" HorizontalAlignment="Left" />
-                                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="8,5">
-                                                <Grid>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
+                                        <!-- 右列: ネームプレート詳細メタ情報 (案2: 高さ42px同期コンパクトバッジ + 詳細ツールチップ) -->
+                                        <Border Grid.Column="1" Margin="8,0,0,0" Height="42" VerticalAlignment="Center"
+                                                Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="8,4">
+                                            <!-- ホバー時のリッチツールチップ -->
+                                            <Border.ToolTip>
+                                                <ToolTip Background="#18191C" BorderBrush="#383A40" BorderThickness="1" Padding="10,8">
+                                                    <StackPanel>
+                                                        <TextBlock Text="Nameplate Collectibles" FontSize="11" FontWeight="Bold" Foreground="#60A5FA" Margin="0,0,0,6" />
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="label:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
+                                                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtTipLabel" Text="--" FontSize="10.5" FontWeight="Bold" Foreground="#8EB4FF" Margin="0,0,0,3" />
+
+                                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="palette:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
+                                                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTipPalette" Text="--" FontSize="10.5" Foreground="#F2F3F5" Margin="0,0,0,3" />
+
+                                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="sku_id:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
+                                                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtTipSkuId" Text="--" FontSize="10.5" FontFamily="Consolas" Foreground="#F2F3F5" Margin="0,0,0,3" />
+
+                                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="asset:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,0" />
+                                                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtTipAsset" Text="--" FontSize="10.5" FontFamily="Consolas" Foreground="#F2F3F5" />
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </Border.ToolTip>
+
+                                            <!-- 常時表示エリア (高さ42pxにピタッと収まる2段レイアウト) -->
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <!-- 上段: label (強調) + palette バッジ -->
+                                                <Grid Grid.Row="0" Margin="0,0,0,2">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
                                                         <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <!-- sku_id -->
-                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="sku_id" FontSize="9.5" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,6,2" />
-                                                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtPlateSkuId" Text="--" FontSize="9.5" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,2" />
-
                                                     <!-- label -->
-                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="label" FontSize="9.5" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,6,2" />
-                                                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtPlateLabel" Text="--" FontSize="9.5" FontWeight="SemiBold" Foreground="{DynamicResource AccentCyanBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,2" />
+                                                    <TextBlock Grid.Column="0" x:Name="TxtPlateLabel" Text="--" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
 
-                                                    <!-- asset -->
-                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="asset" FontSize="9.5" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,6,2" />
-                                                    <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtPlateAsset" Text="--" FontSize="9.5" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,2" />
-
-                                                    <!-- palette -->
-                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="palette" FontSize="9.5" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,6,0" />
-                                                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Border x:Name="PlatePaletteIndicator" Width="7" Height="7" CornerRadius="3.5" Background="Transparent" Margin="0,0,4,0" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                        <TextBlock x:Name="TxtPlatePalette" Text="--" FontSize="9.5" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-                                                    </StackPanel>
+                                                    <!-- palette ピルバッジ -->
+                                                    <Border Grid.Column="1" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="4,0,0,0" VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <Border x:Name="PlatePaletteIndicator" Width="6" Height="6" CornerRadius="3" Background="Transparent" Margin="0,0,3,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                            <TextBlock x:Name="TxtPlatePalette" Text="--" FontSize="9.5" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                        </StackPanel>
+                                                    </Border>
                                                 </Grid>
-                                            </Border>
-                                        </StackPanel>
+
+                                                <!-- 下段: sku_id ＋ asset (コンパクトに横並び) -->
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="SKU:" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,3,0" VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="TxtPlateSkuId" Text="--" FontSize="9.5" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="110" VerticalAlignment="Center" />
+                                                    <!-- asset 内部バインディング -->
+                                                    <TextBlock x:Name="TxtPlateAsset" Text="--" Visibility="Collapsed" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
                                     </Grid>
 
                                 </StackPanel>
