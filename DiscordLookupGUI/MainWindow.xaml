@@ -616,17 +616,21 @@
                                                                 <ColumnDefinition Width="*" />
                                                             </Grid.ColumnDefinitions>
 
-                                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="label:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
-                                                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtTipLabel" Text="--" FontSize="10.5" FontWeight="Bold" Foreground="#8EB4FF" Margin="0,0,0,3" />
+                                                            <!-- 1. sku_id -->
+                                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="sku_id:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
+                                                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtTipSkuId" Text="--" FontSize="10.5" FontFamily="Consolas" Foreground="#F2F3F5" Margin="0,0,0,3" />
 
-                                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="palette:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
-                                                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTipPalette" Text="--" FontSize="10.5" Foreground="#F2F3F5" Margin="0,0,0,3" />
+                                                            <!-- 2. label -->
+                                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="label:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
+                                                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtTipLabel" Text="--" FontSize="10.5" FontWeight="Bold" Foreground="#8EB4FF" Margin="0,0,0,3" />
 
-                                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="sku_id:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
-                                                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtTipSkuId" Text="--" FontSize="10.5" FontFamily="Consolas" Foreground="#F2F3F5" Margin="0,0,0,3" />
+                                                            <!-- 3. asset -->
+                                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="asset:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,3" />
+                                                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtTipAsset" Text="--" FontSize="10.5" FontFamily="Consolas" Foreground="#F2F3F5" Margin="0,0,0,3" />
 
-                                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="asset:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,0" />
-                                                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtTipAsset" Text="--" FontSize="10.5" FontFamily="Consolas" Foreground="#F2F3F5" />
+                                                            <!-- 4. palette -->
+                                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="palette:" FontSize="10.5" FontWeight="SemiBold" Foreground="#949BA4" Margin="0,0,8,0" />
+                                                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtTipPalette" Text="--" FontSize="10.5" Foreground="#F2F3F5" />
                                                         </Grid>
                                                     </StackPanel>
                                                 </ToolTip>
