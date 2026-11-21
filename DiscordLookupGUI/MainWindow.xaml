@@ -532,7 +532,8 @@
                                     </Grid>
 
                                     <!-- ── Discord 公式メンバーリスト原寸 ネームプレート (248x42px) ── -->
-                                    <Border x:Name="NameplateCard" Width="248" Height="42" Margin="0,12,0,0" HorizontalAlignment="Left"
+                                    <TextBlock Text="Nameplate" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,12,0,4" HorizontalAlignment="Left" />
+                                    <Border x:Name="NameplateCard" Width="248" Height="42" Margin="0,0,0,0" HorizontalAlignment="Left"
                                             CornerRadius="8" ClipToBounds="True" Background="#232035" BorderThickness="0">
                                         <Grid>
                                             <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・角丸8pxクリップ・真の32bitアルファAPNG) -->
