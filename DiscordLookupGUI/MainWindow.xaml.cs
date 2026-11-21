@@ -967,4 +967,85 @@ public partial class MainWindow : Window
             ? (SolidColorBrush)FindResource("SuccessGreenBrush")
             : (SolidColorBrush)FindResource("DangerRedBrush");
     }
+
+    private void CopyToClipboard(string text, string description)
+    {
+        if (string.IsNullOrWhiteSpace(text) || text == "-" || text == "なし" || text == "--" || text == "未装備" || text.StartsWith("UTC: --") || text.StartsWith("-- 年"))
+            return;
+
+        try
+        {
+            Clipboard.SetText(text);
+            SetStatus($"COPIED: {description}", true);
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"COPY FAILED: {ex.Message}", false);
+        }
+    }
+
+    private void AccentColor_Click(object sender, MouseButtonEventArgs e)
+    {
+        CopyToClipboard(TxtAccentColor.Text, "Accent Color");
+    }
+
+    private void NameplateMetaCard_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (TxtPlateSkuId.Text == "--" || TxtPlateSkuId.Text == "未装備") return;
+        var text = $"sku_id: {TxtPlateSkuId.Text}\nlabel: {TxtPlateLabel.Text}\nasset: {TxtPlateAsset.Text}\npalette: {TxtPlatePalette.Text}";
+        CopyToClipboard(text, "Nameplate Collectibles");
+    }
+
+    private void CopyPlateLabel_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        CopyToClipboard(TxtPlateLabel.Text, "Nameplate Label");
+    }
+
+    private void CopyPlatePalette_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        CopyToClipboard(TxtPlatePalette.Text, "Nameplate Palette");
+    }
+
+    private void CopyPlateSkuId_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        CopyToClipboard(TxtPlateSkuId.Text, "Nameplate SKU ID");
+    }
+
+    private void CreatedAtJst_Click(object sender, MouseButtonEventArgs e)
+    {
+        CopyToClipboard(TxtCreatedAtJst.Text, "Created At (JST)");
+    }
+
+    private void CreatedAtUtc_Click(object sender, MouseButtonEventArgs e)
+    {
+        var text = TxtCreatedAtUtc.Text;
+        if (text.StartsWith("UTC: ")) text = text.Substring(5).Trim();
+        CopyToClipboard(text, "Created At (UTC)");
+    }
+
+    private void CopySnowflakeAll_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        if (TxtWorkerId.Text == "--") return;
+        var text = $"Epoch Offset: 1420070400000 ms\nInternal Worker ID: {TxtWorkerId.Text}\nInternal Process ID: {TxtProcessId.Text}";
+        CopyToClipboard(text, "Snowflake Decoding");
+    }
+
+    private void CopyEpoch_Click(object sender, MouseButtonEventArgs e)
+    {
+        CopyToClipboard("1420070400000", "Epoch Offset");
+    }
+
+    private void CopyWorkerId_Click(object sender, MouseButtonEventArgs e)
+    {
+        CopyToClipboard(TxtWorkerId.Text, "Worker ID");
+    }
+
+    private void CopyProcessId_Click(object sender, MouseButtonEventArgs e)
+    {
+        CopyToClipboard(TxtProcessId.Text, "Process ID");
+    }
 }
