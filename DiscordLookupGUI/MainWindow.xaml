@@ -795,14 +795,43 @@
 
                 <!-- 【タブ2: RAW DATA 画面】 -->
                 <Grid x:Name="ViewRaw" Visibility="Collapsed">
-                    <Border Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="16">
+                    <!-- 未検索時の案内画面 (初期表示・Mainと完全同期) -->
+                    <Border x:Name="RawEmptyStateView" Visibility="Visible" Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="30">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- アイコン発光サークル -->
+                            <Border Width="72" Height="72" CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2" Margin="0,0,0,18">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+                                </Border.Effect>
+                                <TextBlock Text="{}{ }" FontSize="22" FontWeight="Bold" FontFamily="Consolas" Foreground="{DynamicResource AccentCyanBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <TextBlock Text="NO RAW DATA AVAILABLE" FontWeight="ExtraBold" FontSize="18" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                            <TextBlock Text="ユーザーを検索すると、ここに Discord API の完全な生 JSON レスポンスが表示されます。" 
+                                       FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,16" />
+
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#203A6B9B">
+                                <TextBlock Text="💡 API から返却されるすべての生データ（未公開・詳細フィールド含む）を確認できます" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 検索結果表示 (生 JSON ボックス・Mainと完全に同期して表示/非表示) -->
+                    <Border x:Name="RawDataResultGrid" Visibility="Collapsed" Opacity="0" RenderTransformOrigin="0.5,0.5"
+                            Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="16">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="RawDataTranslate" Y="8" />
+                        </Border.RenderTransform>
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="Raw Discord API Response (JSON)" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,10" />
-                            <TextBox Grid.Row="1" x:Name="TxtRawJson" IsReadOnly="True" Style="{StaticResource CyberTextBox}" FontFamily="Consolas" FontSize="12" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Text="/* API レスポンスがここに表示されます */" />
+                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="Raw Discord API Response (JSON)" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                <Button Content="Copy JSON" Style="{StaticResource GlowButton}" FontSize="11" Padding="10,4" HorizontalAlignment="Right" Click="CopyRawJson_Click" />
+                            </Grid>
+                            <TextBox Grid.Row="1" x:Name="TxtRawJson" IsReadOnly="True" Style="{StaticResource CyberTextBox}" FontFamily="Consolas" FontSize="12" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Text="" />
                         </Grid>
                     </Border>
                 </Grid>

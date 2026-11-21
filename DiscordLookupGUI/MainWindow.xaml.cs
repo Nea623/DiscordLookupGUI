@@ -337,7 +337,9 @@ public partial class MainWindow : Window
 
     private void HideSearchResult(bool withAnimation = true)
     {
-        if (SearchResultGrid.Visibility != Visibility.Visible) return;
+        var isMainVisible = SearchResultGrid != null && SearchResultGrid.Visibility == Visibility.Visible;
+        var isRawVisible = RawDataResultGrid != null && RawDataResultGrid.Visibility == Visibility.Visible;
+        if (!isMainVisible && !isRawVisible) return;
 
         if (withAnimation)
         {
@@ -348,24 +350,48 @@ public partial class MainWindow : Window
 
             animOpacity.Completed += (s, e) =>
             {
-                SearchResultGrid.Visibility = Visibility.Collapsed;
-                EmptyStateView.Visibility = Visibility.Visible;
+                if (SearchResultGrid != null) SearchResultGrid.Visibility = Visibility.Collapsed;
+                if (EmptyStateView != null) EmptyStateView.Visibility = Visibility.Visible;
+                if (RawDataResultGrid != null) RawDataResultGrid.Visibility = Visibility.Collapsed;
+                if (RawEmptyStateView != null) RawEmptyStateView.Visibility = Visibility.Visible;
+                if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
 
                 var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(200));
-                EmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                if (EmptyStateView != null) EmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                if (RawEmptyStateView != null) RawEmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeIn);
             };
 
-            SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
+            if (SearchResultGrid != null) SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
             if (SearchResultTranslate != null)
             {
                 SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
             }
+
+            if (RawDataResultGrid != null)
+            {
+                RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
+                if (RawDataTranslate != null)
+                {
+                    RawDataTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
+                }
+            }
         }
         else
         {
-            SearchResultGrid.Visibility = Visibility.Collapsed;
-            EmptyStateView.Visibility = Visibility.Visible;
-            EmptyStateView.Opacity = 1.0;
+            if (SearchResultGrid != null) SearchResultGrid.Visibility = Visibility.Collapsed;
+            if (EmptyStateView != null)
+            {
+                EmptyStateView.Visibility = Visibility.Visible;
+                EmptyStateView.Opacity = 1.0;
+            }
+
+            if (RawDataResultGrid != null) RawDataResultGrid.Visibility = Visibility.Collapsed;
+            if (RawEmptyStateView != null)
+            {
+                RawEmptyStateView.Visibility = Visibility.Visible;
+                RawEmptyStateView.Opacity = 1.0;
+            }
+            if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
         }
 
         if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
@@ -384,6 +410,13 @@ public partial class MainWindow : Window
         _currentApngController = null;
         _nameplateApngController?.Stop();
         _nameplateApngController = null;
+
+        _currentAvatarUrl = string.Empty;
+        _currentAvatarDecorationUrl = string.Empty;
+        _currentBannerUrl = string.Empty;
+        if (BtnOpenAvatar != null) BtnOpenAvatar.IsEnabled = false;
+        if (BtnOpenDecoration != null) BtnOpenDecoration.IsEnabled = false;
+        if (BtnOpenBanner != null) BtnOpenBanner.IsEnabled = false;
 
         SetStatus("READY", true);
     }
@@ -481,6 +514,9 @@ public partial class MainWindow : Window
         EmptyStateView.Visibility = Visibility.Collapsed;
         SearchResultGrid.Visibility = Visibility.Visible;
 
+        if (RawEmptyStateView != null) RawEmptyStateView.Visibility = Visibility.Collapsed;
+        if (RawDataResultGrid != null) RawDataResultGrid.Visibility = Visibility.Visible;
+
         var duration = TimeSpan.FromMilliseconds(500);
         var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
         var animOpacity = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration) { EasingFunction = easing };
@@ -490,6 +526,15 @@ public partial class MainWindow : Window
         if (SearchResultTranslate != null)
         {
             SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
+        }
+
+        if (RawDataResultGrid != null)
+        {
+            RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
+            if (RawDataTranslate != null)
+            {
+                RawDataTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
+            }
         }
 
         // プロフィール情報
@@ -1047,5 +1092,10 @@ public partial class MainWindow : Window
     private void CopyProcessId_Click(object sender, MouseButtonEventArgs e)
     {
         CopyToClipboard(TxtProcessId.Text, "Process ID");
+    }
+
+    private void CopyRawJson_Click(object sender, RoutedEventArgs e)
+    {
+        CopyToClipboard(TxtRawJson.Text, "Raw JSON");
     }
 }
