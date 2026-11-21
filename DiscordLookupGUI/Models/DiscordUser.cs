@@ -11,6 +11,9 @@ public class DiscordUser
     [Newtonsoft.Json.JsonProperty("username")]
     public string Username { get; set; } = string.Empty;
 
+    [Newtonsoft.Json.JsonProperty("discriminator")]
+    public string? Discriminator { get; set; }
+
     [Newtonsoft.Json.JsonProperty("global_name")]
     public string? GlobalName { get; set; }
 
@@ -26,6 +29,9 @@ public class DiscordUser
     [Newtonsoft.Json.JsonProperty("banner_color")]
     public string? BannerColor { get; set; }
 
+    [Newtonsoft.Json.JsonProperty("primary_guild")]
+    public ClanInfo? PrimaryGuild { get; set; }
+
     [Newtonsoft.Json.JsonProperty("clan")]
     public ClanInfo? Clan { get; set; }
 
@@ -36,6 +42,14 @@ public class DiscordUser
     public CollectiblesInfo? Collectibles { get; set; }
 
     // ── 算出プロパティ ──
+
+    private ClanInfo? EffectiveClan => PrimaryGuild ?? Clan;
+
+    /// <summary>判別子を考慮したユーザー名表示（Pomelo方式は @username、レガシー・Bot は name#0000）</summary>
+    public string DisplayUsername =>
+        !string.IsNullOrEmpty(Discriminator) && Discriminator != "0"
+            ? $"{Username}#{Discriminator}"
+            : $"@{Username}";
 
     /// <summary>Snowflake IDからアカウント作成日時を算出</summary>
     public DateTimeOffset CreatedAt
@@ -49,13 +63,17 @@ public class DiscordUser
     }
 
     /// <summary>日本時間での作成日時</summary>
-    public DateTimeOffset CreatedAtJst => CreatedAt.ToOffset(TimeSpan.FromHours(9));
+    public DateTimeOffset CreatedAtJst => CreatedAt == DateTimeOffset.MinValue
+        ? DateTimeOffset.MinValue
+        : CreatedAt.ToOffset(TimeSpan.FromHours(9));
 
     /// <summary>作成からの経過日数</summary>
-    public double ElapsedDays => (DateTimeOffset.UtcNow - CreatedAt).TotalDays;
+    public double ElapsedDays => CreatedAt == DateTimeOffset.MinValue
+        ? 0.0
+        : Math.Max(0.0, (DateTimeOffset.UtcNow - CreatedAt).TotalDays);
 
     /// <summary>作成からの経過年数</summary>
-    public double ElapsedYears => ElapsedDays / 365.0;
+    public double ElapsedYears => ElapsedDays / 365.2425;
 
     /// <summary>アバターURL（null の場合はデフォルトアバター）</summary>
     public string AvatarUrl
@@ -64,12 +82,20 @@ public class DiscordUser
         {
             if (string.IsNullOrEmpty(Avatar))
             {
-                // デフォルトアバター
-                var index = ulong.TryParse(Id, out var id) ? (id >> 22) % 6 : 0;
+                // デフォルトアバター (レガシー/Bot は discriminator % 5、Pomelo は (id >> 22) % 6)
+                ulong index;
+                if (!string.IsNullOrEmpty(Discriminator) && Discriminator != "0" && int.TryParse(Discriminator, out var disc))
+                {
+                    index = (ulong)(Math.Abs(disc) % 5);
+                }
+                else
+                {
+                    index = ulong.TryParse(Id, out var id) ? (id >> 22) % 6 : 0;
+                }
                 return $"https://cdn.discordapp.com/embed/avatars/{index}.png";
             }
             var ext = Avatar.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/avatars/{Id}/{Avatar}.{ext}?size=256";
+            return $"https://cdn.discordapp.com/avatars/{Uri.EscapeDataString(Id)}/{Uri.EscapeDataString(Avatar)}.{ext}?size=256";
         }
     }
 
@@ -80,15 +106,19 @@ public class DiscordUser
         {
             if (string.IsNullOrEmpty(Banner)) return null;
             var ext = Banner.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/banners/{Id}/{Banner}.{ext}?size=600";
+            return $"https://cdn.discordapp.com/banners/{Uri.EscapeDataString(Id)}/{Uri.EscapeDataString(Banner)}.{ext}?size=600";
         }
     }
 
-    /// <summary>クランタグ（なし → null）</summary>
-    public string? ClanTag => Clan?.Tag;
+    /// <summary>クランタグ（なし・非公開 → null）</summary>
+    public string? ClanTag =>
+        EffectiveClan?.IdentityEnabled == true && !string.IsNullOrEmpty(EffectiveClan.Tag)
+            ? EffectiveClan.Tag
+            : null;
 
-    /// <summary>クランバッジ画像URL（なし → null）</summary>
-    public string? ClanBadgeUrl => Clan?.BadgeUrl;
+    /// <summary>クランバッジ画像URL（なし・非公開 → null）</summary>
+    public string? ClanBadgeUrl =>
+        EffectiveClan?.IdentityEnabled == true ? EffectiveClan.BadgeUrl : null;
 
     /// <summary>アバターデコレーション画像URL（なし → null）</summary>
     public string? AvatarDecorationUrl
@@ -96,7 +126,7 @@ public class DiscordUser
         get
         {
             if (string.IsNullOrEmpty(AvatarDecorationData?.Asset)) return null;
-            return $"https://cdn.discordapp.com/avatar-decoration-presets/{AvatarDecorationData.Asset}.png?size=240&passthrough=true";
+            return $"https://cdn.discordapp.com/avatar-decoration-presets/{Uri.EscapeDataString(AvatarDecorationData.Asset)}.png?size=240&passthrough=true";
         }
     }
 
@@ -114,17 +144,17 @@ public class DiscordUser
 
     /// <summary>ネームプレート装飾 静止画URL（448x84 PNG）</summary>
     public string? NameplateStaticUrl => !string.IsNullOrEmpty(NameplateSkuId)
-        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/static"
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{Uri.EscapeDataString(NameplateSkuId)}/static"
         : null;
 
     /// <summary>ネームプレート装飾 アニメーションAPNG URL（448x84 フルアルファ APNG）</summary>
     public string? NameplateAnimatedUrl => !string.IsNullOrEmpty(NameplateSkuId)
-        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/animated"
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{Uri.EscapeDataString(NameplateSkuId)}/animated"
         : null;
 
     /// <summary>ネームプレート装飾 動画URL（アルファ透過 WebM ループ）</summary>
     public string? NameplateVideoUrl => !string.IsNullOrEmpty(NameplateSkuId)
-        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/video"
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{Uri.EscapeDataString(NameplateSkuId)}/video"
         : null;
 }
 
@@ -152,7 +182,7 @@ public class NameplateInfo
 public class AvatarDecorationData
 {
     [Newtonsoft.Json.JsonProperty("asset")]
-    public string Asset { get; set; } = string.Empty;
+    public string? Asset { get; set; }
 
     [Newtonsoft.Json.JsonProperty("sku_id")]
     public string? SkuId { get; set; }
@@ -164,7 +194,7 @@ public class ClanInfo
     public string? IdentityGuildId { get; set; }
 
     [Newtonsoft.Json.JsonProperty("identity_enabled")]
-    public bool IdentityEnabled { get; set; }
+    public bool? IdentityEnabled { get; set; }
 
     [Newtonsoft.Json.JsonProperty("tag")]
     public string? Tag { get; set; }
@@ -173,6 +203,6 @@ public class ClanInfo
     public string? Badge { get; set; }
 
     public string? BadgeUrl => !string.IsNullOrEmpty(IdentityGuildId) && !string.IsNullOrEmpty(Badge)
-        ? $"https://cdn.discordapp.com/clan-badges/{IdentityGuildId}/{Badge}.png"
+        ? $"https://cdn.discordapp.com/guild-tag-badges/{Uri.EscapeDataString(IdentityGuildId)}/{Uri.EscapeDataString(Badge)}.png"
         : null;
 }

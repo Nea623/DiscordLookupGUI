@@ -23,7 +23,7 @@ public class DiscordApiService : IDisposable
     /// <summary>ユーザーIDからユーザー情報を取得する</summary>
     public async Task<DiscordUser> GetUserAsync(string userId)
     {
-        var response = await _client.GetAsync($"https://discord.com/api/v10/users/{userId}");
+        using var response = await _client.GetAsync($"https://discord.com/api/v10/users/{userId}");
 
         if (!response.IsSuccessStatusCode)
         {

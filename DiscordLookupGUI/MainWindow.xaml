@@ -514,7 +514,7 @@
                                             <TextBox Grid.Row="0" Grid.Column="1" x:Name="TxtUserId" Text="-" IsReadOnly="True" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="12" />
 
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Accent Color" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Background="Transparent"
                                                         Cursor="Hand" ToolTip="クリックでカラーコードをコピー" MouseLeftButtonUp="AccentColor_Click">
                                                 <Border x:Name="RectAccentColor" Width="14" Height="14" CornerRadius="3" Background="Transparent" BorderBrush="#405575" BorderThickness="1" Margin="0,0,6,0" />
                                                 <TextBlock x:Name="TxtAccentColor" Text="なし" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
@@ -672,7 +672,7 @@
                                                 </Grid>
 
                                                 <!-- 下段: sku_id ＋ asset (コンパクトに横並び・個別クリックでSKUコピー可能) -->
-                                                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" Background="Transparent"
                                                             ToolTip="クリックで SKU ID をコピー" MouseLeftButtonUp="CopyPlateSkuId_Click">
                                                     <TextBlock Text="SKU:" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,3,0" VerticalAlignment="Center" />
                                                     <TextBlock x:Name="TxtPlateSkuId" Text="--" FontSize="9.5" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="110" VerticalAlignment="Center" />
@@ -759,15 +759,15 @@
                                                 </Border>
                                             </Grid>
                                             
-                                            <Grid Margin="0,0,0,4" Cursor="Hand" ToolTip="クリックで Epoch Offset をコピー" MouseLeftButtonUp="CopyEpoch_Click">
+                                            <Grid Margin="0,0,0,4" Background="Transparent" Cursor="Hand" ToolTip="クリックで Epoch Offset をコピー" MouseLeftButtonUp="CopyEpoch_Click">
                                                 <TextBlock Text="Epoch Offset" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock Text="1420070400000 ms" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
-                                            <Grid Margin="0,0,0,4" Cursor="Hand" ToolTip="クリックで Worker ID をコピー" MouseLeftButtonUp="CopyWorkerId_Click">
+                                            <Grid Margin="0,0,0,4" Background="Transparent" Cursor="Hand" ToolTip="クリックで Worker ID をコピー" MouseLeftButtonUp="CopyWorkerId_Click">
                                                 <TextBlock Text="Internal Worker ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock x:Name="TxtWorkerId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
-                                            <Grid Cursor="Hand" ToolTip="クリックで Process ID をコピー" MouseLeftButtonUp="CopyProcessId_Click">
+                                            <Grid Background="Transparent" Cursor="Hand" ToolTip="クリックで Process ID をコピー" MouseLeftButtonUp="CopyProcessId_Click">
                                                 <TextBlock Text="Internal Process ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock x:Name="TxtProcessId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>

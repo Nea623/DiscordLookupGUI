@@ -17,7 +17,6 @@ namespace DiscordLookup;
 
 public partial class MainWindow : Window
 {
-    private readonly DiscordApiService _apiService = new();
     private static readonly HttpClient _discordApiClient = new()
     {
         Timeout = TimeSpan.FromSeconds(10)
@@ -26,11 +25,31 @@ public partial class MainWindow : Window
     {
         Timeout = TimeSpan.FromSeconds(10)
     };
-    private static ApngAnimationController? _currentApngController;
-    private static ApngAnimationController? _nameplateApngController;
-    private static readonly Dictionary<string, List<ApngFrame>> _nameplateCache = new();
+
+    private sealed class NameplateCacheEntry
+    {
+        public required List<ApngFrame> Frames { get; init; }
+        public required long EstimatedBytes { get; init; }
+    }
+
+    private const int MaxNameplateCacheItems = 10;
+    private const long MaxNameplateCacheBytes = 64L * 1024 * 1024;
+    private readonly Dictionary<string, LinkedListNode<(string Key, NameplateCacheEntry Entry)>> _nameplateCache = new();
+    private readonly LinkedList<(string Key, NameplateCacheEntry Entry)> _nameplateCacheLru = new();
+    private long _nameplateCacheTotalBytes = 0;
+
+    private ApngAnimationController? _currentApngController;
+    private ApngAnimationController? _nameplateApngController;
+    private readonly Dictionary<Image, int> _imageLoadTokens = new();
+    private readonly Dictionary<Image, MemoryStream> _activeGifStreams = new();
+
+    private CancellationTokenSource? _lookupCts;
+    private int _lookupVersion = 0;
     private int _nameplateLoadVersion = 0;
-    private static readonly Dictionary<Image, int> _imageLoadTokens = new();
+    private int _viewTransitionVersion = 0;
+    private bool _isHidingResult = false;
+    private DiscordUser? _currentUser;
+
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
@@ -59,11 +78,11 @@ public partial class MainWindow : Window
     /// </summary>
     private string GetEffectiveToken()
     {
-        if (!string.IsNullOrWhiteSpace(_botToken)) return _botToken;
+        if (!string.IsNullOrWhiteSpace(_botToken)) return _botToken.Trim();
         var input = InputBotToken.Password?.Trim();
         if (!string.IsNullOrWhiteSpace(input)) return input;
 
-        var env = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+        var env = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN")?.Trim();
         if (!string.IsNullOrWhiteSpace(env)) return env;
 
         return GetDefaultSharedToken();
@@ -77,6 +96,8 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        Loaded -= MainWindow_Loaded;
+
         // テーマ機能の初期化
         ThemeManager.ThemeChanged += OnThemeChanged;
         ThemeManager.Initialize();
@@ -100,7 +121,7 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(_botToken))
         {
-            var envToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+            var envToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN")?.Trim();
             if (!string.IsNullOrWhiteSpace(envToken))
             {
                 _botToken = envToken;
@@ -116,14 +137,27 @@ public partial class MainWindow : Window
 
         // プレースホルダーの初期状態 & 入力空欄時の自動フェードアウト復帰
         UpdatePlaceholder();
-        UserIdInput.TextChanged += (s, ev) =>
+        UserIdInput.TextChanged += UserIdInput_TextChanged;
+    }
+
+    private void UserIdInput_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        UpdatePlaceholder();
+        if (string.IsNullOrWhiteSpace(UserIdInput.Text))
         {
-            UpdatePlaceholder();
-            if (string.IsNullOrWhiteSpace(UserIdInput.Text))
-            {
-                HideSearchResult(withAnimation: true);
-            }
-        };
+            HideSearchResult(withAnimation: true);
+        }
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        ThemeManager.ThemeChanged -= OnThemeChanged;
+        UserIdInput.TextChanged -= UserIdInput_TextChanged;
+        CancelActiveLookup();
+        ClearAllResultImages();
+        _imageLoadTokens.Clear();
+        ClearNameplateCache();
+        base.OnClosed(e);
     }
 
     private void UpdatePlaceholder()
@@ -292,7 +326,6 @@ public partial class MainWindow : Window
             }
             catch { }
 
-            _apiService.SetToken(_botToken);
             SetStatus("CUSTOM TOKEN SAVED", true);
             MessageBox.Show("カスタム Bot トークンを保存しました。\n今後はこのトークンで優先検索されます。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -320,6 +353,159 @@ public partial class MainWindow : Window
     }
 
     // ─────────────────────────────────────────────
+    // リソース・キャッシュ・キャンセル管理ヘルパー
+    // ─────────────────────────────────────────────
+    private static long EstimateFramesBytes(List<ApngFrame> frames)
+    {
+        long total = 0;
+        foreach (var f in frames)
+        {
+            if (f.Image != null)
+            {
+                total += (long)f.Image.PixelWidth * f.Image.PixelHeight * 4L;
+            }
+        }
+        return Math.Max(total, 1);
+    }
+
+    private bool TryGetNameplateCache(string skuId, out List<ApngFrame>? frames)
+    {
+        lock (_nameplateCache)
+        {
+            if (_nameplateCache.TryGetValue(skuId, out var node))
+            {
+                _nameplateCacheLru.Remove(node);
+                _nameplateCacheLru.AddFirst(node);
+                frames = node.Value.Entry.Frames;
+                return true;
+            }
+            frames = null;
+            return false;
+        }
+    }
+
+    private void AddNameplateCache(string skuId, List<ApngFrame> frames)
+    {
+        long estimated = EstimateFramesBytes(frames);
+        if (estimated > MaxNameplateCacheBytes) return;
+
+        lock (_nameplateCache)
+        {
+            if (_nameplateCache.TryGetValue(skuId, out var existing))
+            {
+                _nameplateCacheTotalBytes -= existing.Value.Entry.EstimatedBytes;
+                _nameplateCacheLru.Remove(existing);
+                _nameplateCache.Remove(skuId);
+            }
+
+            while (_nameplateCache.Count >= MaxNameplateCacheItems ||
+                   (_nameplateCacheTotalBytes + estimated > MaxNameplateCacheBytes && _nameplateCacheLru.Last != null))
+            {
+                var tail = _nameplateCacheLru.Last;
+                if (tail == null) break;
+                _nameplateCacheTotalBytes -= tail.Value.Entry.EstimatedBytes;
+                _nameplateCache.Remove(tail.Value.Key);
+                _nameplateCacheLru.RemoveLast();
+            }
+
+            var entry = new NameplateCacheEntry { Frames = frames, EstimatedBytes = estimated };
+            var node = new LinkedListNode<(string Key, NameplateCacheEntry Entry)>((skuId, entry));
+            _nameplateCacheLru.AddFirst(node);
+            _nameplateCache[skuId] = node;
+            _nameplateCacheTotalBytes += estimated;
+        }
+    }
+
+    private void ClearNameplateCache()
+    {
+        lock (_nameplateCache)
+        {
+            _nameplateCache.Clear();
+            _nameplateCacheLru.Clear();
+            _nameplateCacheTotalBytes = 0;
+        }
+    }
+
+    private void CancelActiveLookup()
+    {
+        ++_lookupVersion;
+        if (_lookupCts != null)
+        {
+            try { _lookupCts.Cancel(); } catch { }
+            try { _lookupCts.Dispose(); } catch { }
+            _lookupCts = null;
+        }
+    }
+
+    private int AdvanceImageToken(params Image?[] targets)
+    {
+        int firstToken = 0;
+        bool hasFirst = false;
+        lock (_imageLoadTokens)
+        {
+            foreach (var t in targets)
+            {
+                if (t == null) continue;
+                _imageLoadTokens.TryGetValue(t, out var cur);
+                int next = cur + 1;
+                _imageLoadTokens[t] = next;
+                if (!hasFirst)
+                {
+                    firstToken = next;
+                    hasFirst = true;
+                }
+            }
+        }
+        return firstToken;
+    }
+
+    private bool IsLatestImageToken(Image target, int token)
+    {
+        lock (_imageLoadTokens)
+        {
+            return _imageLoadTokens.TryGetValue(target, out var cur) && cur == token;
+        }
+    }
+
+    private void ClearImageControl(Image? img)
+    {
+        if (img == null) return;
+        try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(img, null); } catch { }
+        try { XamlAnimatedGif.AnimationBehavior.SetSourceStream(img, null); } catch { }
+        if (_activeGifStreams.Remove(img, out var oldStream))
+        {
+            try { oldStream.Dispose(); } catch { }
+        }
+        img.Source = null;
+    }
+
+    private void ClearAllResultImages()
+    {
+        _currentApngController?.Stop();
+        _currentApngController = null;
+        _nameplateApngController?.Stop();
+        _nameplateApngController = null;
+
+        Image?[] allImages =
+        [
+            AvatarImage,
+            PlateAvatarImage,
+            AvatarDecorationImage,
+            PlateAvatarDecoImage,
+            BannerImage,
+            PlateBackgroundStaticImage,
+            ImgClanBadge,
+            PlateClanBadgeImage
+        ];
+
+        AdvanceImageToken(allImages);
+        foreach (var img in allImages)
+        {
+            ClearImageControl(img);
+        }
+    }
+
+    // ─────────────────────────────────────────────
     // ユーザー検索処理
     // ─────────────────────────────────────────────
     private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -329,7 +515,7 @@ public partial class MainWindow : Window
 
     private async void UserIdInput_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter)
+        if (e.Key == Key.Enter && !e.IsRepeat)
         {
             await ExecuteLookupAsync();
         }
@@ -337,75 +523,10 @@ public partial class MainWindow : Window
 
     private void HideSearchResult(bool withAnimation = true)
     {
-        var isMainVisible = SearchResultGrid != null && SearchResultGrid.Visibility == Visibility.Visible;
-        var isRawVisible = RawDataResultGrid != null && RawDataResultGrid.Visibility == Visibility.Visible;
-        if (!isMainVisible && !isRawVisible) return;
+        CancelActiveLookup();
+        ++_nameplateLoadVersion;
+        _currentUser = null;
 
-        if (withAnimation)
-        {
-            var duration = TimeSpan.FromMilliseconds(300);
-            var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseIn };
-            var animOpacity = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.0, duration) { EasingFunction = easing };
-            var animTranslate = new System.Windows.Media.Animation.DoubleAnimation(0.0, 8.0, duration) { EasingFunction = easing };
-
-            animOpacity.Completed += (s, e) =>
-            {
-                if (SearchResultGrid != null) SearchResultGrid.Visibility = Visibility.Collapsed;
-                if (EmptyStateView != null) EmptyStateView.Visibility = Visibility.Visible;
-                if (RawDataResultGrid != null) RawDataResultGrid.Visibility = Visibility.Collapsed;
-                if (RawEmptyStateView != null) RawEmptyStateView.Visibility = Visibility.Visible;
-                if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
-
-                var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(200));
-                if (EmptyStateView != null) EmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-                if (RawEmptyStateView != null) RawEmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-            };
-
-            if (SearchResultGrid != null) SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
-            if (SearchResultTranslate != null)
-            {
-                SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
-            }
-
-            if (RawDataResultGrid != null)
-            {
-                RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
-                if (RawDataTranslate != null)
-                {
-                    RawDataTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
-                }
-            }
-        }
-        else
-        {
-            if (SearchResultGrid != null) SearchResultGrid.Visibility = Visibility.Collapsed;
-            if (EmptyStateView != null)
-            {
-                EmptyStateView.Visibility = Visibility.Visible;
-                EmptyStateView.Opacity = 1.0;
-            }
-
-            if (RawDataResultGrid != null) RawDataResultGrid.Visibility = Visibility.Collapsed;
-            if (RawEmptyStateView != null)
-            {
-                RawEmptyStateView.Visibility = Visibility.Visible;
-                RawEmptyStateView.Opacity = 1.0;
-            }
-            if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
-        }
-
-        if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
-        if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
-        if (AvatarDecorationImage != null)
-        {
-            AvatarDecorationImage.Visibility = Visibility.Collapsed;
-            AvatarDecorationImage.Source = null;
-        }
-        if (PlateBackgroundStaticImage != null)
-        {
-            PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
-            PlateBackgroundStaticImage.Source = null;
-        }
         _currentApngController?.Stop();
         _currentApngController = null;
         _nameplateApngController?.Stop();
@@ -418,62 +539,212 @@ public partial class MainWindow : Window
         if (BtnOpenDecoration != null) BtnOpenDecoration.IsEnabled = false;
         if (BtnOpenBanner != null) BtnOpenBanner.IsEnabled = false;
 
+        AdvanceImageToken(
+            AvatarImage, PlateAvatarImage,
+            AvatarDecorationImage, PlateAvatarDecoImage,
+            BannerImage, PlateBackgroundStaticImage,
+            ImgClanBadge, PlateClanBadgeImage);
+
+        var isMainVisible = SearchResultGrid != null && SearchResultGrid.Visibility == Visibility.Visible;
+        var isRawVisible = RawDataResultGrid != null && RawDataResultGrid.Visibility == Visibility.Visible;
+        if (!isMainVisible && !isRawVisible && !_isHidingResult)
+        {
+            ClearAllResultImages();
+            SetStatus("READY", true);
+            return;
+        }
+
+        if (withAnimation && _isHidingResult) return;
+
+        int transitionVersion = ++_viewTransitionVersion;
+
+        if (withAnimation)
+        {
+            _isHidingResult = true;
+            var duration = TimeSpan.FromMilliseconds(300);
+            var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseIn };
+
+            var animMainOpacity = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.0, duration) { EasingFunction = easing };
+            var animMainTranslate = new System.Windows.Media.Animation.DoubleAnimation(0.0, 8.0, duration) { EasingFunction = easing };
+            var animRawOpacity = new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.0, duration) { EasingFunction = easing };
+            var animRawTranslate = new System.Windows.Media.Animation.DoubleAnimation(0.0, 8.0, duration) { EasingFunction = easing };
+
+            animMainOpacity.Completed += (s, e) =>
+            {
+                if (_viewTransitionVersion != transitionVersion) return;
+                _isHidingResult = false;
+
+                if (SearchResultGrid != null)
+                {
+                    SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
+                    SearchResultGrid.Visibility = Visibility.Collapsed;
+                }
+                if (RawDataResultGrid != null)
+                {
+                    RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
+                    RawDataResultGrid.Visibility = Visibility.Collapsed;
+                }
+                if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
+                ClearAllResultImages();
+
+                if (EmptyStateView != null)
+                {
+                    EmptyStateView.Visibility = Visibility.Visible;
+                    var fadeInMain = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(200));
+                    EmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeInMain);
+                }
+                if (RawEmptyStateView != null)
+                {
+                    RawEmptyStateView.Visibility = Visibility.Visible;
+                    var fadeInRaw = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(200));
+                    RawEmptyStateView.BeginAnimation(UIElement.OpacityProperty, fadeInRaw);
+                }
+            };
+
+            if (SearchResultGrid != null) SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animMainOpacity);
+            if (SearchResultTranslate != null) SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animMainTranslate);
+
+            if (RawDataResultGrid != null) RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, animRawOpacity);
+            if (RawDataTranslate != null) RawDataTranslate.BeginAnimation(TranslateTransform.YProperty, animRawTranslate);
+        }
+        else
+        {
+            _isHidingResult = false;
+
+            if (SearchResultGrid != null)
+            {
+                SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
+                SearchResultGrid.Visibility = Visibility.Collapsed;
+            }
+            if (EmptyStateView != null)
+            {
+                EmptyStateView.BeginAnimation(UIElement.OpacityProperty, null);
+                EmptyStateView.Visibility = Visibility.Visible;
+                EmptyStateView.Opacity = 1.0;
+            }
+
+            if (RawDataResultGrid != null)
+            {
+                RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
+                RawDataResultGrid.Visibility = Visibility.Collapsed;
+            }
+            if (RawEmptyStateView != null)
+            {
+                RawEmptyStateView.BeginAnimation(UIElement.OpacityProperty, null);
+                RawEmptyStateView.Visibility = Visibility.Visible;
+                RawEmptyStateView.Opacity = 1.0;
+            }
+            if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
+            ClearAllResultImages();
+        }
+
+        if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
+        if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
+        if (AvatarDecorationImage != null) AvatarDecorationImage.Visibility = Visibility.Collapsed;
+        if (PlateAvatarDecoImage != null) PlateAvatarDecoImage.Visibility = Visibility.Collapsed;
+        if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
+
         SetStatus("READY", true);
     }
 
     private async Task ExecuteLookupAsync()
     {
-        var rawInput = UserIdInput.Text.Trim();
-
-        if (string.IsNullOrWhiteSpace(rawInput))
-        {
-            // 空欄時はエラーメッセージを出さず、メニューを滑らかにフェードアウト非表示化
-            HideSearchResult(withAnimation: true);
-            return;
-        }
-
-        if (!ulong.TryParse(rawInput, out var userId))
-        {
-            MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        // トークン取得 (カスタム ➔ 環境変数 ➔ 共有トークン)
-        var token = GetEffectiveToken();
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            MessageBox.Show("Bot トークンを取得できませんでした。\nSettings からトークンを設定してください。", "トークン未設定", MessageBoxButton.OK, MessageBoxImage.Warning);
-            TabSettings.IsChecked = true;
-            return;
-        }
-
-        _apiService.SetToken(token);
+        CancellationTokenSource? cts = null;
+        int myVersion = -1;
 
         try
         {
+            var rawInput = UserIdInput.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(rawInput))
+            {
+                // 空欄時はエラーメッセージを出さず、メニューを滑らかにフェードアウト非表示化
+                HideSearchResult(withAnimation: true);
+                return;
+            }
+
+            if (!ulong.TryParse(rawInput, out var userId) || userId == 0)
+            {
+                MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // トークン取得 (カスタム ➔ 環境変数 ➔ 共有トークン)
+            var token = GetEffectiveToken()?.Trim() ?? string.Empty;
+            if (token.StartsWith("Bot ", StringComparison.OrdinalIgnoreCase))
+            {
+                token = token.Substring(4).Trim();
+            }
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                MessageBox.Show("Bot トークンを取得できませんでした。\nSettings からトークンを設定してください。", "トークン未設定", MessageBoxButton.OK, MessageBoxImage.Warning);
+                TabSettings.IsChecked = true;
+                return;
+            }
+            if (token.Any(c => char.IsControl(c) || char.IsWhiteSpace(c) || c > 0x7F))
+            {
+                MessageBox.Show("Bot トークンの形式が不正です（空白・改行・非ASCII文字が含まれています）。\nSettings のトークン設定を確認してください。", "トークン形式エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                TabSettings.IsChecked = true;
+                return;
+            }
+
+            CancelActiveLookup();
+            cts = new CancellationTokenSource();
+            _lookupCts = cts;
+            myVersion = _lookupVersion;
+            var ct = cts.Token;
+
             SearchButton.IsEnabled = false;
             SetStatus("LOOKING UP USER...", true);
 
             // API リクエスト (静的 HttpClient を再利用して Keep-Alive 接続により超高速化)
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://discord.com/api/v10/users/{userId}");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"https://discord.com/api/v10/users/{userId}");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", token);
             if (!request.Headers.UserAgent.Any())
             {
                 request.Headers.UserAgent.ParseAdd("DiscordLookupGUI/2.4");
             }
 
-            var response = await _discordApiClient.SendAsync(request);
-            var content = await response.Content.ReadAsStringAsync();
+            using var response = await _discordApiClient.SendAsync(request, ct);
+            var content = await response.Content.ReadAsStringAsync(ct);
+
+            if (myVersion != _lookupVersion || ct.IsCancellationRequested) return;
 
             if (!response.IsSuccessStatusCode)
             {
-                SetStatus($"API ERROR: {(int)response.StatusCode}", false);
-                MessageBox.Show($"Discord API エラー:\n{(int)response.StatusCode} {response.ReasonPhrase}\n\n{content}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                int code = (int)response.StatusCode;
+                SetStatus($"API ERROR: {code}", false);
+                if (code == 429)
+                {
+                    string? retryInfo = null;
+                    if (response.Headers.TryGetValues("Retry-After", out var retryVals) ||
+                        response.Headers.TryGetValues("X-RateLimit-Reset-After", out retryVals))
+                    {
+                        retryInfo = retryVals.FirstOrDefault();
+                    }
+                    var waitMsg = !string.IsNullOrWhiteSpace(retryInfo)
+                        ? $"約 {retryInfo} 秒待ってから再試行してください。"
+                        : "数秒待ってから再試行してください。";
+                    MessageBox.Show($"Discord API のレート制限 (429 Too Many Requests) に達しました。\n{waitMsg}", "レート制限", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else if (code == 404)
+                {
+                    MessageBox.Show("指定されたユーザーIDは見つかりませんでした。", "検索結果なし (404)", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else if (code == 401 || code == 403)
+                {
+                    MessageBox.Show($"Bot トークンが無効またはアクセス権限が不足しています ({code})。\nSettings のトークン設定を確認してください。", "認証エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    var truncated = content.Length > 300 ? content.Substring(0, 300) + "..." : content;
+                    MessageBox.Show($"Discord API エラー:\n{code} {response.ReasonPhrase}\n\n{truncated}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 return;
             }
 
             // Raw JSON 整形とモデルデシリアライズをバックグラウンドで並行実行 (UIスレッド完全解放)
-            var (formattedJson, user) = await Task.Run(() =>
+            var (formattedJson, user, parseError) = await Task.Run(() =>
             {
                 string json;
                 try
@@ -484,62 +755,110 @@ public partial class MainWindow : Window
                 {
                     json = content;
                 }
-                var parsedUser = JsonConvert.DeserializeObject<DiscordUser>(content);
-                return (json, parsedUser);
+
+                DiscordUser? parsedUser = null;
+                string? err = null;
+                try
+                {
+                    parsedUser = JsonConvert.DeserializeObject<DiscordUser>(content);
+                }
+                catch (Exception ex)
+                {
+                    err = ex.Message;
+                }
+                return (json, parsedUser, err);
             });
 
-            TxtRawJson.Text = formattedJson;
+            if (myVersion != _lookupVersion || ct.IsCancellationRequested) return;
 
-            if (user != null)
+            if (user == null)
             {
-                user.Id = userId.ToString();
-                DisplayUser(user, userId);
-                SetStatus("USER LOADED SUCCESSFULLY", true);
+                SetStatus("PARSE ERROR", false);
+                var msg = string.IsNullOrEmpty(parseError)
+                    ? "ユーザーデータの解析に失敗しました（空のレスポンスまたは無効なデータ）。"
+                    : $"ユーザーデータの解析に失敗しました:\n{parseError}";
+                MessageBox.Show(msg, "パースエラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+
+            TxtRawJson.Text = formattedJson;
+            user.Id = userId.ToString();
+            DisplayUser(user, userId, ct);
+            SetStatus("USER LOADED SUCCESSFULLY", true);
+        }
+        catch (OperationCanceledException)
+        {
+            if (myVersion != _lookupVersion || (cts != null && cts.IsCancellationRequested))
+            {
+                return;
+            }
+            SetStatus("REQUEST TIMEOUT", false);
+            MessageBox.Show("Discord API への接続がタイムアウトしました（10秒）。\n時間をおいて再試行してください。", "タイムアウト", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        catch (HttpRequestException ex)
+        {
+            if (myVersion != _lookupVersion) return;
+            SetStatus("NETWORK ERROR", false);
+            MessageBox.Show($"ネットワーク接続エラーが発生しました:\n{ex.Message}", "通信エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         catch (Exception ex)
         {
+            if (myVersion != _lookupVersion) return;
             SetStatus("ERROR OCCURRED", false);
             MessageBox.Show($"エラーが発生しました:\n{ex.Message}", "例外エラー", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
-            SearchButton.IsEnabled = true;
+            if (myVersion == _lookupVersion && SearchButton != null)
+            {
+                SearchButton.IsEnabled = true;
+            }
         }
     }
 
-    private void DisplayUser(DiscordUser user, ulong rawId)
+    private void DisplayUser(DiscordUser user, ulong rawId, CancellationToken ct)
     {
+        ++_viewTransitionVersion;
+        _isHidingResult = false;
+        _currentUser = user;
+
         // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (0.5秒 / 500ms)
         EmptyStateView.Visibility = Visibility.Collapsed;
+        SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
         SearchResultGrid.Visibility = Visibility.Visible;
 
         if (RawEmptyStateView != null) RawEmptyStateView.Visibility = Visibility.Collapsed;
-        if (RawDataResultGrid != null) RawDataResultGrid.Visibility = Visibility.Visible;
+        if (RawDataResultGrid != null)
+        {
+            RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
+            RawDataResultGrid.Visibility = Visibility.Visible;
+        }
 
         var duration = TimeSpan.FromMilliseconds(500);
         var easing = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
-        var animOpacity = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration) { EasingFunction = easing };
-        var animTranslate = new System.Windows.Media.Animation.DoubleAnimation(12.0, 0.0, duration) { EasingFunction = easing };
 
-        SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
+        var animMainOpacity = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration) { EasingFunction = easing };
+        var animMainTranslate = new System.Windows.Media.Animation.DoubleAnimation(12.0, 0.0, duration) { EasingFunction = easing };
+        SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, animMainOpacity);
         if (SearchResultTranslate != null)
         {
-            SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
+            SearchResultTranslate.BeginAnimation(TranslateTransform.YProperty, animMainTranslate);
         }
 
         if (RawDataResultGrid != null)
         {
-            RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, animOpacity);
+            var animRawOpacity = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration) { EasingFunction = easing };
+            var animRawTranslate = new System.Windows.Media.Animation.DoubleAnimation(12.0, 0.0, duration) { EasingFunction = easing };
+            RawDataResultGrid.BeginAnimation(UIElement.OpacityProperty, animRawOpacity);
             if (RawDataTranslate != null)
             {
-                RawDataTranslate.BeginAnimation(TranslateTransform.YProperty, animTranslate);
+                RawDataTranslate.BeginAnimation(TranslateTransform.YProperty, animRawTranslate);
             }
         }
 
         // プロフィール情報
         TxtGlobalName.Text = string.IsNullOrWhiteSpace(user.GlobalName) ? user.Username : user.GlobalName;
-        TxtUsername.Text = $"@{user.Username}";
+        TxtUsername.Text = user.DisplayUsername;
         TxtUserId.Text = user.Id;
 
         // クランタグ & クランバッジ
@@ -548,17 +867,22 @@ public partial class MainWindow : Window
             TxtClanTag.Text = user.ClanTag;
             if (!string.IsNullOrEmpty(user.ClanBadgeUrl))
             {
-                LoadImage(ImgClanBadge, user.ClanBadgeUrl);
+                _ = LoadImageAsync(ImgClanBadge, user.ClanBadgeUrl, ct: ct);
                 ImgClanBadge.Visibility = Visibility.Visible;
             }
             else
             {
+                AdvanceImageToken(ImgClanBadge);
+                ClearImageControl(ImgClanBadge);
                 ImgClanBadge.Visibility = Visibility.Collapsed;
             }
             BadgeClan.Visibility = Visibility.Visible;
         }
         else
         {
+            AdvanceImageToken(ImgClanBadge);
+            ClearImageControl(ImgClanBadge);
+            ImgClanBadge.Visibility = Visibility.Collapsed;
             BadgeClan.Visibility = Visibility.Collapsed;
         }
 
@@ -570,7 +894,9 @@ public partial class MainWindow : Window
             try
             {
                 var color = (Color)ColorConverter.ConvertFromString(hex);
-                RectAccentColor.Background = new SolidColorBrush(color);
+                var brush = new SolidColorBrush(color);
+                brush.Freeze();
+                RectAccentColor.Background = brush;
             }
             catch
             {
@@ -593,26 +919,31 @@ public partial class MainWindow : Window
             {
                 PlateClanBadgeImage.Visibility = Visibility.Visible;
                 PlateClanHeart.Visibility = Visibility.Collapsed;
-                LoadImage(PlateClanBadgeImage, user.ClanBadgeUrl);
+                _ = LoadImageAsync(PlateClanBadgeImage, user.ClanBadgeUrl, ct: ct);
             }
             else
             {
+                AdvanceImageToken(PlateClanBadgeImage);
+                ClearImageControl(PlateClanBadgeImage);
                 PlateClanBadgeImage.Visibility = Visibility.Collapsed;
                 PlateClanHeart.Visibility = Visibility.Visible;
             }
         }
         else
         {
+            AdvanceImageToken(PlateClanBadgeImage);
+            ClearImageControl(PlateClanBadgeImage);
+            PlateClanBadgeImage.Visibility = Visibility.Collapsed;
             PlateClanContainer.Visibility = Visibility.Collapsed;
         }
 
         // ネームプレート公式装飾 (Nameplate Collectible) の動的自動反映 (各ユーザー固有の公式 APNG を 60FPS 再生)
-        _ = LoadNameplateAsync(user);
+        _ = LoadNameplateAsync(user, ct);
 
         // アバター読み込み
         _currentAvatarUrl = user.AvatarUrl;
         BtnOpenAvatar.IsEnabled = !string.IsNullOrEmpty(_currentAvatarUrl);
-        LoadImage(AvatarImage, _currentAvatarUrl, extraTargetImage: PlateAvatarImage);
+        _ = LoadImageAsync(AvatarImage, _currentAvatarUrl, extraTargetImage: PlateAvatarImage, ct: ct);
 
         // アバターデコレーション（飾り枠）読み込み
         _currentAvatarDecorationUrl = user.AvatarDecorationUrl ?? string.Empty;
@@ -623,7 +954,7 @@ public partial class MainWindow : Window
             BtnOpenDecoration.IsEnabled = true;
             if (AvatarRing != null) AvatarRing.StrokeThickness = 0;
             if (AvatarShadow != null) AvatarShadow.Opacity = 0;
-            LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl, isDecoration: true, extraTargetImage: PlateAvatarDecoImage);
+            _ = LoadImageAsync(AvatarDecorationImage, _currentAvatarDecorationUrl, isDecoration: true, extraTargetImage: PlateAvatarDecoImage, ct: ct);
         }
         else
         {
@@ -632,21 +963,25 @@ public partial class MainWindow : Window
             BtnOpenDecoration.IsEnabled = false;
             if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
             if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
-            LoadImage(AvatarDecorationImage, string.Empty, extraTargetImage: PlateAvatarDecoImage);
+            _ = LoadImageAsync(AvatarDecorationImage, string.Empty, isDecoration: true, extraTargetImage: PlateAvatarDecoImage, ct: ct);
         }
 
         // バナー読み込み
         _currentBannerUrl = user.BannerUrl ?? string.Empty;
         BtnOpenBanner.IsEnabled = !string.IsNullOrEmpty(_currentBannerUrl);
-        LoadImage(BannerImage, _currentBannerUrl);
+        _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct);
 
         // タイムライン / Snowflake 解析
-        TxtCreatedAtJst.Text = user.CreatedAtJst.ToString("yyyy年M月d日 HH:mm:ss");
-        TxtCreatedAtUtc.Text = $"UTC: {user.CreatedAt:yyyy-MM-dd HH:mm:ss}";
+        TxtCreatedAtJst.Text = user.CreatedAtJst == DateTimeOffset.MinValue
+            ? "--"
+            : user.CreatedAtJst.ToString("yyyy年M月d日 HH:mm:ss");
+        TxtCreatedAtUtc.Text = user.CreatedAt == DateTimeOffset.MinValue
+            ? "UTC: --"
+            : $"UTC: {user.CreatedAt:yyyy-MM-dd HH:mm:ss}";
 
         TxtElapsedBadge.Text = $"{user.ElapsedYears:F1} years";
         TxtElapsedDays.Text = $"{user.ElapsedDays:N0} 日経過";
-        ProgAccountAge.Value = Math.Min(10.0, user.ElapsedYears);
+        ProgAccountAge.Value = Math.Clamp(user.ElapsedYears, 0.0, 10.0);
 
         // Snowflake 内部ID
         var workerId = (rawId & 0x3E0000) >> 17;
@@ -655,19 +990,21 @@ public partial class MainWindow : Window
         TxtProcessId.Text = $"{processId}";
     }
 
-    private async Task LoadNameplateAsync(DiscordUser user)
+    private async Task LoadNameplateAsync(DiscordUser user, CancellationToken ct)
     {
         int currentVersion = ++_nameplateLoadVersion;
+        AdvanceImageToken(PlateBackgroundStaticImage);
         _nameplateApngController?.Stop();
         _nameplateApngController = null;
-        try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
+        ClearImageControl(PlateBackgroundStaticImage);
 
         if (string.IsNullOrEmpty(user.NameplateSkuId))
         {
             // ネームプレート未装備時はデフォルトのDiscordダーク背景に戻す
-            NameplateCard.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#313338"));
+            var defaultBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#313338"));
+            defaultBg.Freeze();
+            NameplateCard.Background = defaultBg;
             PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
-            PlateBackgroundStaticImage.Source = null;
 
             TxtPlateSkuId.Text = "なし";
             TxtPlateLabel.Text = "未装備";
@@ -699,13 +1036,16 @@ public partial class MainWindow : Window
         TxtTipPalette.Text = pal;
 
         var paletteColor = GetNameplatePaletteColor(user.NameplatePalette);
-        PlatePaletteIndicator.Background = new SolidColorBrush(paletteColor);
+        var indicatorBrush = new SolidColorBrush(paletteColor);
+        indicatorBrush.Freeze();
+        PlatePaletteIndicator.Background = indicatorBrush;
         PlatePaletteIndicator.Visibility = Visibility.Visible;
 
         // パレットに応じた公式ダーク背景トーンを設定
-        NameplateCard.Background = new SolidColorBrush(paletteColor);
+        var cardBg = new SolidColorBrush(paletteColor);
+        cardBg.Freeze();
+        NameplateCard.Background = cardBg;
         PlateBackgroundStaticImage.Visibility = Visibility.Visible;
-        PlateBackgroundStaticImage.Source = null;
 
         string skuId = user.NameplateSkuId;
         string? animatedUrl = user.NameplateAnimatedUrl;
@@ -713,70 +1053,72 @@ public partial class MainWindow : Window
 
         try
         {
-            List<ApngFrame>? frames = null;
-
-            // メモリキャッシュに存在すれば即座に利用
-            lock (_nameplateCache)
-            {
-                _nameplateCache.TryGetValue(skuId, out frames);
-            }
+            TryGetNameplateCache(skuId, out var frames);
 
             if (frames == null && !string.IsNullOrEmpty(animatedUrl))
             {
-                var bytes = await _imageClient.GetByteArrayAsync(animatedUrl);
-                if (_nameplateLoadVersion != currentVersion) return;
+                var bytes = await _imageClient.GetByteArrayAsync(animatedUrl, ct);
+                if (ct.IsCancellationRequested || _nameplateLoadVersion != currentVersion) return;
 
-                frames = await ApngDecoder.DecodeAsync(bytes);
-                if (_nameplateLoadVersion != currentVersion) return;
+                frames = await ApngDecoder.DecodeAsync(bytes, ct);
+                if (ct.IsCancellationRequested || _nameplateLoadVersion != currentVersion) return;
 
                 if (frames != null && frames.Count > 1)
                 {
-                    lock (_nameplateCache)
-                    {
-                        if (_nameplateCache.Count >= 10)
-                        {
-                            _nameplateCache.Clear();
-                        }
-                        _nameplateCache[skuId] = frames;
-                    }
+                    AddNameplateCache(skuId, frames);
                 }
                 else if (frames == null)
                 {
-                    // 単一フレーム PNG の場合はそのままデコードして表示
-                    using var ms = new MemoryStream(bytes);
-                    var bmp = new BitmapImage();
-                    bmp.BeginInit();
-                    bmp.StreamSource = ms;
-                    bmp.CacheOption = BitmapCacheOption.OnLoad;
-                    bmp.EndInit();
-                    bmp.Freeze();
-                    PlateBackgroundStaticImage.Source = bmp;
+                    bool isGif = bytes.Length >= 3 && bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F';
+                    if (isGif)
+                    {
+                        ClearImageControl(PlateBackgroundStaticImage);
+                        var msGif = new MemoryStream(bytes);
+                        _activeGifStreams[PlateBackgroundStaticImage] = msGif;
+                        XamlAnimatedGif.AnimationBehavior.SetSourceStream(PlateBackgroundStaticImage, msGif);
+                    }
+                    else
+                    {
+                        // 単一フレーム PNG の場合はそのままデコードして表示
+                        var bmp = new BitmapImage();
+                        using (var ms = new MemoryStream(bytes))
+                        {
+                            bmp.BeginInit();
+                            bmp.StreamSource = ms;
+                            bmp.CacheOption = BitmapCacheOption.OnLoad;
+                            bmp.EndInit();
+                        }
+                        bmp.Freeze();
+                        PlateBackgroundStaticImage.Source = bmp;
+                    }
                     return;
                 }
             }
 
-            if (_nameplateLoadVersion != currentVersion) return;
+            if (ct.IsCancellationRequested || _nameplateLoadVersion != currentVersion) return;
 
             if (frames != null && frames.Count > 1)
             {
+                _nameplateApngController?.Stop();
+                _nameplateApngController = null;
                 PlateBackgroundStaticImage.Source = frames[0].Image;
                 _nameplateApngController = new ApngAnimationController(PlateBackgroundStaticImage, frames);
                 _nameplateApngController.Start();
             }
-            else if (frames != null && frames.Count == 1)
-            {
-                PlateBackgroundStaticImage.Source = frames[0].Image;
-            }
             else if (!string.IsNullOrEmpty(staticUrl))
             {
-                LoadImage(PlateBackgroundStaticImage, staticUrl);
+                _ = LoadImageAsync(PlateBackgroundStaticImage, staticUrl, ct: ct);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // キャンセル時は何もしない
         }
         catch
         {
-            if (_nameplateLoadVersion == currentVersion && !string.IsNullOrEmpty(staticUrl))
+            if (_nameplateLoadVersion == currentVersion && !ct.IsCancellationRequested && !string.IsNullOrEmpty(staticUrl))
             {
-                LoadImage(PlateBackgroundStaticImage, staticUrl);
+                _ = LoadImageAsync(PlateBackgroundStaticImage, staticUrl, ct: ct);
             }
         }
     }
@@ -812,36 +1154,34 @@ public partial class MainWindow : Window
             BannerImage.Height = double.NaN;
 
             // コンテナ枠全体を角丸(12px)でクリップ
-            BannerContainer.Clip = new RectangleGeometry(
+            var clip = new RectangleGeometry(
                 new Rect(0, 0, e.NewSize.Width, e.NewSize.Height),
                 12, 12);
+            clip.Freeze();
+            BannerContainer.Clip = clip;
         }
     }
 
-    private static async void LoadImage(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null)
+    private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default)
     {
+        var targetsAll = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
+        int token = AdvanceImageToken(targetsAll);
+
         try
         {
+            if (isDecoration)
+            {
+                _currentApngController?.Stop();
+                _currentApngController = null;
+            }
+
+            foreach (var t in targetsAll)
+            {
+                ClearImageControl(t);
+            }
+
             if (string.IsNullOrEmpty(url))
             {
-                // 読み込み中の古い画像が後から表示されないようトークンを進める
-                lock (_imageLoadTokens)
-                {
-                    _imageLoadTokens.TryGetValue(targetImage, out var cur);
-                    _imageLoadTokens[targetImage] = cur + 1;
-                }
-                if (isDecoration)
-                {
-                    _currentApngController?.Stop();
-                    _currentApngController = null;
-                }
-                try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
-                targetImage.Source = null;
-                if (extraTargetImage != null)
-                {
-                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, null); } catch { }
-                    extraTargetImage.Source = null;
-                }
                 return;
             }
 
@@ -850,85 +1190,62 @@ public partial class MainWindow : Window
             if (isDecoration)
             {
                 // アバターデコレーション (60FPS 完全同期 + 濁りゼロの完全透明度・色彩維持)
-                _currentApngController?.Stop();
-                _currentApngController = null;
+                var bytes = await _imageClient.GetByteArrayAsync(uri, ct);
+                if (ct.IsCancellationRequested || !IsLatestImageToken(targetImage, token)) return;
 
-                try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
-                if (extraTargetImage != null)
+                // APNG マルチフレームの非同期解析 (STAスレッドで処理しUIスレッドを1ミリ秒も止めない)
+                var frames = await ApngDecoder.DecodeAsync(bytes, ct);
+                if (ct.IsCancellationRequested || !IsLatestImageToken(targetImage, token)) return;
+
+                if (frames != null && frames.Count > 1)
                 {
-                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, null); } catch { }
-                }
+                    // 60FPS 完全同期アニメーションコントローラーで再生 (再代入直前にも既存コントローラーを必ず停止)
+                    _currentApngController?.Stop();
+                    _currentApngController = null;
 
-                try
-                {
-                    var bytes = await _imageClient.GetByteArrayAsync(uri);
-
-                    // APNG マルチフレームの非同期解析 (STAスレッドで処理しUIスレッドを1ミリ秒も止めない)
-                    var frames = await ApngDecoder.DecodeAsync(bytes);
-                    if (frames != null && frames.Count > 1)
+                    foreach (var t in targetsAll)
                     {
-                        // 60FPS 完全同期アニメーションコントローラーで再生
-                        targetImage.Source = frames[0].Image;
-                        if (extraTargetImage != null) extraTargetImage.Source = frames[0].Image;
-
-                        var targets = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
-                        _currentApngController = new ApngAnimationController(targets, frames);
-                        _currentApngController.Start();
-                        return;
+                        t.Source = frames[0].Image;
                     }
 
-                    // 単一フレーム / 通常 PNG の場合
-                    var ms = new MemoryStream(bytes);
-                    var bitmap = new BitmapImage();
+                    _currentApngController = new ApngAnimationController(targetsAll, frames);
+                    _currentApngController.Start();
+                    return;
+                }
+
+                // 単一フレーム / 通常 PNG の場合
+                var bitmap = new BitmapImage();
+                using (var ms = new MemoryStream(bytes))
+                {
                     bitmap.BeginInit();
                     bitmap.StreamSource = ms;
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
                     bitmap.EndInit();
-                    bitmap.Freeze();
+                }
+                bitmap.Freeze();
 
-                    targetImage.Source = bitmap;
-                    if (extraTargetImage != null) extraTargetImage.Source = bitmap;
-                    return;
-                }
-                catch
+                foreach (var t in targetsAll)
                 {
-                    targetImage.Source = null;
-                    if (extraTargetImage != null) extraTargetImage.Source = null;
-                    return;
+                    t.Source = bitmap;
                 }
+                return;
             }
 
             // 通常アバター & バナー (GIF / PNG)
-            // 同一URLを XamlAnimatedGif に同時に2回渡すと内部キャッシュが衝突して片方が表示されないため、
-            // 1回だけダウンロードしたバイト列を各ターゲットに個別ストリームで配る
-            var targetsAll = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
-            int token;
-            lock (_imageLoadTokens)
-            {
-                foreach (var t in targetsAll)
-                {
-                    _imageLoadTokens.TryGetValue(t, out var cur);
-                    _imageLoadTokens[t] = cur + 1;
-                }
-                token = _imageLoadTokens[targetImage];
-            }
-
-            var data = await _imageClient.GetByteArrayAsync(uri);
+            var data = await _imageClient.GetByteArrayAsync(uri, ct);
 
             // 連続検索時に古い画像で上書きしないようにガード
-            lock (_imageLoadTokens)
-            {
-                if (_imageLoadTokens[targetImage] != token) return;
-            }
+            if (ct.IsCancellationRequested || !IsLatestImageToken(targetImage, token)) return;
 
             bool isGif = data.Length >= 3 && data[0] == 'G' && data[1] == 'I' && data[2] == 'F';
             if (isGif)
             {
                 foreach (var t in targetsAll)
                 {
-                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(t, null); } catch { }
-                    try { XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, null); } catch { }
-                    XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, new MemoryStream(data));
+                    ClearImageControl(t);
+                    var ms = new MemoryStream(data);
+                    _activeGifStreams[t] = ms;
+                    XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, ms);
                 }
             }
             else
@@ -944,19 +1261,24 @@ public partial class MainWindow : Window
                 bmp.Freeze();
                 foreach (var t in targetsAll)
                 {
-                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(t, null); } catch { }
-                    try { XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, null); } catch { }
+                    ClearImageControl(t);
                     t.Source = bmp;
                 }
             }
         }
+        catch (OperationCanceledException)
+        {
+            // キャンセル時は何もしない
+        }
         catch
         {
-            try
+            if (!ct.IsCancellationRequested && IsLatestImageToken(targetImage, token))
             {
-                targetImage.Source = null;
+                foreach (var t in targetsAll)
+                {
+                    try { ClearImageControl(t); } catch { }
+                }
             }
-            catch { }
         }
     }
 
@@ -991,11 +1313,17 @@ public partial class MainWindow : Window
 
     private static void OpenInBrowser(string url)
     {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+        {
+            MessageBox.Show("無効または許可されていない URL です。", "セキュリティ保護", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         try
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = url,
+                FileName = uri.AbsoluteUri,
                 UseShellExecute = true
             });
         }
@@ -1008,25 +1336,40 @@ public partial class MainWindow : Window
     private void SetStatus(string message, bool isSuccess)
     {
         TxtStatus.Text = message;
-        StatusDot.Fill = isSuccess
-            ? (SolidColorBrush)FindResource("SuccessGreenBrush")
-            : (SolidColorBrush)FindResource("DangerRedBrush");
+        StatusDot.SetResourceReference(
+            System.Windows.Shapes.Shape.FillProperty,
+            isSuccess ? "SuccessGreenBrush" : "DangerRedBrush");
     }
 
     private void CopyToClipboard(string text, string description)
     {
-        if (string.IsNullOrWhiteSpace(text) || text == "-" || text == "なし" || text == "--" || text == "未装備" || text.StartsWith("UTC: --") || text.StartsWith("-- 年"))
+        if (string.IsNullOrWhiteSpace(text) ||
+            text == "-" ||
+            text == "なし" ||
+            text == "--" ||
+            text == "未装備" ||
+            text == "(None)" ||
+            text.StartsWith("UTC: --") ||
+            text.StartsWith("-- 年"))
             return;
 
-        try
+        for (int attempt = 0; attempt < 3; attempt++)
         {
-            Clipboard.SetText(text);
-            SetStatus($"COPIED: {description}", true);
+            try
+            {
+                Clipboard.SetDataObject(text, true);
+                SetStatus($"COPIED: {description}", true);
+                return;
+            }
+            catch
+            {
+                if (attempt < 2)
+                {
+                    Thread.Sleep(20);
+                }
+            }
         }
-        catch (Exception ex)
-        {
-            SetStatus($"COPY FAILED: {ex.Message}", false);
-        }
+        SetStatus("COPY FAILED: クリップボードにアクセスできませんでした", false);
     }
 
     private void AccentColor_Click(object sender, MouseButtonEventArgs e)
@@ -1036,7 +1379,7 @@ public partial class MainWindow : Window
 
     private void NameplateMetaCard_Click(object sender, MouseButtonEventArgs e)
     {
-        if (TxtPlateSkuId.Text == "--" || TxtPlateSkuId.Text == "未装備") return;
+        if (_currentUser == null || string.IsNullOrEmpty(_currentUser.NameplateSkuId)) return;
         var text = $"sku_id: {TxtPlateSkuId.Text}\nlabel: {TxtPlateLabel.Text}\nasset: {TxtPlateAsset.Text}\npalette: {TxtPlatePalette.Text}";
         CopyToClipboard(text, "Nameplate Collectibles");
     }
@@ -1044,18 +1387,21 @@ public partial class MainWindow : Window
     private void CopyPlateLabel_Click(object sender, MouseButtonEventArgs e)
     {
         e.Handled = true;
+        if (_currentUser == null || string.IsNullOrEmpty(_currentUser.NameplateSkuId)) return;
         CopyToClipboard(TxtPlateLabel.Text, "Nameplate Label");
     }
 
     private void CopyPlatePalette_Click(object sender, MouseButtonEventArgs e)
     {
         e.Handled = true;
+        if (_currentUser == null || string.IsNullOrEmpty(_currentUser.NameplateSkuId)) return;
         CopyToClipboard(TxtPlatePalette.Text, "Nameplate Palette");
     }
 
     private void CopyPlateSkuId_Click(object sender, MouseButtonEventArgs e)
     {
         e.Handled = true;
+        if (_currentUser == null || string.IsNullOrEmpty(_currentUser.NameplateSkuId)) return;
         CopyToClipboard(TxtPlateSkuId.Text, "Nameplate SKU ID");
     }
 
@@ -1074,23 +1420,26 @@ public partial class MainWindow : Window
     private void CopySnowflakeAll_Click(object sender, MouseButtonEventArgs e)
     {
         e.Handled = true;
-        if (TxtWorkerId.Text == "--") return;
+        if (_currentUser == null || TxtWorkerId.Text == "--") return;
         var text = $"Epoch Offset: 1420070400000 ms\nInternal Worker ID: {TxtWorkerId.Text}\nInternal Process ID: {TxtProcessId.Text}";
         CopyToClipboard(text, "Snowflake Decoding");
     }
 
     private void CopyEpoch_Click(object sender, MouseButtonEventArgs e)
     {
+        if (_currentUser == null) return;
         CopyToClipboard("1420070400000", "Epoch Offset");
     }
 
     private void CopyWorkerId_Click(object sender, MouseButtonEventArgs e)
     {
+        if (_currentUser == null) return;
         CopyToClipboard(TxtWorkerId.Text, "Worker ID");
     }
 
     private void CopyProcessId_Click(object sender, MouseButtonEventArgs e)
     {
+        if (_currentUser == null) return;
         CopyToClipboard(TxtProcessId.Text, "Process ID");
     }
 

@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace DiscordLookup.Utils;
 
@@ -20,6 +24,12 @@ public class ApngFrame
 /// </summary>
 public static class ApngDecoder
 {
+    private const int MaxCanvasDimension = 4096;
+    private const int MaxFrameCount = 600;
+    private const long MaxCanvasBytes = 64L * 1024 * 1024;
+    private const long MaxTotalDecodedBytes = 128L * 1024 * 1024;
+    private static readonly SemaphoreSlim _decodeConcurrency = new(2, 2);
+
     private static readonly byte[] PngSignature = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     private static readonly byte[] IendChunk = { 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82 };
     private static readonly uint[] CrcTable = InitializeCrcTable();
@@ -64,7 +74,7 @@ public static class ApngDecoder
         public List<byte[]> IdatChunks = new();
     }
 
-    public static List<ApngFrame>? Decode(byte[] bytes)
+    public static List<ApngFrame>? Decode(byte[] bytes, CancellationToken cancellationToken = default)
     {
         if (bytes == null || bytes.Length < 8) return null;
         for (int i = 0; i < 8; i++)
@@ -81,21 +91,29 @@ public static class ApngDecoder
 
         while (pos + 12 <= bytes.Length)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             uint length = ((uint)bytes[pos] << 24) | ((uint)bytes[pos + 1] << 16) | ((uint)bytes[pos + 2] << 8) | bytes[pos + 3];
+            if (length > int.MaxValue - 12) break;
+
             string type = System.Text.Encoding.ASCII.GetString(bytes, pos + 4, 4);
             int dataStart = pos + 8;
-            int nextPos = pos + 12 + (int)length;
+            long nextPosLong = (long)pos + 12L + length;
 
-            if (nextPos > bytes.Length) break;
+            if (nextPosLong > bytes.Length || nextPosLong <= pos) break;
+            int nextPos = (int)nextPosLong;
 
             if (type == "IHDR")
             {
+                if (length != 13) return null;
                 ihdrChunk = new byte[12 + length];
                 Array.Copy(bytes, pos, ihdrChunk, 0, ihdrChunk.Length);
                 canvasWidth = (bytes[dataStart] << 24) | (bytes[dataStart + 1] << 16) | (bytes[dataStart + 2] << 8) | bytes[dataStart + 3];
                 canvasHeight = (bytes[dataStart + 4] << 24) | (bytes[dataStart + 5] << 16) | (bytes[dataStart + 6] << 8) | bytes[dataStart + 7];
+                if (canvasWidth <= 0 || canvasHeight <= 0 || canvasWidth > MaxCanvasDimension || canvasHeight > MaxCanvasDimension)
+                    return null;
             }
-            else if (type == "PLTE" || type == "tRNS")
+            else if (type is "PLTE" or "tRNS" or "sRGB" or "gAMA" or "cHRM" or "iCCP")
             {
                 var chunk = new byte[12 + length];
                 Array.Copy(bytes, pos, chunk, 0, chunk.Length);
@@ -103,6 +121,13 @@ public static class ApngDecoder
             }
             else if (type == "fcTL")
             {
+                if (length != 26)
+                {
+                    pos = nextPos;
+                    continue;
+                }
+                if (rawFrames.Count >= MaxFrameCount) break;
+
                 int w = (bytes[dataStart + 4] << 24) | (bytes[dataStart + 5] << 16) | (bytes[dataStart + 6] << 8) | bytes[dataStart + 7];
                 int h = (bytes[dataStart + 8] << 24) | (bytes[dataStart + 9] << 16) | (bytes[dataStart + 10] << 8) | bytes[dataStart + 11];
                 int x = (bytes[dataStart + 12] << 24) | (bytes[dataStart + 13] << 16) | (bytes[dataStart + 14] << 8) | bytes[dataStart + 15];
@@ -111,8 +136,9 @@ public static class ApngDecoder
                 ushort delayNum = (ushort)((bytes[dataStart + 20] << 8) | bytes[dataStart + 21]);
                 ushort delayDen = (ushort)((bytes[dataStart + 22] << 8) | bytes[dataStart + 23]);
                 if (delayDen == 0) delayDen = 100;
-                double delayMs = (double)delayNum * 1000.0 / delayDen;
-                if (delayMs < 10.0) delayMs = 33.3;
+                double delayMs = delayNum == 0
+                    ? 33.3
+                    : Math.Max(10.0, (double)delayNum * 1000.0 / delayDen);
 
                 byte disposeOp = bytes[dataStart + 24];
                 byte blendOp = bytes[dataStart + 25];
@@ -177,14 +203,25 @@ public static class ApngDecoder
 
         if (ihdrChunk == null || rawFrames.Count <= 1 || canvasWidth <= 0 || canvasHeight <= 0) return null;
 
+        long canvasByteSize = (long)canvasWidth * canvasHeight * 4L;
+        if (canvasByteSize <= 0 || canvasByteSize > MaxCanvasBytes) return null;
+
         byte[] ihdrTypeBytes = { 0x49, 0x48, 0x44, 0x52 };
         var frames = new List<ApngFrame>();
         int canvasStride = canvasWidth * 4;
-        byte[] canvasBuffer = new byte[canvasHeight * canvasStride];
+        byte[] canvasBuffer = new byte[(int)canvasByteSize];
+        byte[] framePixels = new byte[(int)canvasByteSize];
+        byte[]? previousBuffer = null;
+        long totalDecodedBytes = 0;
 
         foreach (var rf in rawFrames)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (totalDecodedBytes + canvasByteSize > MaxTotalDecodedBytes) break;
             if (rf.IdatChunks.Count == 0 || rf.Width <= 0 || rf.Height <= 0) continue;
+            if (rf.XOffset < 0 || rf.YOffset < 0 ||
+                (long)rf.XOffset + rf.Width > canvasWidth ||
+                (long)rf.YOffset + rf.Height > canvasHeight) continue;
 
             // 各フレーム固有の幅・高さに合わせた IHDR チャンクを作成
             byte[] frameIhdr = (byte[])ihdrChunk.Clone();
@@ -227,7 +264,11 @@ public static class ApngDecoder
             }
 
             // DisposeOp == 2 (APNG_DISPOSE_OP_PREVIOUS) のため描画前のキャンバスを退避
-            byte[]? previousBuffer = rf.DisposeOp == 2 ? (byte[])canvasBuffer.Clone() : null;
+            if (rf.DisposeOp == 2)
+            {
+                previousBuffer ??= new byte[canvasBuffer.Length];
+                Buffer.BlockCopy(canvasBuffer, 0, previousBuffer, 0, canvasBuffer.Length);
+            }
 
             // Bgra32 に正規化してピクセル抽出
             BitmapSource bgraFrame = frameBitmap.Format == PixelFormats.Bgra32
@@ -235,7 +276,6 @@ public static class ApngDecoder
                 : new FormatConvertedBitmap(frameBitmap, PixelFormats.Bgra32, null, 0);
 
             int frameStride = rf.Width * 4;
-            byte[] framePixels = new byte[rf.Height * frameStride];
             bgraFrame.CopyPixels(framePixels, frameStride, 0);
 
             // キャンバスへ描画 (BlendOp: 0=SOURCE 上書き, 1=OVER アルファ合成)
@@ -244,14 +284,12 @@ public static class ApngDecoder
             for (int y = 0; y < maxY; y++)
             {
                 int dstY = rf.YOffset + y;
-                if (dstY < 0) continue;
                 int srcRow = y * frameStride;
                 int dstRow = dstY * canvasStride;
 
                 for (int x = 0; x < maxX; x++)
                 {
                     int dstX = rf.XOffset + x;
-                    if (dstX < 0) continue;
                     int sIdx = srcRow + x * 4;
                     int dIdx = dstRow + dstX * 4;
 
@@ -275,13 +313,15 @@ public static class ApngDecoder
                         else if (sa > 0)
                         {
                             byte da = canvasBuffer[dIdx + 3];
-                            int outA = sa + (da * (255 - sa) + 127) / 255;
+                            int invSa = 255 - sa;
+                            int outA255 = sa * 255 + da * invSa; // 1 .. 65025
+                            int outA = (outA255 + 127) / 255;
                             if (outA > 0)
                             {
-                                int invSa = 255 - sa;
-                                canvasBuffer[dIdx] = (byte)((framePixels[sIdx] * sa + canvasBuffer[dIdx] * da * invSa / 255) / outA);
-                                canvasBuffer[dIdx + 1] = (byte)((framePixels[sIdx + 1] * sa + canvasBuffer[dIdx + 1] * da * invSa / 255) / outA);
-                                canvasBuffer[dIdx + 2] = (byte)((framePixels[sIdx + 2] * sa + canvasBuffer[dIdx + 2] * da * invSa / 255) / outA);
+                                int half = outA255 / 2;
+                                canvasBuffer[dIdx]     = (byte)((framePixels[sIdx]     * sa * 255 + canvasBuffer[dIdx]     * da * invSa + half) / outA255);
+                                canvasBuffer[dIdx + 1] = (byte)((framePixels[sIdx + 1] * sa * 255 + canvasBuffer[dIdx + 1] * da * invSa + half) / outA255);
+                                canvasBuffer[dIdx + 2] = (byte)((framePixels[sIdx + 2] * sa * 255 + canvasBuffer[dIdx + 2] * da * invSa + half) / outA255);
                                 canvasBuffer[dIdx + 3] = (byte)outA;
                             }
                         }
@@ -289,12 +329,13 @@ public static class ApngDecoder
                 }
             }
 
-            // 合成済みキャンバスから不変の BitmapSource を生成して Freeze
+            // 合成済みキャンバスから不変の BitmapSource を生成して Freeze (BitmapSource.Create は内部コピーするため clone 不要)
             var finalImage = BitmapSource.Create(
                 canvasWidth, canvasHeight, 96, 96, PixelFormats.Bgra32, null,
-                (byte[])canvasBuffer.Clone(), canvasStride);
+                canvasBuffer, canvasStride);
             finalImage.Freeze();
             frames.Add(new ApngFrame { Image = finalImage, DelayMs = rf.DelayMs });
+            totalDecodedBytes += canvasByteSize;
 
             // 次フレームのための DisposeOp 適用
             if (rf.DisposeOp == 1)
@@ -303,19 +344,13 @@ public static class ApngDecoder
                 for (int y = 0; y < maxY; y++)
                 {
                     int dstY = rf.YOffset + y;
-                    if (dstY < 0) continue;
-                    int clearStart = Math.Max(0, rf.XOffset);
-                    int clearLen = maxX - (clearStart - rf.XOffset);
-                    if (clearLen > 0)
-                    {
-                        Array.Clear(canvasBuffer, dstY * canvasStride + clearStart * 4, clearLen * 4);
-                    }
+                    Array.Clear(canvasBuffer, dstY * canvasStride + rf.XOffset * 4, maxX * 4);
                 }
             }
             else if (rf.DisposeOp == 2 && previousBuffer != null)
             {
                 // APNG_DISPOSE_OP_PREVIOUS: 描画前のキャンバスに戻す
-                canvasBuffer = previousBuffer;
+                Buffer.BlockCopy(previousBuffer, 0, canvasBuffer, 0, canvasBuffer.Length);
             }
         }
 
@@ -326,25 +361,42 @@ public static class ApngDecoder
     /// STAバックグラウンドスレッドでAPNGの全フレームを非同期デコード・事前合成・Freezeして返し、
     /// UIスレッドの同期ブロック（フリーズ・ラグ）を完全にゼロにする非同期デコーダー
     /// </summary>
-    public static Task<List<ApngFrame>?> DecodeAsync(byte[] bytes)
+    public static async Task<List<ApngFrame>?> DecodeAsync(byte[] bytes, CancellationToken cancellationToken = default)
     {
-        var tcs = new TaskCompletionSource<List<ApngFrame>?>();
-        var thread = new Thread(() =>
+        await _decodeConcurrency.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            try
+            var tcs = new TaskCompletionSource<List<ApngFrame>?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var thread = new Thread(() =>
             {
-                var result = Decode(bytes);
-                tcs.SetResult(result);
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.IsBackground = true;
-        thread.Start();
-        return tcs.Task;
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var result = Decode(bytes, cancellationToken);
+                    tcs.TrySetResult(result);
+                }
+                catch (OperationCanceledException)
+                {
+                    tcs.TrySetCanceled(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+                finally
+                {
+                    Dispatcher.FromThread(Thread.CurrentThread)?.InvokeShutdown();
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.IsBackground = true;
+            thread.Start();
+            return await tcs.Task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _decodeConcurrency.Release();
+        }
     }
 }
 
@@ -352,7 +404,7 @@ public static class ApngDecoder
 /// CompositionTarget.Rendering (60FPS/ディスプレイリフレッシュレート完全同期) により
 /// CPU負荷ほぼゼロで極めて滑らかにAPNGアニメーションをループ再生する高精度コントローラー
 /// </summary>
-public class ApngAnimationController
+public class ApngAnimationController : IDisposable
 {
     private readonly List<System.Windows.Controls.Image> _targets;
     private readonly List<ApngFrame> _frames;
@@ -376,14 +428,14 @@ public class ApngAnimationController
         for (int i = 0; i < frames.Count; i++)
         {
             _frameStartTimes[i] = current;
-            current += Math.Max(16.0, frames[i].DelayMs);
+            current += Math.Max(10.0, frames[i].DelayMs);
         }
-        _totalDurationMs = Math.Max(current, 16.0);
+        _totalDurationMs = Math.Max(current, 10.0);
     }
 
     public void Start()
     {
-        if (_isRunning || _frames.Count <= 1) return;
+        if (_isRunning || _frames.Count <= 1 || _targets.Count == 0) return;
         _isRunning = true;
         _stopwatch.Restart();
         _lastFrameIndex = -1;
@@ -398,9 +450,16 @@ public class ApngAnimationController
         CompositionTarget.Rendering -= OnRendering;
     }
 
+    public void Dispose()
+    {
+        Stop();
+        GC.SuppressFinalize(this);
+    }
+
     private void OnRendering(object? sender, EventArgs e)
     {
         if (!_isRunning || _frames.Count == 0) return;
+        if (_targets.All(t => !t.IsVisible)) return;
 
         double elapsed = _stopwatch.Elapsed.TotalMilliseconds % _totalDurationMs;
         int frameIndex = 0;
