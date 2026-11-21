@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DiscordLookup.Models;
 using DiscordLookup.Services;
+using DiscordLookup.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XamlAnimatedGif;
@@ -18,6 +19,7 @@ public partial class MainWindow : Window
 {
     private readonly DiscordApiService _apiService = new();
     private static readonly HttpClient _imageClient = new();
+    private static ApngAnimationController? _currentApngController;
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
@@ -357,7 +359,13 @@ public partial class MainWindow : Window
 
         if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
         if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
-        if (AvatarDecorationImage != null) AvatarDecorationImage.Visibility = Visibility.Collapsed;
+        if (AvatarDecorationImage != null)
+        {
+            AvatarDecorationImage.Visibility = Visibility.Collapsed;
+            AvatarDecorationImage.Source = null;
+        }
+        _currentApngController?.Stop();
+        _currentApngController = null;
 
         SetStatus("READY", true);
     }
@@ -565,7 +573,11 @@ public partial class MainWindow : Window
         {
             if (string.IsNullOrEmpty(url))
             {
-                try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+                if (isDecoration)
+                {
+                    _currentApngController?.Stop();
+                    _currentApngController = null;
+                }
                 try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
                 targetImage.Source = null;
                 return;
@@ -575,28 +587,49 @@ public partial class MainWindow : Window
 
             if (isDecoration)
             {
-                // アバターデコレーション (WPFネイティブ 32bit アルファ高精度レンダリング)
-                // サードパーティ製 APNG レンダラーのフレーム蓄積バグ（白濁・透過破壊）を完全排除し、
-                // クリスタルのように澄んだ完全な透明度と本来の鮮やかな色彩でアイコンの上に重ねる
-                try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+                // アバターデコレーション (60FPS 完全同期 + 濁りゼロの完全透明度・色彩維持)
+                _currentApngController?.Stop();
+                _currentApngController = null;
+
                 try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
 
-                var bytes = await _imageClient.GetByteArrayAsync(uri);
-                var ms = new MemoryStream(bytes);
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = ms;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze();
+                try
+                {
+                    var bytes = await _imageClient.GetByteArrayAsync(uri);
 
-                targetImage.Source = bitmap;
-                return;
+                    // APNG マルチフレームの解析
+                    var frames = ApngDecoder.Decode(bytes);
+                    if (frames != null && frames.Count > 1)
+                    {
+                        // 60FPS 完全同期アニメーションコントローラーで再生
+                        targetImage.Source = frames[0].Image;
+                        _currentApngController = new ApngAnimationController(targetImage, frames);
+                        _currentApngController.Start();
+                        return;
+                    }
+
+                    // 単一フレーム / 通常 PNG の場合
+                    var ms = new MemoryStream(bytes);
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = ms;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+
+                    targetImage.Source = bitmap;
+                    return;
+                }
+                catch
+                {
+                    targetImage.Source = null;
+                    return;
+                }
             }
 
             // 通常アバター & バナー (GIF / PNG)
             // 安定したループ再生実績のある XamlAnimatedGif を使用
-            try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+            try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
             XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, uri);
         }
         catch
