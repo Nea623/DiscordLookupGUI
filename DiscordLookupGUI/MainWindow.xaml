@@ -583,29 +583,19 @@
 
                                                 <!-- 2. 右側: ユーザー情報 & アクティビティ -->
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0">
-                                                    <!-- 上段: 表示名 + クランタグ + バッジ群 -->
+                                                    <!-- 上段: 表示名 + クランバッジのみ -->
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <!-- 表示名 (Nea) -->
-                                                        <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13.5" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="85" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13.5" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="130" TextTrimming="CharacterEllipsis" />
 
                                                         <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
-                                                        <Border x:Name="PlateClanContainer" Background="#282236" CornerRadius="4" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center">
+                                                        <Border x:Name="PlateClanContainer" Background="#282236" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
                                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                                 <Image x:Name="PlateClanBadgeImage" Width="11" Height="11" Margin="0,0,3,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
                                                                 <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="9.5" Margin="0,0,2,0" VerticalAlignment="Center" />
                                                                 <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10.5" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                                                             </StackPanel>
                                                         </Border>
-
-                                                        <!-- ステータス/デバイスアイコン (画面共有 / VR / 王冠) -->
-                                                        <StackPanel Orientation="Horizontal" Margin="5,0,0,0" VerticalAlignment="Center">
-                                                            <!-- 画面共有 (赤) -->
-                                                            <TextBlock Text="🖥️" FontSize="10.5" Margin="0,0,2,0" VerticalAlignment="Center" ToolTip="Screen Share" />
-                                                            <!-- VRゴーグル (赤) -->
-                                                            <TextBlock Text="🥽" FontSize="10.5" Margin="0,0,2,0" VerticalAlignment="Center" ToolTip="VR Connected" />
-                                                            <!-- 王冠 (ゴールド) -->
-                                                            <TextBlock Text="👑" FontSize="10.5" Foreground="#FEE75C" VerticalAlignment="Center" ToolTip="Server Owner" />
-                                                        </StackPanel>
                                                     </StackPanel>
 
                                                     <!-- 下段: 🎮 Visual Studio (アクティビティ) -->
