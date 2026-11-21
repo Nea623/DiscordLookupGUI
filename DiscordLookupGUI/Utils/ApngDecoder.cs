@@ -59,6 +59,8 @@ public static class ApngDecoder
         public int XOffset;
         public int YOffset;
         public double DelayMs;
+        public byte DisposeOp;
+        public byte BlendOp;
         public List<byte[]> IdatChunks = new();
     }
 
@@ -112,13 +114,18 @@ public static class ApngDecoder
                 double delayMs = (double)delayNum * 1000.0 / delayDen;
                 if (delayMs < 10.0) delayMs = 33.3;
 
+                byte disposeOp = bytes[dataStart + 24];
+                byte blendOp = bytes[dataStart + 25];
+
                 currentRawFrame = new RawFrameData
                 {
                     Width = w,
                     Height = h,
                     XOffset = x,
                     YOffset = y,
-                    DelayMs = delayMs
+                    DelayMs = delayMs,
+                    DisposeOp = disposeOp,
+                    BlendOp = blendOp
                 };
                 rawFrames.Add(currentRawFrame);
             }
@@ -172,6 +179,8 @@ public static class ApngDecoder
 
         byte[] ihdrTypeBytes = { 0x49, 0x48, 0x44, 0x52 };
         var frames = new List<ApngFrame>();
+        int canvasStride = canvasWidth * 4;
+        byte[] canvasBuffer = new byte[canvasHeight * canvasStride];
 
         foreach (var rf in rawFrames)
         {
@@ -217,27 +226,97 @@ public static class ApngDecoder
                 frameBitmap = bmp;
             }
 
-            // フルキャンバスと一致しない部分矩形や 1x1 のフレームの場合、
-            // 288x288 の完全透明キャンバスの正しい (XOffset, YOffset) にマッピングしてノイズを完全に除去
-            BitmapSource finalImage;
-            if (rf.Width == canvasWidth && rf.Height == canvasHeight && rf.XOffset == 0 && rf.YOffset == 0)
+            // DisposeOp == 2 (APNG_DISPOSE_OP_PREVIOUS) のため描画前のキャンバスを退避
+            byte[]? previousBuffer = rf.DisposeOp == 2 ? (byte[])canvasBuffer.Clone() : null;
+
+            // Bgra32 に正規化してピクセル抽出
+            BitmapSource bgraFrame = frameBitmap.Format == PixelFormats.Bgra32
+                ? frameBitmap
+                : new FormatConvertedBitmap(frameBitmap, PixelFormats.Bgra32, null, 0);
+
+            int frameStride = rf.Width * 4;
+            byte[] framePixels = new byte[rf.Height * frameStride];
+            bgraFrame.CopyPixels(framePixels, frameStride, 0);
+
+            // キャンバスへ描画 (BlendOp: 0=SOURCE 上書き, 1=OVER アルファ合成)
+            int maxY = Math.Min(rf.Height, canvasHeight - rf.YOffset);
+            int maxX = Math.Min(rf.Width, canvasWidth - rf.XOffset);
+            for (int y = 0; y < maxY; y++)
             {
-                finalImage = frameBitmap;
-            }
-            else
-            {
-                var visual = new DrawingVisual();
-                using (var dc = visual.RenderOpen())
+                int dstY = rf.YOffset + y;
+                if (dstY < 0) continue;
+                int srcRow = y * frameStride;
+                int dstRow = dstY * canvasStride;
+
+                for (int x = 0; x < maxX; x++)
                 {
-                    dc.DrawImage(frameBitmap, new Rect(rf.XOffset, rf.YOffset, rf.Width, rf.Height));
+                    int dstX = rf.XOffset + x;
+                    if (dstX < 0) continue;
+                    int sIdx = srcRow + x * 4;
+                    int dIdx = dstRow + dstX * 4;
+
+                    if (rf.BlendOp == 0)
+                    {
+                        canvasBuffer[dIdx] = framePixels[sIdx];
+                        canvasBuffer[dIdx + 1] = framePixels[sIdx + 1];
+                        canvasBuffer[dIdx + 2] = framePixels[sIdx + 2];
+                        canvasBuffer[dIdx + 3] = framePixels[sIdx + 3];
+                    }
+                    else
+                    {
+                        byte sa = framePixels[sIdx + 3];
+                        if (sa == 255)
+                        {
+                            canvasBuffer[dIdx] = framePixels[sIdx];
+                            canvasBuffer[dIdx + 1] = framePixels[sIdx + 1];
+                            canvasBuffer[dIdx + 2] = framePixels[sIdx + 2];
+                            canvasBuffer[dIdx + 3] = 255;
+                        }
+                        else if (sa > 0)
+                        {
+                            byte da = canvasBuffer[dIdx + 3];
+                            int outA = sa + (da * (255 - sa) + 127) / 255;
+                            if (outA > 0)
+                            {
+                                int invSa = 255 - sa;
+                                canvasBuffer[dIdx] = (byte)((framePixels[sIdx] * sa + canvasBuffer[dIdx] * da * invSa / 255) / outA);
+                                canvasBuffer[dIdx + 1] = (byte)((framePixels[sIdx + 1] * sa + canvasBuffer[dIdx + 1] * da * invSa / 255) / outA);
+                                canvasBuffer[dIdx + 2] = (byte)((framePixels[sIdx + 2] * sa + canvasBuffer[dIdx + 2] * da * invSa / 255) / outA);
+                                canvasBuffer[dIdx + 3] = (byte)outA;
+                            }
+                        }
+                    }
                 }
-                var rtb = new RenderTargetBitmap(canvasWidth, canvasHeight, 96, 96, PixelFormats.Pbgra32);
-                rtb.Render(visual);
-                rtb.Freeze();
-                finalImage = rtb;
             }
 
+            // 合成済みキャンバスから不変の BitmapSource を生成して Freeze
+            var finalImage = BitmapSource.Create(
+                canvasWidth, canvasHeight, 96, 96, PixelFormats.Bgra32, null,
+                (byte[])canvasBuffer.Clone(), canvasStride);
+            finalImage.Freeze();
             frames.Add(new ApngFrame { Image = finalImage, DelayMs = rf.DelayMs });
+
+            // 次フレームのための DisposeOp 適用
+            if (rf.DisposeOp == 1)
+            {
+                // APNG_DISPOSE_OP_BACKGROUND: 描画領域を完全透明にクリア
+                for (int y = 0; y < maxY; y++)
+                {
+                    int dstY = rf.YOffset + y;
+                    if (dstY < 0) continue;
+                    int clearStart = Math.Max(0, rf.XOffset);
+                    int clearLen = maxX - (clearStart - rf.XOffset);
+                    if (clearLen > 0)
+                    {
+                        Array.Clear(canvasBuffer, dstY * canvasStride + clearStart * 4, clearLen * 4);
+                    }
+                }
+            }
+            else if (rf.DisposeOp == 2 && previousBuffer != null)
+            {
+                // APNG_DISPOSE_OP_PREVIOUS: 描画前のキャンバスに戻す
+                canvasBuffer = previousBuffer;
+            }
         }
 
         return frames.Count > 1 ? frames : null;

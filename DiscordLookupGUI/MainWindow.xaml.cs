@@ -28,6 +28,8 @@ public partial class MainWindow : Window
     };
     private static ApngAnimationController? _currentApngController;
     private static ApngAnimationController? _nameplateApngController;
+    private static readonly Dictionary<string, List<ApngFrame>> _nameplateCache = new();
+    private int _nameplateLoadVersion = 0;
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
@@ -472,7 +474,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void DisplayUser(DiscordUser user, ulong rawId)
+    private void DisplayUser(DiscordUser user, ulong rawId)
     {
         // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (0.5秒 / 500ms)
         EmptyStateView.Visibility = Visibility.Collapsed;
@@ -558,53 +560,8 @@ public partial class MainWindow : Window
             PlateClanContainer.Visibility = Visibility.Collapsed;
         }
 
-        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映 (32bit完全透明度 APNG エンジン再生)
-        if (!string.IsNullOrEmpty(user.NameplateSkuId))
-        {
-            PlateBackgroundStaticImage.Visibility = Visibility.Visible;
-            _nameplateApngController?.Stop();
-            _nameplateApngController = null;
-            try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
-
-            try
-            {
-                // アプリ内リソースの 32bit フルアルファ APNG (煙の半透明フェード完全再現) を非同期デコードして再生
-                var resUri = new Uri("pack://application:,,,/Assets/nameplate_rocketfuel.png", UriKind.Absolute);
-                var streamInfo = Application.GetResourceStream(resUri);
-                if (streamInfo != null)
-                {
-                    using var ms = new MemoryStream();
-                    streamInfo.Stream.CopyTo(ms);
-                    var bytes = ms.ToArray();
-                    var frames = await ApngDecoder.DecodeAsync(bytes);
-                    if (frames != null && frames.Count > 1)
-                    {
-                        PlateBackgroundStaticImage.Source = frames[0].Image;
-                        _nameplateApngController = new ApngAnimationController(PlateBackgroundStaticImage, frames);
-                        _nameplateApngController.Start();
-                    }
-                    else if (frames != null && frames.Count == 1)
-                    {
-                        PlateBackgroundStaticImage.Source = frames[0].Image;
-                    }
-                }
-            }
-            catch
-            {
-                if (!string.IsNullOrEmpty(user.NameplateStaticUrl))
-                {
-                    LoadImage(PlateBackgroundStaticImage, user.NameplateStaticUrl);
-                }
-            }
-        }
-        else
-        {
-            _nameplateApngController?.Stop();
-            _nameplateApngController = null;
-            try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
-            PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
-            PlateBackgroundStaticImage.Source = null;
-        }
+        // ネームプレート公式装飾 (Nameplate Collectible) の動的自動反映 (各ユーザー固有の公式 APNG を 60FPS 再生)
+        _ = LoadNameplateAsync(user);
 
         // アバター読み込み
         _currentAvatarUrl = user.AvatarUrl;
@@ -650,6 +607,121 @@ public partial class MainWindow : Window
         var processId = (rawId & 0x1F000) >> 12;
         TxtWorkerId.Text = $"{workerId}";
         TxtProcessId.Text = $"{processId}";
+    }
+
+    private async Task LoadNameplateAsync(DiscordUser user)
+    {
+        int currentVersion = ++_nameplateLoadVersion;
+        _nameplateApngController?.Stop();
+        _nameplateApngController = null;
+        try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
+
+        if (string.IsNullOrEmpty(user.NameplateSkuId))
+        {
+            // ネームプレート未装備時はデフォルトのDiscordダーク背景に戻す
+            NameplateCard.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#313338"));
+            PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
+            PlateBackgroundStaticImage.Source = null;
+            return;
+        }
+
+        // パレットに応じた公式ダーク背景トーンを設定
+        NameplateCard.Background = new SolidColorBrush(GetNameplatePaletteColor(user.NameplatePalette));
+        PlateBackgroundStaticImage.Visibility = Visibility.Visible;
+        PlateBackgroundStaticImage.Source = null;
+
+        string skuId = user.NameplateSkuId;
+        string? animatedUrl = user.NameplateAnimatedUrl;
+        string? staticUrl = user.NameplateStaticUrl;
+
+        try
+        {
+            List<ApngFrame>? frames = null;
+
+            // メモリキャッシュに存在すれば即座に利用
+            lock (_nameplateCache)
+            {
+                _nameplateCache.TryGetValue(skuId, out frames);
+            }
+
+            if (frames == null && !string.IsNullOrEmpty(animatedUrl))
+            {
+                var bytes = await _imageClient.GetByteArrayAsync(animatedUrl);
+                if (_nameplateLoadVersion != currentVersion) return;
+
+                frames = await ApngDecoder.DecodeAsync(bytes);
+                if (_nameplateLoadVersion != currentVersion) return;
+
+                if (frames != null && frames.Count > 1)
+                {
+                    lock (_nameplateCache)
+                    {
+                        if (_nameplateCache.Count >= 10)
+                        {
+                            _nameplateCache.Clear();
+                        }
+                        _nameplateCache[skuId] = frames;
+                    }
+                }
+                else if (frames == null)
+                {
+                    // 単一フレーム PNG の場合はそのままデコードして表示
+                    using var ms = new MemoryStream(bytes);
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.StreamSource = ms;
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    PlateBackgroundStaticImage.Source = bmp;
+                    return;
+                }
+            }
+
+            if (_nameplateLoadVersion != currentVersion) return;
+
+            if (frames != null && frames.Count > 1)
+            {
+                PlateBackgroundStaticImage.Source = frames[0].Image;
+                _nameplateApngController = new ApngAnimationController(PlateBackgroundStaticImage, frames);
+                _nameplateApngController.Start();
+            }
+            else if (frames != null && frames.Count == 1)
+            {
+                PlateBackgroundStaticImage.Source = frames[0].Image;
+            }
+            else if (!string.IsNullOrEmpty(staticUrl))
+            {
+                LoadImage(PlateBackgroundStaticImage, staticUrl);
+            }
+        }
+        catch
+        {
+            if (_nameplateLoadVersion == currentVersion && !string.IsNullOrEmpty(staticUrl))
+            {
+                LoadImage(PlateBackgroundStaticImage, staticUrl);
+            }
+        }
+    }
+
+    private static Color GetNameplatePaletteColor(string? palette)
+    {
+        string hex = palette?.ToLowerInvariant() switch
+        {
+            "violet" => "#232035",
+            "crimson" => "#2E1E24",
+            "berry" => "#2B1F2E",
+            "sky" => "#1E2833",
+            "teal" => "#1C2B2D",
+            "forest" => "#1D2B22",
+            "bubble_gum" => "#2E1F2A",
+            "cobalt" => "#1E2336",
+            "clover" => "#1E2B20",
+            "lemon" => "#2D2A1E",
+            "white" => "#2B2D31",
+            _ => "#232035"
+        };
+        return (Color)ColorConverter.ConvertFromString(hex);
     }
 
     private void BannerContainer_SizeChanged(object sender, SizeChangedEventArgs e)

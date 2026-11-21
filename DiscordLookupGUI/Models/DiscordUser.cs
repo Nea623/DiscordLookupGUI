@@ -88,9 +88,17 @@ public class DiscordUser
     /// <summary>ネームプレート装飾SKU ID（未装備 → null）</summary>
     public string? NameplateSkuId => Collectibles?.Nameplate?.SkuId;
 
+    /// <summary>ネームプレート装飾 パレット名（未装備 → null）</summary>
+    public string? NameplatePalette => Collectibles?.Nameplate?.Palette;
+
     /// <summary>ネームプレート装飾 静止画URL（448x84 PNG）</summary>
     public string? NameplateStaticUrl => !string.IsNullOrEmpty(NameplateSkuId)
         ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/static"
+        : null;
+
+    /// <summary>ネームプレート装飾 アニメーションAPNG URL（448x84 フルアルファ APNG）</summary>
+    public string? NameplateAnimatedUrl => !string.IsNullOrEmpty(NameplateSkuId)
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/animated"
         : null;
 
     /// <summary>ネームプレート装飾 動画URL（アルファ透過 WebM ループ）</summary>
