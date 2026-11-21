@@ -345,12 +345,20 @@
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- アイコン発光サークル (Gaming RGB テーマ時は完全同期レインボーサイクル発光) -->
                             <Grid Width="72" Height="72" HorizontalAlignment="Center" Margin="0,0,0,18">
-                                <!-- ① 通常テーマ用ベースサークル (Dark, Light, Sunset, StarryNight: 他テーマ本来の美しさを100%完全維持) -->
+                                <!-- ① 通常テーマ用ベースサークル (Dark, Light, Sunset, StarryNight: 絵文字🔍の親しみやすい形のまま、各テーマカラーでグローなしでクッキリ染める) -->
                                 <Border CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
-                                    <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Rectangle Width="32" Height="32" Fill="{DynamicResource SearchIconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Rectangle.OpacityMask>
+                                            <VisualBrush Stretch="Uniform">
+                                                <VisualBrush.Visual>
+                                                    <TextBlock Text="🔍" FontSize="30" FontFamily="Segoe UI Emoji" />
+                                                </VisualBrush.Visual>
+                                            </VisualBrush>
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
                                 </Border>
 
-                                <!-- ② 🎮 Gaming RGB テーマ専用オーバーレイ (Gaming RGB 選択時のみ前面に表示: 強烈レインボーサイクル発光) -->
+                                <!-- ② 🎮 Gaming RGB テーマ専用オーバーレイ (Gaming RGB 選択時のみ前面に表示: 強烈レインボー回転ボーダー & 鮮烈緑ネオングロー) -->
                                 <Grid Visibility="{DynamicResource GamingRgbVisibility}">
                                     <!-- 虫眼鏡がくっきり浮き出るスレートブラック円盤 + 3px太枠レインボー回転ボーダー & ネオングロー -->
                                     <Border CornerRadius="36" Background="#242832" BorderThickness="3">
@@ -372,8 +380,12 @@
                                             <DropShadowEffect x:Name="SearchIconRgbShadow" BlurRadius="30" ShadowDepth="0" Color="#FF00FFCC" Opacity="1.0" />
                                         </Border.Effect>
                                     </Border>
-                                    <!-- 虫眼鏡アイコン (Gaming RGB 専用) -->
-                                    <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <!-- 虫眼鏡アイコン (Gaming RGB 専用: 鮮烈ネオングリーン固定発光) -->
+                                    <TextBlock Text="🔍" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect BlurRadius="18" ShadowDepth="0" Color="#00FF66" Opacity="0.9" />
+                                        </TextBlock.Effect>
+                                    </TextBlock>
                                 </Grid>
                             </Grid>
 
