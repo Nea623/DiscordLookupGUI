@@ -53,6 +53,8 @@
     <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#1F0D9488" />
     <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#2E0D9488" />
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#4D0D9488" />
+    <Color x:Key="SearchIconGlowColor">#FF0D9488</Color>
+    <SolidColorBrush x:Key="SearchIconBrush" Color="#FF0D9488" />
     <x:Null x:Key="ThemeBackgroundImage" />
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#FFF0F4F8" />
     <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
