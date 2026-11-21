@@ -39,11 +39,7 @@
                                     <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentGlowMidBrush}" />
                                     <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
                                     <Setter Property="Foreground" Value="{DynamicResource AccentCyanBrush}" />
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.5" />
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter TargetName="border" Property="Effect" Value="{DynamicResource PillTabGlowEffect}" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -74,11 +70,7 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentGlowHighBrush}" />
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.6" />
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter TargetName="border" Property="Effect" Value="{DynamicResource GlowButtonHoverEffect}" />
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter TargetName="border" Property="Opacity" Value="0.4" />
@@ -111,11 +103,7 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
-                                    <Setter TargetName="border" Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.5" />
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter TargetName="border" Property="Effect" Value="{DynamicResource CyberTextBoxFocusEffect}" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -162,7 +150,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="{StaticResource DangerRedBrush}" />
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource DangerRedBrush}" />
                                     <Setter Property="Foreground" Value="White" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
@@ -176,17 +164,18 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Padding" Value="5" />
-                <Setter Property="HasDropShadow" Value="True" />
+                <Setter Property="HasDropShadow" Value="False" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ContextMenu">
-                            <Border Background="{TemplateBinding Background}"
+                            <Border Margin="10"
+                                    Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="12"
                                     Padding="{TemplateBinding Padding}">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#000000" BlurRadius="18" ShadowDepth="3" Opacity="0.45" />
+                                    <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.45" />
                                 </Border.Effect>
                                 <StackPanel Orientation="Vertical" IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                             </Border>

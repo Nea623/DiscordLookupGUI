@@ -42,6 +42,12 @@ public partial class MainWindow : Window
     private ApngAnimationController? _nameplateApngController;
     private readonly Dictionary<Image, int> _imageLoadTokens = new();
 
+    private System.Windows.Media.Animation.Storyboard? _rgbBorderStoryboard;
+    private System.Windows.Media.Animation.Storyboard? _rgbSearchIconStoryboard;
+    private bool _isRgbBorderRunning;
+    private bool _isRgbSearchIconRunning;
+    private bool _isClosing;
+
     private CancellationTokenSource? _lookupCts;
     private int _lookupVersion = 0;
     private int _nameplateLoadVersion = 0;
@@ -97,10 +103,20 @@ public partial class MainWindow : Window
     {
         Loaded -= MainWindow_Loaded;
 
+        _rgbBorderStoryboard = TryFindResource("GamingRgbBorderStoryboard") as System.Windows.Media.Animation.Storyboard;
+        _rgbSearchIconStoryboard = TryFindResource("GamingRgbSearchIconStoryboard") as System.Windows.Media.Animation.Storyboard;
+
+        StateChanged += MainWindow_StateChanged;
+        if (EmptyStateView != null)
+        {
+            EmptyStateView.IsVisibleChanged += EmptyStateView_IsVisibleChanged;
+        }
+
         // テーマ機能の初期化
         ThemeManager.ThemeChanged += OnThemeChanged;
         ThemeManager.Initialize();
         UpdateThemeUi(ThemeManager.CurrentTheme);
+        UpdateGamingRgbAnimations();
 
         // トークン設定の読み込み (カスタム保存 ➔ 環境変数 ➔ デフォルト共有)
         if (File.Exists(TokenSettingsFilePath))
@@ -152,6 +168,12 @@ public partial class MainWindow : Window
     {
         ThemeManager.ThemeChanged -= OnThemeChanged;
         UserIdInput.TextChanged -= UserIdInput_TextChanged;
+        StateChanged -= MainWindow_StateChanged;
+        if (EmptyStateView != null)
+        {
+            EmptyStateView.IsVisibleChanged -= EmptyStateView_IsVisibleChanged;
+        }
+        StopGamingRgbAnimations();
         CancelActiveLookup();
         ClearAllResultImages();
         _imageLoadTokens.Clear();
@@ -163,7 +185,7 @@ public partial class MainWindow : Window
     {
         if (UserIdPlaceholder != null)
         {
-            UserIdPlaceholder.Visibility = string.IsNullOrEmpty(UserIdInput.Text)
+            UserIdPlaceholder.Visibility = string.IsNullOrWhiteSpace(UserIdInput.Text)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         }
@@ -174,9 +196,25 @@ public partial class MainWindow : Window
     // ─────────────────────────────────────────────
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ButtonState == MouseButtonState.Pressed)
+        if (e.ChangedButton == MouseButton.Left && e.LeftButton == MouseButtonState.Pressed && e.ClickCount == 1)
         {
-            DragMove();
+            try
+            {
+                DragMove();
+            }
+            catch (InvalidOperationException)
+            {
+            }
+        }
+    }
+
+    private void ThemeBgLayer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (ThemeBgLayer != null && e.NewSize.Width > 0 && e.NewSize.Height > 0)
+        {
+            var clip = new RectangleGeometry(new Rect(0, 0, e.NewSize.Width, e.NewSize.Height), 17, 17);
+            clip.Freeze();
+            ThemeBgLayer.Clip = clip;
         }
     }
 
@@ -233,6 +271,69 @@ public partial class MainWindow : Window
     private void OnThemeChanged(AppTheme theme)
     {
         UpdateThemeUi(theme);
+        UpdateGamingRgbAnimations();
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        UpdateGamingRgbAnimations();
+    }
+
+    private void EmptyStateView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        UpdateGamingRgbAnimations();
+    }
+
+    private void UpdateGamingRgbAnimations()
+    {
+        bool allowRgb = ThemeManager.CurrentTheme == AppTheme.GamingRgb && WindowState != WindowState.Minimized;
+
+        if (allowRgb)
+        {
+            if (!_isRgbBorderRunning && _rgbBorderStoryboard != null)
+            {
+                _rgbBorderStoryboard.Begin(this, isControllable: true);
+                _isRgbBorderRunning = true;
+            }
+        }
+        else if (_isRgbBorderRunning && _rgbBorderStoryboard != null)
+        {
+            _rgbBorderStoryboard.Stop(this);
+            _rgbBorderStoryboard.Remove(this);
+            _isRgbBorderRunning = false;
+        }
+
+        bool runSearchIconRgb = allowRgb && EmptyStateView != null && EmptyStateView.IsVisible;
+        if (runSearchIconRgb)
+        {
+            if (!_isRgbSearchIconRunning && _rgbSearchIconStoryboard != null)
+            {
+                _rgbSearchIconStoryboard.Begin(this, isControllable: true);
+                _isRgbSearchIconRunning = true;
+            }
+        }
+        else if (_isRgbSearchIconRunning && _rgbSearchIconStoryboard != null)
+        {
+            _rgbSearchIconStoryboard.Stop(this);
+            _rgbSearchIconStoryboard.Remove(this);
+            _isRgbSearchIconRunning = false;
+        }
+    }
+
+    private void StopGamingRgbAnimations()
+    {
+        if (_isRgbBorderRunning && _rgbBorderStoryboard != null)
+        {
+            _rgbBorderStoryboard.Stop(this);
+            _rgbBorderStoryboard.Remove(this);
+            _isRgbBorderRunning = false;
+        }
+        if (_isRgbSearchIconRunning && _rgbSearchIconStoryboard != null)
+        {
+            _rgbSearchIconStoryboard.Stop(this);
+            _rgbSearchIconStoryboard.Remove(this);
+            _isRgbSearchIconRunning = false;
+        }
     }
 
     private void UpdateThemeUi(AppTheme theme)
@@ -268,6 +369,10 @@ public partial class MainWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
+        if (_isClosing) return;
+        _isClosing = true;
+        IsHitTestVisible = false;
+
         // 終了時もスムーズに縮小＆フェードアウトして自然に閉じる
         var sb = new System.Windows.Media.Animation.Storyboard();
         var duration = TimeSpan.FromMilliseconds(180);
@@ -1147,9 +1252,12 @@ public partial class MainWindow : Window
     {
         if (BannerImage != null && e.NewSize.Width > 0 && e.NewSize.Height > 0)
         {
+            double innerW = Math.Max(0, e.NewSize.Width - 2);
+            double innerH = Math.Max(0, e.NewSize.Height - 2);
+
             // 枠全体を満たしつつ、上下左右の重心が完全に中央に来るように MinWidth/MinHeight を設定
-            BannerImage.MinWidth = e.NewSize.Width;
-            BannerImage.MinHeight = e.NewSize.Height;
+            BannerImage.MinWidth = innerW;
+            BannerImage.MinHeight = innerH;
             BannerImage.Width = double.NaN;
             BannerImage.Height = double.NaN;
 

@@ -1,5 +1,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="po">
 
     <!-- ══════════════════════════════════════════
          テーマ: Sunset (トワイライト街並み背景イラスト ＆ 鮮烈なサンセットオレンジ)
@@ -61,5 +64,10 @@
     <SolidColorBrush x:Key="InputPlaceholderBrush" Color="#FFD4B5DD" />
     <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
     <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
+
+    <!-- コントロール用 Freeze 済みグローエフェクト (テーマ動的追従・継承コンテキスト競合なし) -->
+    <DropShadowEffect x:Key="PillTabGlowEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.5" />
+    <DropShadowEffect x:Key="GlowButtonHoverEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.6" />
+    <DropShadowEffect x:Key="CyberTextBoxFocusEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.5" />
 
 </ResourceDictionary>

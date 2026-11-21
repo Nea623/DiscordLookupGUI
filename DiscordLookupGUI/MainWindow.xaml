@@ -18,6 +18,51 @@
         TextOptions.TextRenderingMode="ClearType">
 
     <!-- ══════════════════════════════════════════
+         Gaming RGB 用 独立アニメーション定義 (必要時のみ起動・省電力化)
+         ══════════════════════════════════════════ -->
+    <Window.Resources>
+        <Storyboard x:Key="GamingRgbBorderStoryboard">
+            <DoubleAnimation Storyboard.TargetName="RgbRotate"
+                             Storyboard.TargetProperty="Angle"
+                             From="0" To="360"
+                             Duration="0:0:4"
+                             RepeatBehavior="Forever" />
+            <ColorAnimationUsingKeyFrames Storyboard.TargetName="RgbShadow"
+                                          Storyboard.TargetProperty="Color"
+                                          Duration="0:0:4"
+                                          RepeatBehavior="Forever">
+                <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="#FFFF0055" />
+                <LinearColorKeyFrame KeyTime="0:0:0.6" Value="#FFFF7700" />
+                <LinearColorKeyFrame KeyTime="0:0:1.3" Value="#FFFFDD00" />
+                <LinearColorKeyFrame KeyTime="0:0:2.0" Value="#FF00FF66" />
+                <LinearColorKeyFrame KeyTime="0:0:2.6" Value="#FF00DDFF" />
+                <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
+                <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <Storyboard x:Key="GamingRgbSearchIconStoryboard">
+            <DoubleAnimation Storyboard.TargetName="SearchIconRgbRotate"
+                             Storyboard.TargetProperty="Angle"
+                             From="0" To="360"
+                             Duration="0:0:4"
+                             RepeatBehavior="Forever" />
+            <ColorAnimationUsingKeyFrames Storyboard.TargetName="SearchIconRgbShadow"
+                                          Storyboard.TargetProperty="Color"
+                                          Duration="0:0:4"
+                                          RepeatBehavior="Forever">
+                <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="#FFFF0055" />
+                <LinearColorKeyFrame KeyTime="0:0:0.6" Value="#FFFF7700" />
+                <LinearColorKeyFrame KeyTime="0:0:1.3" Value="#FFFFDD00" />
+                <LinearColorKeyFrame KeyTime="0:0:2.0" Value="#FF00FF66" />
+                <LinearColorKeyFrame KeyTime="0:0:2.6" Value="#FF00DDFF" />
+                <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
+                <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
+            </ColorAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+
+    <!-- ══════════════════════════════════════════
          起動時アニメーション (1.5秒スプラッシュ ➔ メイン画面展開)
          ══════════════════════════════════════════ -->
     <Window.Triggers>
@@ -93,52 +138,18 @@
                         <SplineDoubleKeyFrame KeyTime="0:0:1.9" Value="0.0" />
                     </DoubleAnimationUsingKeyFrames>
 
-                    <!-- ③ スプラッシュ終了時(1.9秒)に完全非表示(Collapsed)化 -->
+                    <!-- ③ スプラッシュ終了時(1.9秒)に完全非表示(Collapsed)化 ＆ 背面入力解放 -->
                     <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SplashOverlay"
                                                    Storyboard.TargetProperty="Visibility">
                         <DiscreteObjectKeyFrame KeyTime="0:0:0.0" Value="{x:Static Visibility.Visible}" />
                         <DiscreteObjectKeyFrame KeyTime="0:0:1.9" Value="{x:Static Visibility.Collapsed}" />
                     </ObjectAnimationUsingKeyFrames>
 
-                    <!-- ④ ゲーミング RGB ネオンの無限レインボー回転 ＆ グローサイクル (4秒周期で滑らかにループ) -->
-                    <DoubleAnimation Storyboard.TargetName="RgbRotate"
-                                     Storyboard.TargetProperty="Angle"
-                                     From="0" To="360"
-                                     Duration="0:0:4"
-                                     RepeatBehavior="Forever" />
-
-                    <ColorAnimationUsingKeyFrames Storyboard.TargetName="RgbShadow"
-                                                  Storyboard.TargetProperty="Color"
-                                                  Duration="0:0:4"
-                                                  RepeatBehavior="Forever">
-                        <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="#FFFF0055" />
-                        <LinearColorKeyFrame KeyTime="0:0:0.6" Value="#FFFF7700" />
-                        <LinearColorKeyFrame KeyTime="0:0:1.3" Value="#FFFFDD00" />
-                        <LinearColorKeyFrame KeyTime="0:0:2.0" Value="#FF00FF66" />
-                        <LinearColorKeyFrame KeyTime="0:0:2.6" Value="#FF00DDFF" />
-                        <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
-                        <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
-                    </ColorAnimationUsingKeyFrames>
-
-                    <!-- 虫眼鏡アイコンサークルの同期レインボー回転 ＆ グローサイクル -->
-                    <DoubleAnimation Storyboard.TargetName="SearchIconRgbRotate"
-                                     Storyboard.TargetProperty="Angle"
-                                     From="0" To="360"
-                                     Duration="0:0:4"
-                                     RepeatBehavior="Forever" />
-
-                    <ColorAnimationUsingKeyFrames Storyboard.TargetName="SearchIconRgbShadow"
-                                                  Storyboard.TargetProperty="Color"
-                                                  Duration="0:0:4"
-                                                  RepeatBehavior="Forever">
-                        <DiscreteColorKeyFrame KeyTime="0:0:0.0" Value="#FFFF0055" />
-                        <LinearColorKeyFrame KeyTime="0:0:0.6" Value="#FFFF7700" />
-                        <LinearColorKeyFrame KeyTime="0:0:1.3" Value="#FFFFDD00" />
-                        <LinearColorKeyFrame KeyTime="0:0:2.0" Value="#FF00FF66" />
-                        <LinearColorKeyFrame KeyTime="0:0:2.6" Value="#FF00DDFF" />
-                        <LinearColorKeyFrame KeyTime="0:0:3.3" Value="#FF0055FF" />
-                        <LinearColorKeyFrame KeyTime="0:0:4.0" Value="#FFFF0055" />
-                    </ColorAnimationUsingKeyFrames>
+                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="MainContentContainer"
+                                                    Storyboard.TargetProperty="IsEnabled">
+                        <DiscreteBooleanKeyFrame KeyTime="0:0:0.0" Value="False" />
+                        <DiscreteBooleanKeyFrame KeyTime="0:0:1.9" Value="True" />
+                    </BooleanAnimationUsingKeyFrames>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -158,37 +169,36 @@
 
             <Grid>
                 <!-- ══════════════════════════════════════════
-                     すりガラス背景画像レイヤー (BlurEffectによるガラスエフェクト)
+                     すりガラス背景画像レイヤー (軽量角丸クリップ ＆ BitmapCache)
                      ══════════════════════════════════════════ -->
-                <Border CornerRadius="18">
-                    <Border.OpacityMask>
-                        <VisualBrush>
-                            <VisualBrush.Visual>
-                                <Border Width="{Binding ActualWidth, ElementName=RootBorder}"
-                                        Height="{Binding ActualHeight, ElementName=RootBorder}"
-                                        CornerRadius="18"
-                                        Background="Black" />
-                            </VisualBrush.Visual>
-                        </VisualBrush>
-                    </Border.OpacityMask>
-                    <Grid ClipToBounds="True">
-                        <Image x:Name="ThemeBgImage"
-                               Source="{DynamicResource ThemeBackgroundImage}"
-                               Stretch="UniformToFill"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               RenderTransformOrigin="0.5,0.5">
-                            <Image.RenderTransform>
-                                <ScaleTransform ScaleX="1.08" ScaleY="1.08" />
-                            </Image.RenderTransform>
-                            <Image.Effect>
-                                <BlurEffect Radius="24" RenderingBias="Quality" />
-                            </Image.Effect>
-                        </Image>
-                        <!-- 半透明オーバーレイティント -->
-                        <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="18" />
-                    </Grid>
-                </Border>
+                <Grid x:Name="ThemeBgLayer" ClipToBounds="True" SizeChanged="ThemeBgLayer_SizeChanged">
+                    <Image x:Name="ThemeBgImage"
+                           Source="{DynamicResource ThemeBackgroundImage}"
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           CacheMode="BitmapCache"
+                           RenderTransformOrigin="0.5,0.5">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <Trigger Property="Source" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.08" ScaleY="1.08" />
+                        </Image.RenderTransform>
+                        <Image.Effect>
+                            <BlurEffect Radius="24" RenderingBias="Quality" />
+                        </Image.Effect>
+                    </Image>
+                    <!-- 半透明オーバーレイティント -->
+                    <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="17" />
+                </Grid>
 
             <!-- ══════════════════════════════════════════
                  ウィンドウ枠線のキラリ星オーナメント (ユーザー考案 + 対称アクセント)
@@ -217,7 +227,7 @@
                     </Image.Effect>
                 </Image>
             </Canvas>
-            <Grid x:Name="MainContentContainer" Opacity="0" RenderTransformOrigin="0.5,0.5">
+            <Grid x:Name="MainContentContainer" Opacity="0" IsEnabled="False" RenderTransformOrigin="0.5,0.5">
                 <Grid.RenderTransform>
                     <TranslateTransform Y="10" />
                 </Grid.RenderTransform>
@@ -247,8 +257,8 @@
                         <TextBlock Text="DISCORD" FontWeight="ExtraBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         <TextBlock Text=" LOOKUP" FontWeight="Light" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         <TextBlock Text=" GUI" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
-                        <Border Margin="10,0,0,0" VerticalAlignment="Center" Background="#1A3B82F6" CornerRadius="8" Padding="7,2">
-                            <TextBlock Text="v2.4" FontSize="10" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
+                        <Border Margin="10,0,0,0" VerticalAlignment="Center" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="8" Padding="7,2">
+                            <TextBlock Text="v2.4" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
                         </Border>
                     </StackPanel>
 
@@ -393,7 +403,7 @@
                             <TextBlock Text="上部の入力欄に Discord ユーザーID (Snowflake) を入力し、Enterキーを押してください。" 
                                        FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,16" />
 
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#203A6B9B">
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <TextBlock Text="💡 ヒント: Discordでユーザーを右クリック ➔ 「ユーザーIDをコピー」で取得できます" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                             </Border>
                         </StackPanel>
@@ -470,15 +480,19 @@
 
                                         <StackPanel Grid.Column="0" Margin="0,18,0,0">
                                             <emoji:TextBlock x:Name="TxtGlobalName" Text="ユーザー未検索" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                <emoji:TextBlock x:Name="TxtUsername" Text="@username" FontSize="13" Foreground="{StaticResource AccentCyanBrush}" VerticalAlignment="Center" />
-                                                <Border x:Name="BadgeClan" Margin="10,0,0,0" Background="#203B82F6" CornerRadius="6" Padding="6,2" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <Grid HorizontalAlignment="Left" Margin="0,4,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <emoji:TextBlock Grid.Column="0" x:Name="TxtUsername" Text="@username" FontSize="13" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                <Border Grid.Column="1" x:Name="BadgeClan" Margin="10,0,0,0" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="6" Padding="6,2" VerticalAlignment="Center" Visibility="Collapsed">
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <Image x:Name="ImgClanBadge" Width="14" Height="14" Margin="0,0,5,0" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                        <emoji:TextBlock x:Name="TxtClanTag" Text="CLAN" FontSize="12" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
+                                                        <emoji:TextBlock x:Name="TxtClanTag" Text="CLAN" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBlueBrush}" VerticalAlignment="Center" />
                                                     </StackPanel>
                                                 </Border>
-                                            </StackPanel>
+                                            </Grid>
                                         </StackPanel>
 
                                         <!-- 🌟 ユーザー考案: バナー右下のリング付き三日月 ＋ きらめき星屑 🌟 -->
@@ -516,7 +530,7 @@
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Accent Color" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Background="Transparent"
                                                         Cursor="Hand" ToolTip="クリックでカラーコードをコピー" MouseLeftButtonUp="AccentColor_Click">
-                                                <Border x:Name="RectAccentColor" Width="14" Height="14" CornerRadius="3" Background="Transparent" BorderBrush="#405575" BorderThickness="1" Margin="0,0,6,0" />
+                                                <Border x:Name="RectAccentColor" Width="14" Height="14" CornerRadius="3" Background="Transparent" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,6,0" />
                                                 <TextBlock x:Name="TxtAccentColor" Text="なし" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
                                             </StackPanel>
                                         </Grid>
@@ -582,19 +596,24 @@
                                                     </Grid>
 
                                                     <!-- 2. 右側: ユーザー情報 (表示名 + クランバッジのみのシンプル1行構成) -->
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                    <Grid Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
                                                         <!-- 表示名 (Discord公式準拠 13px太字・絵文字対応・global_name反映) -->
-                                                        <emoji:TextBlock x:Name="PlateDisplayName" Text="User" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="125" TextTrimming="CharacterEllipsis" />
+                                                        <emoji:TextBlock Grid.Column="0" x:Name="PlateDisplayName" Text="User" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
 
                                                         <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
-                                                        <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center">
+                                                        <Border Grid.Column="1" x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center">
                                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                                 <Image x:Name="PlateClanBadgeImage" Width="11" Height="11" Margin="0,0,2,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
                                                                 <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center" />
-                                                                <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                                                <emoji:TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                                                             </StackPanel>
                                                         </Border>
-                                                    </StackPanel>
+                                                    </Grid>
                                                 </Grid>
                                             </Grid>
                                         </Border>
@@ -657,12 +676,12 @@
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <!-- label (個別クリックでlabelのみコピー可能) -->
-                                                    <TextBlock Grid.Column="0" x:Name="TxtPlateLabel" Text="--" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
-                                                               ToolTip="クリックで Label をコピー" MouseLeftButtonUp="CopyPlateLabel_Click" />
+                                                    <!-- label (個別クリックでlabelのみコピー可能・絵文字対応) -->
+                                                    <emoji:TextBlock Grid.Column="0" x:Name="TxtPlateLabel" Text="--" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                                                     ToolTip="クリックで Label をコピー" MouseLeftButtonUp="CopyPlateLabel_Click" />
 
                                                     <!-- palette ピルバッジ (個別クリックでpaletteのみコピー可能) -->
-                                                    <Border Grid.Column="1" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="4,0,0,0" VerticalAlignment="Center"
+                                                    <Border Grid.Column="1" Background="{DynamicResource TabContainerBgBrush}" CornerRadius="3" Padding="4,1" Margin="4,0,0,0" VerticalAlignment="Center"
                                                             ToolTip="クリックで Palette をコピー" MouseLeftButtonUp="CopyPlatePalette_Click">
                                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                             <Border x:Name="PlatePaletteIndicator" Width="6" Height="6" CornerRadius="3" Background="Transparent" Margin="0,0,3,0" VerticalAlignment="Center" Visibility="Collapsed" />
@@ -814,7 +833,7 @@
                             <TextBlock Text="ユーザーを検索すると、ここに Discord API の完全な生 JSON レスポンスが表示されます。" 
                                        FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,16" />
 
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#203A6B9B">
+                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="14,8" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <TextBlock Text="💡 API から返却されるすべての生データ（未公開・詳細フィールド含む）を確認できます" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                             </Border>
                         </StackPanel>
@@ -849,100 +868,104 @@
 
                     <!-- ── 左カード: Bot Configuration ── -->
                     <Border Grid.Column="0" Margin="0,0,10,0" Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="20">
-                        <StackPanel>
-                            <!-- カードヘッダー -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
-                                <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentCyanBrush}" Margin="0,0,8,0" />
-                                <TextBlock Text="Bot Configuration" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
-                            </StackPanel>
-
-                            <TextBlock Text="Discord Bot Token (カスタム設定)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,8" />
-                            <PasswordBox x:Name="InputBotToken" Background="{DynamicResource CardInnerBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Padding="12,10" FontSize="14" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,0,8" />
-                            
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
-                                <StackPanel>
-                                    <TextBlock Text="✨ 共有Botトークン内蔵中！設定不要でそのまま検索可能です" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" Margin="0,0,0,4" />
-                                    <TextBlock Text="💡 独自の Bot トークンを使用したい場合のみ、ここに入力して保存してください。空欄で保存またはクリアすると共有トークンに戻ります。" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <!-- カードヘッダー -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentCyanBrush}" Margin="0,0,8,0" />
+                                    <TextBlock Text="Bot Configuration" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
                                 </StackPanel>
-                            </Border>
 
-                            <StackPanel Orientation="Horizontal">
-                                <Button Style="{StaticResource GlowButton}" Content="Save Token" Width="130" HorizontalAlignment="Left" Click="SaveToken_Click" Margin="0,0,10,0" />
-                                <Button Style="{StaticResource GlowButton}" Content="Reset to Shared" Width="140" HorizontalAlignment="Left" Click="ResetToken_Click" Opacity="0.85" />
-                            </StackPanel>
+                                <TextBlock Text="Discord Bot Token (カスタム設定)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,8" />
+                                <PasswordBox x:Name="InputBotToken" Background="{DynamicResource CardInnerBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource AccentCyanBrush}" Padding="12,10" FontSize="14" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,0,8" />
+                                
+                                <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,16" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
+                                    <StackPanel>
+                                        <TextBlock Text="✨ 共有Botトークン内蔵中！設定不要でそのまま検索可能です" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="💡 独自の Bot トークンを使用したい場合のみ、ここに入力して保存してください。空欄で保存またはクリアすると共有トークンに戻ります。" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" LineHeight="16" />
+                                    </StackPanel>
+                                </Border>
 
-                            <!-- テーマ設定 (ボタン押下でリスト表示) -->
-                            <TextBlock Text="Theme Preference" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
-                            <Button x:Name="BtnSettingsThemeSelect" Style="{StaticResource GlowButton}" Click="BtnSettingsThemeSelect_Click" HorizontalAlignment="Left" MinWidth="180">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock x:Name="TxtSettingsThemeCurrent" Text="🌙  Dark Theme" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    <TextBlock Text=" ▸" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" Margin="10,0,0,0" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource GlowButton}" Content="Save Token" Width="130" HorizontalAlignment="Left" Click="SaveToken_Click" Margin="0,0,10,0" />
+                                    <Button Style="{StaticResource GlowButton}" Content="Reset to Shared" Width="140" HorizontalAlignment="Left" Click="ResetToken_Click" Opacity="0.85" />
                                 </StackPanel>
-                                <Button.ContextMenu>
-                                    <ContextMenu Style="{StaticResource CyberContextMenu}">
-                                        <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
-                                        <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
-                                        <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
-                                        <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
-                                        <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
-                        </StackPanel>
+
+                                <!-- テーマ設定 (ボタン押下でリスト表示) -->
+                                <TextBlock Text="Theme Preference" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
+                                <Button x:Name="BtnSettingsThemeSelect" Style="{StaticResource GlowButton}" Click="BtnSettingsThemeSelect_Click" HorizontalAlignment="Left" MinWidth="180">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock x:Name="TxtSettingsThemeCurrent" Text="🌙  Dark Theme" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text=" ▸" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" Margin="10,0,0,0" />
+                                    </StackPanel>
+                                    <Button.ContextMenu>
+                                        <ContextMenu Style="{StaticResource CyberContextMenu}">
+                                            <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
+                                            <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                            <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
+                                            <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
+                                            <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Border>
 
                     <!-- ── 右カード: About & Credits ── -->
                     <Border Grid.Column="1" Margin="10,0,0,0" Background="{DynamicResource CardBgBrush}" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Padding="20">
-                        <StackPanel>
-                            <!-- カードヘッダー -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
-                                <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{StaticResource AccentPurpleBrush}" Margin="0,0,8,0" />
-                                <TextBlock Text="About &amp; Credits" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <!-- カードヘッダー -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                                    <Rectangle Width="4" Height="15" RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentPurpleBrush}" Margin="0,0,8,0" />
+                                    <TextBlock Text="About &amp; Credits" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                </StackPanel>
+
+                                <!-- アプリ情報 -->
+                                <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14" Margin="0,0,0,14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                            <TextBlock Text="DISCORD LOOKUP GUI" FontWeight="ExtraBold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <Border Margin="10,0,0,0" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="6" Padding="6,1" VerticalAlignment="Center">
+                                                <TextBlock Text="v2.4" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="Cyberpunk-themed Discord User OSINT / Lookup Client" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+                                        
+                                        <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" FontSize="12">
+                                            <Run Text="Created by: " Foreground="{DynamicResource TextMutedBrush}" />
+                                            <Run Text="Neaneko" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
+                                            <Run Text="  •  Built with: " Foreground="{DynamicResource TextMutedBrush}" />
+                                            <Run Text="Visual Studio" FontWeight="Bold" Foreground="{DynamicResource AccentPurpleBrush}" />
+                                            <Run Text=" &amp; " Foreground="{DynamicResource TextMutedBrush}" />
+                                            <Run Text="Antigravity IDE" FontWeight="Bold" Foreground="{DynamicResource AccentPurpleBrush}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- リンクボタン -->
+                                <Button Style="{StaticResource GlowButton}" Margin="0,0,0,14" Click="BtnOpenGitHub_Click" HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="🔗 " FontSize="13" />
+                                        <TextBlock Text="GitHub Repository (Nea623/DiscordLookupGUI)" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- 技術スタック / 謝辞 -->
+                                <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
+                                    <StackPanel>
+                                        <TextBlock Text="Special Thanks / Technologies" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                                        <TextBlock Text="• Microsoft Visual Studio (C# / .NET Tooling)" FontSize="11" Foreground="{DynamicResource AccentBlueBrush}" FontWeight="SemiBold" Margin="0,2" />
+                                        <TextBlock Text="• Antigravity IDE (Agentic AI Development Environment)" FontSize="11" Foreground="{DynamicResource AccentPurpleBrush}" FontWeight="SemiBold" Margin="0,2" />
+                                        <TextBlock Text="• .NET 8 WPF (Windows Desktop)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                        <TextBlock Text="• XamlAnimatedGif (Animated GIF Engine)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                        <TextBlock Text="• Emoji.Wpf (DirectWrite Color Emoji Support)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                        <TextBlock Text="• Newtonsoft.Json (Discord API v10 Parser)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-
-                            <!-- アプリ情報 -->
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14" Margin="0,0,0,14" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                        <TextBlock Text="DISCORD LOOKUP GUI" FontWeight="ExtraBold" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <Border Margin="10,0,0,0" Background="#204DF2D3" CornerRadius="6" Padding="6,1" VerticalAlignment="Center">
-                                            <TextBlock Text="v2.4" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
-                                        </Border>
-                                    </StackPanel>
-                                    <TextBlock Text="Cyberpunk-themed Discord User OSINT / Lookup Client" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8" />
-                                    
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="Created by: " FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
-                                        <TextBlock Text="Neaneko" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentCyanBrush}" />
-                                        <TextBlock Text="  •  Built with: " FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
-                                        <TextBlock Text="Visual Studio" FontWeight="Bold" FontSize="12" Foreground="#C084FC" />
-                                        <TextBlock Text=" &amp; " FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
-                                        <TextBlock Text="Antigravity IDE" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentPurpleBrush}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- リンクボタン -->
-                            <Button Style="{StaticResource GlowButton}" Margin="0,0,0,14" Click="BtnOpenGitHub_Click" HorizontalAlignment="Stretch">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="🔗 " FontSize="13" />
-                                    <TextBlock Text="GitHub Repository (Nea623/DiscordLookupGUI)" FontWeight="SemiBold" FontSize="12" />
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 技術スタック / 謝辞 -->
-                            <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
-                                <StackPanel>
-                                    <TextBlock Text="Special Thanks / Technologies" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6" />
-                                    <TextBlock Text="• Microsoft Visual Studio (C# / .NET Tooling)" FontSize="11" Foreground="#60A5FA" FontWeight="SemiBold" Margin="0,2" />
-                                    <TextBlock Text="• Antigravity IDE (Agentic AI Development Environment)" FontSize="11" Foreground="#A78BFA" FontWeight="SemiBold" Margin="0,2" />
-                                    <TextBlock Text="• .NET 8 WPF (Windows Desktop)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
-                                    <TextBlock Text="• XamlAnimatedGif (Animated GIF Engine)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
-                                    <TextBlock Text="• Emoji.Wpf (DirectWrite Color Emoji Support)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
-                                    <TextBlock Text="• Newtonsoft.Json (Discord API v10 Parser)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
+                        </ScrollViewer>
                     </Border>
                 </Grid>
 
@@ -995,7 +1018,7 @@
                  起動時スプラッシュ画面 (1.5秒間前面を完全カバーし、背後の操作画面を一切隠す)
                  ══════════════════════════════════════════ -->
             <Grid x:Name="SplashOverlay">
-                <Border Background="#FF080C14" CornerRadius="18">
+                <Border Background="{DynamicResource WindowBgBrush}" CornerRadius="17">
                     <Grid>
                         <!-- スプラッシュ中もタイトルバー部分を掴んでウィンドウ移動可能 -->
                         <Border Height="56" VerticalAlignment="Top" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" />
@@ -1007,11 +1030,11 @@
                             </StackPanel.RenderTransform>
 
                             <!-- ネオン発光サークルロゴ -->
-                            <Border Width="92" Height="92" CornerRadius="24" Background="#184DF2D3" BorderBrush="#804DF2D3" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,18">
+                            <Border Width="92" Height="92" CornerRadius="24" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,18">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#4DF2D3" BlurRadius="35" ShadowDepth="0" Opacity="0.85" />
+                                    <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="35" ShadowDepth="0" Opacity="0.85" />
                                 </Border.Effect>
-                                <TextBlock Text="⚡" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource AccentCyanBrush}" />
+                                <TextBlock Text="⚡" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AccentCyanBrush}" />
                             </Border>
 
                             <!-- タイトル -->
@@ -1022,10 +1045,10 @@
                             </StackPanel>
 
                             <!-- サブタイトル & ローディングプログレス演出 -->
-                            <Border Margin="0,16,0,0" Background="#153B82F6" CornerRadius="10" Padding="14,6" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="#254DF2D3">
+                            <Border Margin="0,16,0,0" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="10" Padding="14,6" HorizontalAlignment="Center" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="INITIALIZING CLIENT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyanBrush}" />
-                                    <TextBlock Text=" • v2.4" FontSize="11" Foreground="#60A5FA" FontWeight="SemiBold" />
+                                    <TextBlock Text=" • v2.4" FontSize="11" Foreground="{DynamicResource AccentBlueBrush}" FontWeight="SemiBold" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>

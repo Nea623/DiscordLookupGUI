@@ -50,7 +50,26 @@ public static class ThemeManager
             // 読み込み失敗時はデフォルトのダークテーマを使用
         }
 
-        ApplyTheme(AppTheme.Dark, save: false);
+        try
+        {
+            ApplyTheme(AppTheme.Dark, save: false);
+        }
+        catch
+        {
+            // フォールバックも失敗した場合は既定のリソースを維持
+        }
+    }
+
+    private static bool IsThemeDictionary(ResourceDictionary dict)
+    {
+        var source = dict.Source?.OriginalString;
+        if (string.IsNullOrEmpty(source)) return false;
+
+        return source.Contains("Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.Contains("Light.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.Contains("Sunset.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.Contains("StarryNight.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.Contains("GamingRgb.xaml", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -58,7 +77,9 @@ public static class ThemeManager
     /// </summary>
     public static void ApplyTheme(AppTheme theme, bool save = true)
     {
-        CurrentTheme = theme;
+        var app = Application.Current;
+        if (app == null) return;
+
         var themeUri = theme switch
         {
             AppTheme.Light => new Uri("Themes/Light.xaml", UriKind.Relative),
@@ -68,32 +89,51 @@ public static class ThemeManager
             _ => new Uri("Themes/Dark.xaml", UriKind.Relative)
         };
 
-        var newDict = new ResourceDictionary { Source = themeUri };
-
-        // 既存のテーマ辞書を探して置き換える
-        var appResources = Application.Current.Resources;
-        ResourceDictionary? oldDict = null;
-
-        foreach (var dict in appResources.MergedDictionaries)
+        var merged = app.Resources.MergedDictionaries;
+        var existingIndices = new List<int>();
+        for (int i = 0; i < merged.Count; i++)
         {
-            if (dict.Source != null && (
-                dict.Source.OriginalString.Contains("Dark.xaml") ||
-                dict.Source.OriginalString.Contains("Light.xaml") ||
-                dict.Source.OriginalString.Contains("Sunset.xaml") ||
-                dict.Source.OriginalString.Contains("StarryNight.xaml") ||
-                dict.Source.OriginalString.Contains("GamingRgb.xaml")))
+            if (IsThemeDictionary(merged[i]))
             {
-                oldDict = dict;
-                break;
+                existingIndices.Add(i);
             }
         }
 
-        if (oldDict != null)
+        if (existingIndices.Count == 1 &&
+            CurrentTheme == theme &&
+            merged[existingIndices[0]].Source?.OriginalString.Equals(themeUri.OriginalString, StringComparison.OrdinalIgnoreCase) == true)
         {
-            appResources.MergedDictionaries.Remove(oldDict);
+            if (save)
+            {
+                SaveTheme(theme);
+            }
+            return;
         }
 
-        appResources.MergedDictionaries.Insert(0, newDict);
+        ResourceDictionary newDict;
+        try
+        {
+            newDict = new ResourceDictionary { Source = themeUri };
+        }
+        catch
+        {
+            return;
+        }
+
+        if (existingIndices.Count > 0)
+        {
+            merged[existingIndices[0]] = newDict;
+            for (int i = existingIndices.Count - 1; i >= 1; i--)
+            {
+                merged.RemoveAt(existingIndices[i]);
+            }
+        }
+        else
+        {
+            merged.Insert(0, newDict);
+        }
+
+        CurrentTheme = theme;
 
         if (save)
         {
