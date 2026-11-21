@@ -659,6 +659,8 @@ public partial class MainWindow : Window
         if (AvatarDecorationImage != null) AvatarDecorationImage.Visibility = Visibility.Collapsed;
         if (PlateAvatarDecoImage != null) PlateAvatarDecoImage.Visibility = Visibility.Collapsed;
         if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
+        if (BannerContainer != null) BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
+        if (BannerImage != null) BannerImage.Visibility = Visibility.Visible;
     }
 
     // ─────────────────────────────────────────────
@@ -1117,10 +1119,40 @@ public partial class MainWindow : Window
             _ = LoadImageAsync(AvatarDecorationImage, string.Empty, isDecoration: true, extraTargetImage: PlateAvatarDecoImage, ct: ct);
         }
 
-        // バナー読み込み
+        // バナー背景色・画像読み込み (未設定時はアクセントカラー ➔ 未設定ならテーマ色で塗りつぶし)
+        if (user.AccentColor.HasValue && user.AccentColor.Value is >= 0 and <= 0xFFFFFF)
+        {
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString($"#{user.AccentColor.Value:X6}");
+                var brush = new SolidColorBrush(color);
+                brush.Freeze();
+                BannerContainer.Background = brush;
+            }
+            catch
+            {
+                BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
+            }
+        }
+        else
+        {
+            BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
+        }
+
         _currentBannerUrl = user.BannerUrl ?? string.Empty;
         BtnOpenBanner.IsEnabled = !string.IsNullOrEmpty(_currentBannerUrl);
-        _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct);
+
+        if (!string.IsNullOrEmpty(_currentBannerUrl))
+        {
+            BannerImage.Visibility = Visibility.Visible;
+            _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct);
+        }
+        else
+        {
+            AdvanceImageToken(BannerImage);
+            ClearImageControl(BannerImage);
+            BannerImage.Visibility = Visibility.Collapsed;
+        }
 
         // タイムライン / Snowflake 解析
         TxtCreatedAtJst.Text = user.CreatedAtJst == DateTimeOffset.MinValue
