@@ -575,34 +575,23 @@ public partial class MainWindow : Window
 
             if (isDecoration)
             {
-                // アバターデコレーション (APNG)
-                // .NET 8 の HttpBaseStream はシーク不可でクラッシュするため、MemoryStream で安全に読み込む
-                try
-                {
-                    var bytes = await _imageClient.GetByteArrayAsync(uri);
-                    var ms = new MemoryStream(bytes);
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = ms;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    ms.Position = 0;
+                // アバターデコレーション (WPFネイティブ 32bit アルファ高精度レンダリング)
+                // サードパーティ製 APNG レンダラーのフレーム蓄積バグ（白濁・透過破壊）を完全排除し、
+                // クリスタルのように澄んだ完全な透明度と本来の鮮やかな色彩でアイコンの上に重ねる
+                try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+                try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
 
-                    AnimatedImage.Wpf.ImageBehavior.SetRepeatBehavior(targetImage, System.Windows.Media.Animation.RepeatBehavior.Forever);
-                    AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, bitmap);
-                    return;
-                }
-                catch
-                {
-                    // フォールバック: 静止画として安全に表示
-                    try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
-                    var fallbackBitmap = new BitmapImage();
-                    fallbackBitmap.BeginInit();
-                    fallbackBitmap.UriSource = uri;
-                    fallbackBitmap.EndInit();
-                    targetImage.Source = fallbackBitmap;
-                    return;
-                }
+                var bytes = await _imageClient.GetByteArrayAsync(uri);
+                var ms = new MemoryStream(bytes);
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = ms;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+
+                targetImage.Source = bitmap;
+                return;
             }
 
             // 通常アバター & バナー (GIF / PNG)
