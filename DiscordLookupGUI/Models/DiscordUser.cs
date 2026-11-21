@@ -78,7 +78,7 @@ public class DiscordUser
         get
         {
             if (string.IsNullOrEmpty(AvatarDecorationData?.Asset)) return null;
-            return $"https://cdn.discordapp.com/avatar-decoration-presets/{AvatarDecorationData.Asset}.png?size=160&passthrough=true";
+            return $"https://cdn.discordapp.com/avatar-decoration-presets/{AvatarDecorationData.Asset}.png?size=240&passthrough=true";
         }
     }
 }

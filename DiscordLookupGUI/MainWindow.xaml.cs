@@ -355,6 +355,10 @@ public partial class MainWindow : Window
             EmptyStateView.Opacity = 1.0;
         }
 
+        if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
+        if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
+        if (AvatarDecorationImage != null) AvatarDecorationImage.Visibility = Visibility.Collapsed;
+
         SetStatus("READY", true);
     }
 
@@ -505,12 +509,16 @@ public partial class MainWindow : Window
         {
             AvatarDecorationImage.Visibility = Visibility.Visible;
             BtnOpenDecoration.IsEnabled = true;
+            if (AvatarRing != null) AvatarRing.StrokeThickness = 0;
+            if (AvatarShadow != null) AvatarShadow.Opacity = 0;
             LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl, isDecoration: true);
         }
         else
         {
             AvatarDecorationImage.Visibility = Visibility.Collapsed;
             BtnOpenDecoration.IsEnabled = false;
+            if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
+            if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
             LoadImage(AvatarDecorationImage, string.Empty);
         }
 
