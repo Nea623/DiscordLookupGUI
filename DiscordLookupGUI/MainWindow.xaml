@@ -534,10 +534,16 @@
                                     <!-- ── Discord 公式メンバーリスト原寸 ネームプレート (248x42px) ── -->
                                     <TextBlock Text="Nameplate" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,12,0,4" HorizontalAlignment="Left" />
                                     <Border x:Name="NameplateCard" Width="248" Height="42" Margin="0,0,0,0" HorizontalAlignment="Left"
-                                            CornerRadius="8" ClipToBounds="True" Background="#232035" BorderThickness="0">
+                                            CornerRadius="8" Background="#232035" BorderThickness="0">
+                                        <Border.Clip>
+                                            <RectangleGeometry Rect="0,0,248,42" RadiusX="8" RadiusY="8" />
+                                        </Border.Clip>
                                         <Grid>
-                                            <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・角丸8pxクリップ・真の32bitアルファAPNG) -->
-                                            <Border Width="248" Height="42" CornerRadius="8" ClipToBounds="True">
+                                            <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・右端含む四隅角丸8pxクリップ) -->
+                                            <Border Width="248" Height="42" CornerRadius="8">
+                                                <Border.Clip>
+                                                    <RectangleGeometry Rect="0,0,248,42" RadiusX="8" RadiusY="8" />
+                                                </Border.Clip>
                                                 <Image x:Name="PlateBackgroundStaticImage" Width="248" Height="42" Opacity="0.6"
                                                        Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                        IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
