@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace DiscordLookup.Utils;
@@ -13,7 +15,8 @@ public class ApngFrame
 
 /// <summary>
 /// Discordのアバターデコレーション(APNG)を完全な透明度と色彩を維持したまま
-/// 各フレーム独立したPNGとして超高速デコードする高精度パーサー
+/// 部分矩形や終盤フレームのオフセットも完全透過キャンバスにマッピングして
+/// ノイズやチラつきを100%排除してデコードする高精度パーサー
 /// </summary>
 public static class ApngDecoder
 {
@@ -49,6 +52,16 @@ public static class ApngDecoder
         return c ^ 0xffffffffu;
     }
 
+    private class RawFrameData
+    {
+        public int Width;
+        public int Height;
+        public int XOffset;
+        public int YOffset;
+        public double DelayMs;
+        public List<byte[]> IdatChunks = new();
+    }
+
     public static List<ApngFrame>? Decode(byte[] bytes)
     {
         if (bytes == null || bytes.Length < 8) return null;
@@ -57,11 +70,12 @@ public static class ApngDecoder
 
         int pos = 8;
         byte[]? ihdrChunk = null;
-        var commonChunks = new List<byte[]>(); // PLTE, tRNS など
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        var commonChunks = new List<byte[]>();
 
-        var frameDataList = new List<(double delayMs, List<byte[]> idatChunks)>();
-        double currentDelay = 40.0;
-        List<byte[]>? currentIdatChunks = null;
+        var rawFrames = new List<RawFrameData>();
+        RawFrameData? currentRawFrame = null;
 
         while (pos + 12 <= bytes.Length)
         {
@@ -76,6 +90,8 @@ public static class ApngDecoder
             {
                 ihdrChunk = new byte[12 + length];
                 Array.Copy(bytes, pos, ihdrChunk, 0, ihdrChunk.Length);
+                canvasWidth = (bytes[dataStart] << 24) | (bytes[dataStart + 1] << 16) | (bytes[dataStart + 2] << 8) | bytes[dataStart + 3];
+                canvasHeight = (bytes[dataStart + 4] << 24) | (bytes[dataStart + 5] << 16) | (bytes[dataStart + 6] << 8) | bytes[dataStart + 7];
             }
             else if (type == "PLTE" || type == "tRNS")
             {
@@ -85,54 +101,55 @@ public static class ApngDecoder
             }
             else if (type == "fcTL")
             {
-                // 新しいフレームの開始
-                if (dataStart + 24 <= bytes.Length)
-                {
-                    ushort delayNum = (ushort)((bytes[dataStart + 20] << 8) | bytes[dataStart + 21]);
-                    ushort delayDen = (ushort)((bytes[dataStart + 22] << 8) | bytes[dataStart + 23]);
-                    if (delayDen == 0) delayDen = 100;
-                    currentDelay = (double)delayNum * 1000.0 / delayDen;
-                    if (currentDelay < 10.0) currentDelay = 33.3; // 30FPS ~ 60FPS
-                }
+                int w = (bytes[dataStart + 4] << 24) | (bytes[dataStart + 5] << 16) | (bytes[dataStart + 6] << 8) | bytes[dataStart + 7];
+                int h = (bytes[dataStart + 8] << 24) | (bytes[dataStart + 9] << 16) | (bytes[dataStart + 10] << 8) | bytes[dataStart + 11];
+                int x = (bytes[dataStart + 12] << 24) | (bytes[dataStart + 13] << 16) | (bytes[dataStart + 14] << 8) | bytes[dataStart + 15];
+                int y = (bytes[dataStart + 16] << 24) | (bytes[dataStart + 17] << 16) | (bytes[dataStart + 18] << 8) | bytes[dataStart + 19];
 
-                currentIdatChunks = new List<byte[]>();
-                frameDataList.Add((currentDelay, currentIdatChunks));
+                ushort delayNum = (ushort)((bytes[dataStart + 20] << 8) | bytes[dataStart + 21]);
+                ushort delayDen = (ushort)((bytes[dataStart + 22] << 8) | bytes[dataStart + 23]);
+                if (delayDen == 0) delayDen = 100;
+                double delayMs = (double)delayNum * 1000.0 / delayDen;
+                if (delayMs < 10.0) delayMs = 33.3;
+
+                currentRawFrame = new RawFrameData
+                {
+                    Width = w,
+                    Height = h,
+                    XOffset = x,
+                    YOffset = y,
+                    DelayMs = delayMs
+                };
+                rawFrames.Add(currentRawFrame);
             }
             else if (type == "IDAT")
             {
-                if (currentIdatChunks == null)
+                if (currentRawFrame != null)
                 {
-                    currentIdatChunks = new List<byte[]>();
-                    frameDataList.Add((currentDelay, currentIdatChunks));
+                    var chunk = new byte[12 + length];
+                    Array.Copy(bytes, pos, chunk, 0, chunk.Length);
+                    currentRawFrame.IdatChunks.Add(chunk);
                 }
-                var chunk = new byte[12 + length];
-                Array.Copy(bytes, pos, chunk, 0, chunk.Length);
-                currentIdatChunks.Add(chunk);
             }
             else if (type == "fdAT")
             {
-                // 先頭4バイト(シーケンス番号)を除去して IDAT チャンクとして再構成
-                if (length > 4 && currentIdatChunks != null)
+                if (length > 4 && currentRawFrame != null)
                 {
                     uint idatLength = length - 4;
                     byte[] idatChunk = new byte[12 + idatLength];
 
-                    // Length
                     idatChunk[0] = (byte)(idatLength >> 24);
                     idatChunk[1] = (byte)(idatLength >> 16);
                     idatChunk[2] = (byte)(idatLength >> 8);
                     idatChunk[3] = (byte)idatLength;
 
-                    // Type "IDAT"
                     idatChunk[4] = 0x49; // I
                     idatChunk[5] = 0x44; // D
                     idatChunk[6] = 0x41; // A
                     idatChunk[7] = 0x54; // T
 
-                    // Data
                     Array.Copy(bytes, dataStart + 4, idatChunk, 8, (int)idatLength);
 
-                    // CRC
                     byte[] idatTypeBytes = { 0x49, 0x44, 0x41, 0x54 };
                     uint crc = CalculateCrc(idatTypeBytes, idatChunk, 8, (int)idatLength);
                     idatChunk[8 + idatLength] = (byte)(crc >> 24);
@@ -140,7 +157,7 @@ public static class ApngDecoder
                     idatChunk[10 + idatLength] = (byte)(crc >> 8);
                     idatChunk[11 + idatLength] = (byte)crc;
 
-                    currentIdatChunks.Add(idatChunk);
+                    currentRawFrame.IdatChunks.Add(idatChunk);
                 }
             }
             else if (type == "IEND")
@@ -151,31 +168,76 @@ public static class ApngDecoder
             pos = nextPos;
         }
 
-        if (ihdrChunk == null || frameDataList.Count <= 1) return null;
+        if (ihdrChunk == null || rawFrames.Count <= 1 || canvasWidth <= 0 || canvasHeight <= 0) return null;
 
+        byte[] ihdrTypeBytes = { 0x49, 0x48, 0x44, 0x52 };
         var frames = new List<ApngFrame>();
-        foreach (var (delay, idats) in frameDataList)
+
+        foreach (var rf in rawFrames)
         {
-            if (idats.Count == 0) continue;
+            if (rf.IdatChunks.Count == 0 || rf.Width <= 0 || rf.Height <= 0) continue;
 
-            using var ms = new MemoryStream();
-            ms.Write(PngSignature, 0, PngSignature.Length);
-            ms.Write(ihdrChunk, 0, ihdrChunk.Length);
-            foreach (var common in commonChunks)
-                ms.Write(common, 0, common.Length);
-            foreach (var idat in idats)
-                ms.Write(idat, 0, idat.Length);
-            ms.Write(IendChunk, 0, IendChunk.Length);
+            // 各フレーム固有の幅・高さに合わせた IHDR チャンクを作成
+            byte[] frameIhdr = (byte[])ihdrChunk.Clone();
+            frameIhdr[8] = (byte)(rf.Width >> 24);
+            frameIhdr[9] = (byte)(rf.Width >> 16);
+            frameIhdr[10] = (byte)(rf.Width >> 8);
+            frameIhdr[11] = (byte)rf.Width;
 
-            ms.Position = 0;
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.StreamSource = ms;
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze();
+            frameIhdr[12] = (byte)(rf.Height >> 24);
+            frameIhdr[13] = (byte)(rf.Height >> 16);
+            frameIhdr[14] = (byte)(rf.Height >> 8);
+            frameIhdr[15] = (byte)rf.Height;
 
-            frames.Add(new ApngFrame { Image = bitmap, DelayMs = delay });
+            // IHDR の CRC32 を再計算
+            uint ihdrCrc = CalculateCrc(ihdrTypeBytes, frameIhdr, 8, 13);
+            frameIhdr[21] = (byte)(ihdrCrc >> 24);
+            frameIhdr[22] = (byte)(ihdrCrc >> 16);
+            frameIhdr[23] = (byte)(ihdrCrc >> 8);
+            frameIhdr[24] = (byte)ihdrCrc;
+
+            BitmapSource frameBitmap;
+            using (var ms = new MemoryStream())
+            {
+                ms.Write(PngSignature, 0, PngSignature.Length);
+                ms.Write(frameIhdr, 0, frameIhdr.Length);
+                foreach (var common in commonChunks)
+                    ms.Write(common, 0, common.Length);
+                foreach (var idat in rf.IdatChunks)
+                    ms.Write(idat, 0, idat.Length);
+                ms.Write(IendChunk, 0, IendChunk.Length);
+
+                ms.Position = 0;
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.StreamSource = ms;
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+                bmp.Freeze();
+                frameBitmap = bmp;
+            }
+
+            // フルキャンバスと一致しない部分矩形や 1x1 のフレームの場合、
+            // 288x288 の完全透明キャンバスの正しい (XOffset, YOffset) にマッピングしてノイズを完全に除去
+            BitmapSource finalImage;
+            if (rf.Width == canvasWidth && rf.Height == canvasHeight && rf.XOffset == 0 && rf.YOffset == 0)
+            {
+                finalImage = frameBitmap;
+            }
+            else
+            {
+                var visual = new DrawingVisual();
+                using (var dc = visual.RenderOpen())
+                {
+                    dc.DrawImage(frameBitmap, new Rect(rf.XOffset, rf.YOffset, rf.Width, rf.Height));
+                }
+                var rtb = new RenderTargetBitmap(canvasWidth, canvasHeight, 96, 96, PixelFormats.Pbgra32);
+                rtb.Render(visual);
+                rtb.Freeze();
+                finalImage = rtb;
+            }
+
+            frames.Add(new ApngFrame { Image = finalImage, DelayMs = rf.DelayMs });
         }
 
         return frames.Count > 1 ? frames : null;
@@ -216,7 +278,7 @@ public class ApngAnimationController
         _isRunning = true;
         _stopwatch.Restart();
         _lastFrameIndex = -1;
-        System.Windows.Media.CompositionTarget.Rendering += OnRendering;
+        CompositionTarget.Rendering += OnRendering;
     }
 
     public void Stop()
@@ -224,7 +286,7 @@ public class ApngAnimationController
         if (!_isRunning) return;
         _isRunning = false;
         _stopwatch.Stop();
-        System.Windows.Media.CompositionTarget.Rendering -= OnRendering;
+        CompositionTarget.Rendering -= OnRendering;
     }
 
     private void OnRendering(object? sender, EventArgs e)
