@@ -537,7 +537,7 @@
                                         <Grid>
                                             <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・角丸8pxクリップ・真の32bitアルファAPNG) -->
                                             <Border Width="248" Height="42" CornerRadius="8" ClipToBounds="True">
-                                                <Image x:Name="PlateBackgroundStaticImage" Width="248" Height="42"
+                                                <Image x:Name="PlateBackgroundStaticImage" Width="248" Height="42" Opacity="0.8"
                                                        Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                        IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
                                             </Border>
