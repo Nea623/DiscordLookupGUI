@@ -103,6 +103,12 @@ public class DiscordUser
     /// <summary>ネームプレート装飾SKU ID（未装備 → null）</summary>
     public string? NameplateSkuId => Collectibles?.Nameplate?.SkuId;
 
+    /// <summary>ネームプレート装飾 アセット識別子（未装備 → null）</summary>
+    public string? NameplateAsset => Collectibles?.Nameplate?.Asset;
+
+    /// <summary>ネームプレート装飾 表示名ラベル（未装備 → null）</summary>
+    public string? NameplateLabel => Collectibles?.Nameplate?.Label;
+
     /// <summary>ネームプレート装飾 パレット名（未装備 → null）</summary>
     public string? NameplatePalette => Collectibles?.Nameplate?.Palette;
 

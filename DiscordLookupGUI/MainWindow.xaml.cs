@@ -623,11 +623,27 @@ public partial class MainWindow : Window
             NameplateCard.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#313338"));
             PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
             PlateBackgroundStaticImage.Source = null;
+
+            TxtPlateSkuId.Text = "なし";
+            TxtPlateLabel.Text = "未装備";
+            TxtPlateAsset.Text = "なし";
+            TxtPlatePalette.Text = "なし";
+            PlatePaletteIndicator.Visibility = Visibility.Collapsed;
             return;
         }
 
+        // ネームプレート詳細メタ情報 (sku_id, label, asset, palette) の反映
+        TxtPlateSkuId.Text = user.NameplateSkuId;
+        TxtPlateLabel.Text = !string.IsNullOrEmpty(user.NameplateLabel) ? user.NameplateLabel : "(None)";
+        TxtPlateAsset.Text = !string.IsNullOrEmpty(user.NameplateAsset) ? user.NameplateAsset : "(None)";
+        TxtPlatePalette.Text = !string.IsNullOrEmpty(user.NameplatePalette) ? user.NameplatePalette : "(None)";
+
+        var paletteColor = GetNameplatePaletteColor(user.NameplatePalette);
+        PlatePaletteIndicator.Background = new SolidColorBrush(paletteColor);
+        PlatePaletteIndicator.Visibility = Visibility.Visible;
+
         // パレットに応じた公式ダーク背景トーンを設定
-        NameplateCard.Background = new SolidColorBrush(GetNameplatePaletteColor(user.NameplatePalette));
+        NameplateCard.Background = new SolidColorBrush(paletteColor);
         PlateBackgroundStaticImage.Visibility = Visibility.Visible;
         PlateBackgroundStaticImage.Source = null;
 
