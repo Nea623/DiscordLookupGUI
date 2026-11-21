@@ -533,23 +533,23 @@
 
                                     <!-- ── Discord 公式メンバーリスト原寸 ネームプレート (248x42px) ── -->
                                     <Border x:Name="NameplateCard" Width="248" Height="42" Margin="0,12,0,0" HorizontalAlignment="Left"
-                                            CornerRadius="8" ClipToBounds="True" Background="#313338" BorderThickness="0">
+                                            CornerRadius="8" ClipToBounds="True" Background="#232035" BorderThickness="0">
                                         <Grid>
-                                            <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・角丸8pxクリップ) -->
+                                            <!-- ネームプレート公式装飾 背景画像 (248x42 公式原寸・角丸8pxクリップ・真の32bitアルファAPNG) -->
                                             <Border Width="248" Height="42" CornerRadius="8" ClipToBounds="True">
                                                 <Image x:Name="PlateBackgroundStaticImage" Width="248" Height="42"
                                                        Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                        IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
                                             </Border>
 
-                                            <!-- メインコンテンツ (アバター + テキスト情報) -->
+                                            <!-- メインコンテンツ (アバター + 2行テキスト情報) -->
                                             <Grid Margin="5,0,6,0" VerticalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="38" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <!-- 1. 左側: アバター + デコレーション (直径32px真円クリップ + 38pxデコレーション) -->
+                                                <!-- 1. 左側: アバター + デコレーション + ステータスバッジ -->
                                                 <Grid Grid.Column="0" Width="38" Height="38" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                     <!-- 円形アバター (直径32px / EllipseGeometryで真円クリップ) -->
                                                     <Image x:Name="PlateAvatarImage" Width="32" Height="32" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
@@ -560,21 +560,42 @@
 
                                                     <!-- アバターデコレーション (幅38px, 高さ38px - 自前APNGエンジンで同期再生) -->
                                                     <Image x:Name="PlateAvatarDecoImage" Width="38" Height="38" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality" />
+
+                                                    <!-- ステータスバッジ (dnd 赤丸) -->
+                                                    <Border x:Name="PlateStatusBadge" Width="10" Height="10" CornerRadius="5" Background="#F23F43"
+                                                            BorderBrush="#232035" BorderThickness="1.5"
+                                                            HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2">
+                                                        <Rectangle Width="5" Height="1.5" Fill="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
                                                 </Grid>
 
-                                                <!-- 2. 右側: ユーザー情報 (表示名 + クランバッジ) -->
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
-                                                    <!-- 表示名 (Discord公式準拠 13px太字) -->
-                                                    <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="130" TextTrimming="CharacterEllipsis" />
+                                                <!-- 2. 右側: ユーザー情報 (公式同様の2行構成) -->
+                                                <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" Margin="5,0,0,0">
+                                                    <!-- 上段: 表示名 + クランバッジ + アイコン -->
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <!-- 表示名 (Discord公式準拠 13px太字) -->
+                                                        <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="105" TextTrimming="CharacterEllipsis" />
 
-                                                    <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
-                                                    <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <Image x:Name="PlateClanBadgeImage" Width="11" Height="11" Margin="0,0,2,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                            <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center" />
-                                                            <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                                                        </StackPanel>
-                                                    </Border>
+                                                        <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
+                                                        <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="4,0,0,0" VerticalAlignment="Center">
+                                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                <Image x:Name="PlateClanBadgeImage" Width="11" Height="11" Margin="0,0,2,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                                <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center" />
+                                                                <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                                            </StackPanel>
+                                                        </Border>
+
+                                                        <!-- デバイスアイコン (🖥️ 赤) -->
+                                                        <TextBlock Text="🖥" FontSize="10" Foreground="#F23F43" Margin="4,0,0,0" VerticalAlignment="Center" />
+                                                        <!-- 王冠アイコン (👑 オレンジ) -->
+                                                        <TextBlock Text="👑" FontSize="10" Foreground="#F0B232" Margin="3,0,0,0" VerticalAlignment="Center" />
+                                                    </StackPanel>
+
+                                                    <!-- 下段: アクティビティ (🎮 Visual Studio) -->
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,1,0,0">
+                                                        <TextBlock Text="🎮" FontSize="9" Foreground="#23A55A" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                                        <TextBlock Text="Visual Studio" FontSize="10" FontWeight="SemiBold" Foreground="#949BA4" VerticalAlignment="Center" MaxWidth="130" TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </Grid>
                                         </Grid>
