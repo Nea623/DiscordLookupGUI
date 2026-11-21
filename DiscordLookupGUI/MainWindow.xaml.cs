@@ -538,8 +538,8 @@ public partial class MainWindow : Window
             RectAccentColor.Background = Brushes.Transparent;
         }
 
-        // ネームプレート (264x56px) への情報反映
-        PlateDisplayName.Text = user.GlobalName ?? user.Username;
+        // ネームプレートへの情報反映 (表示名: global_name 優先、未設定時のみ username)
+        PlateDisplayName.Text = string.IsNullOrWhiteSpace(user.GlobalName) ? user.Username : user.GlobalName;
         if (!string.IsNullOrEmpty(user.ClanTag))
         {
             PlateClanContainer.Visibility = Visibility.Visible;

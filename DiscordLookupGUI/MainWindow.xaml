@@ -571,8 +571,8 @@
 
                                                 <!-- 2. 右側: ユーザー情報 (表示名 + クランバッジのみのシンプル1行構成) -->
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
-                                                    <!-- 表示名 (Discord公式準拠 13px太字) -->
-                                                    <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="125" TextTrimming="CharacterEllipsis" />
+                                                    <!-- 表示名 (Discord公式準拠 13px太字・絵文字対応・global_name反映) -->
+                                                    <emoji:TextBlock x:Name="PlateDisplayName" Text="User" FontSize="13" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="125" TextTrimming="CharacterEllipsis" />
 
                                                     <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
                                                     <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="3" Padding="4,1" Margin="5,0,0,0" VerticalAlignment="Center">

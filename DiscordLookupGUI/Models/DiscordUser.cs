@@ -5,13 +5,28 @@ namespace DiscordLookup.Models;
 /// </summary>
 public class DiscordUser
 {
+    [Newtonsoft.Json.JsonProperty("id")]
     public string Id { get; set; } = string.Empty;
+
+    [Newtonsoft.Json.JsonProperty("username")]
     public string Username { get; set; } = string.Empty;
+
+    [Newtonsoft.Json.JsonProperty("global_name")]
     public string? GlobalName { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("avatar")]
     public string? Avatar { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("banner")]
     public string? Banner { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("accent_color")]
     public int? AccentColor { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("banner_color")]
     public string? BannerColor { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("clan")]
     public ClanInfo? Clan { get; set; }
 
     [Newtonsoft.Json.JsonProperty("avatar_decoration_data")]
