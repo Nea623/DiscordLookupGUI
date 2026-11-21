@@ -59,6 +59,7 @@
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#80C4B5FD" />
     <Color x:Key="SearchIconGlowColor">#FFA78BFA</Color>
     <SolidColorBrush x:Key="SearchIconBrush" Color="#FFC4B5FD" />
+    <SolidColorBrush x:Key="InputPlaceholderBrush" Color="#FFB8AADC" />
     <Visibility x:Key="StarryDecorationVisibility">Visible</Visibility>
     <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
 

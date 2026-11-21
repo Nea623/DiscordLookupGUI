@@ -324,7 +324,7 @@
                                  VerticalContentAlignment="Center"
                                  Padding="14,8,12,8" />
                         <TextBlock x:Name="UserIdPlaceholder" Text="Discord ユーザーID (Snowflake) を入力して Enter..." 
-                                   Foreground="#556987" FontSize="13" VerticalAlignment="Center" Margin="14,0,0,0" IsHitTestVisible="False" />
+                                   Foreground="{DynamicResource InputPlaceholderBrush}" FontSize="13" VerticalAlignment="Center" Margin="14,0,0,0" IsHitTestVisible="False" />
                     </Grid>
 
                     <!-- 検索ボタン -->

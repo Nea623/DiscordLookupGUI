@@ -57,6 +57,7 @@
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#6000FF66" />
     <Color x:Key="SearchIconGlowColor">#FF00FF66</Color>
     <SolidColorBrush x:Key="SearchIconBrush" Color="#FF00FF66" />
+    <SolidColorBrush x:Key="InputPlaceholderBrush" Color="#FF888888" />
 
     <!-- 星空装飾は非表示、Gaming RGB エフェクトを表示 -->
     <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
