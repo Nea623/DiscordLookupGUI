@@ -17,6 +17,9 @@ public class DiscordUser
     [Newtonsoft.Json.JsonProperty("avatar_decoration_data")]
     public AvatarDecorationData? AvatarDecorationData { get; set; }
 
+    [Newtonsoft.Json.JsonProperty("collectibles")]
+    public CollectiblesInfo? Collectibles { get; set; }
+
     // ── 算出プロパティ ──
 
     /// <summary>Snowflake IDからアカウント作成日時を算出</summary>
@@ -81,6 +84,40 @@ public class DiscordUser
             return $"https://cdn.discordapp.com/avatar-decoration-presets/{AvatarDecorationData.Asset}.png?size=240&passthrough=true";
         }
     }
+
+    /// <summary>ネームプレート装飾SKU ID（未装備 → null）</summary>
+    public string? NameplateSkuId => Collectibles?.Nameplate?.SkuId;
+
+    /// <summary>ネームプレート装飾 静止画URL（448x84 PNG）</summary>
+    public string? NameplateStaticUrl => !string.IsNullOrEmpty(NameplateSkuId)
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/static"
+        : null;
+
+    /// <summary>ネームプレート装飾 動画URL（アルファ透過 WebM ループ）</summary>
+    public string? NameplateVideoUrl => !string.IsNullOrEmpty(NameplateSkuId)
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{NameplateSkuId}/video"
+        : null;
+}
+
+public class CollectiblesInfo
+{
+    [Newtonsoft.Json.JsonProperty("nameplate")]
+    public NameplateInfo? Nameplate { get; set; }
+}
+
+public class NameplateInfo
+{
+    [Newtonsoft.Json.JsonProperty("sku_id")]
+    public string? SkuId { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("asset")]
+    public string? Asset { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("label")]
+    public string? Label { get; set; }
+
+    [Newtonsoft.Json.JsonProperty("palette")]
+    public string? Palette { get; set; }
 }
 
 public class AvatarDecorationData
