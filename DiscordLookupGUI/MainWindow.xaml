@@ -535,16 +535,12 @@
                                     <Border x:Name="NameplateCard" Width="264" Height="56" Margin="0,12,0,0" HorizontalAlignment="Left"
                                             CornerRadius="14" ClipToBounds="True" Background="#313338" BorderThickness="0">
                                         <Grid>
-                                            <!-- ネームプレート公式装飾 背景レイヤー -->
-                                            <!-- A. WebM動画レイヤー (対応環境で動くループアニメーション) -->
-                                            <MediaElement x:Name="PlateBackgroundVideo" LoadedBehavior="Manual" UnloadedBehavior="Stop" ScrubbingEnabled="False"
-                                                          Volume="0" IsMuted="True" Stretch="UniformToFill" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                          Width="264" Height="56" IsHitTestVisible="False" Visibility="Collapsed"
-                                                          MediaEnded="PlateBackgroundVideo_MediaEnded" MediaFailed="PlateBackgroundVideo_MediaFailed" />
-
-                                            <!-- B. 静止画PNGレイヤー (448x84 アルファ透過PNG / フォールバック & 即時表示) -->
-                                            <Image x:Name="PlateBackgroundStaticImage" Stretch="UniformToFill" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                   Width="264" Height="56" IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
+                                            <!-- ネームプレート公式装飾 背景画像 (264x56にピッタリ同期・角丸14pxクリップ) -->
+                                            <Border Width="264" Height="56" CornerRadius="14" ClipToBounds="True">
+                                                <Image x:Name="PlateBackgroundStaticImage" Width="264" Height="56"
+                                                       Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" />
+                                            </Border>
 
                                             <!-- メインコンテンツ (アバター + テキスト情報) -->
                                             <Grid Margin="7,0,8,0" VerticalAlignment="Center">

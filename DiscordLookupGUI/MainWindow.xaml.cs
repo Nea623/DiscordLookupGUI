@@ -371,11 +371,6 @@ public partial class MainWindow : Window
             AvatarDecorationImage.Visibility = Visibility.Collapsed;
             AvatarDecorationImage.Source = null;
         }
-        if (PlateBackgroundVideo != null)
-        {
-            PlateBackgroundVideo.Visibility = Visibility.Collapsed;
-            try { PlateBackgroundVideo.Stop(); PlateBackgroundVideo.Source = null; } catch { }
-        }
         if (PlateBackgroundStaticImage != null)
         {
             PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
@@ -560,42 +555,16 @@ public partial class MainWindow : Window
             PlateClanContainer.Visibility = Visibility.Collapsed;
         }
 
-        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映
-        if (!string.IsNullOrEmpty(user.NameplateSkuId))
+        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映 (264x56に完全フィット)
+        if (!string.IsNullOrEmpty(user.NameplateSkuId) && !string.IsNullOrEmpty(user.NameplateStaticUrl))
         {
-            // 静止画アセット (448x84 PNG) を即座に読み込み
-            if (!string.IsNullOrEmpty(user.NameplateStaticUrl))
-            {
-                PlateBackgroundStaticImage.Visibility = Visibility.Visible;
-                LoadImage(PlateBackgroundStaticImage, user.NameplateStaticUrl);
-            }
-
-            // WebM動画ループ再生
-            if (!string.IsNullOrEmpty(user.NameplateVideoUrl))
-            {
-                try
-                {
-                    PlateBackgroundVideo.Source = new Uri(user.NameplateVideoUrl);
-                    PlateBackgroundVideo.Visibility = Visibility.Visible;
-                    PlateBackgroundVideo.Play();
-                }
-                catch
-                {
-                    PlateBackgroundVideo.Visibility = Visibility.Collapsed;
-                }
-            }
+            PlateBackgroundStaticImage.Visibility = Visibility.Visible;
+            LoadImage(PlateBackgroundStaticImage, user.NameplateStaticUrl);
         }
         else
         {
             PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
             PlateBackgroundStaticImage.Source = null;
-            PlateBackgroundVideo.Visibility = Visibility.Collapsed;
-            try
-            {
-                PlateBackgroundVideo.Stop();
-                PlateBackgroundVideo.Source = null;
-            }
-            catch { }
         }
 
         // アバター読み込み
@@ -806,18 +775,5 @@ public partial class MainWindow : Window
         StatusDot.Fill = isSuccess
             ? (SolidColorBrush)FindResource("SuccessGreenBrush")
             : (SolidColorBrush)FindResource("DangerRedBrush");
-    }
-
-    private void PlateBackgroundVideo_MediaEnded(object sender, RoutedEventArgs e)
-    {
-        PlateBackgroundVideo.Position = TimeSpan.Zero;
-        PlateBackgroundVideo.Play();
-    }
-
-    private void PlateBackgroundVideo_MediaFailed(object? sender, ExceptionRoutedEventArgs e)
-    {
-        // 動画再生に失敗（コーデック非対応等）した場合は静止画レイヤーを確実に表示
-        PlateBackgroundVideo.Visibility = Visibility.Collapsed;
-        PlateBackgroundStaticImage.Visibility = Visibility.Visible;
     }
 }
