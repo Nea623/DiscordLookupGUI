@@ -17,6 +17,7 @@ namespace DiscordLookup;
 public partial class MainWindow : Window
 {
     private readonly DiscordApiService _apiService = new();
+    private static readonly HttpClient _imageClient = new();
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
@@ -504,7 +505,7 @@ public partial class MainWindow : Window
         {
             AvatarDecorationImage.Visibility = Visibility.Visible;
             BtnOpenDecoration.IsEnabled = true;
-            LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl);
+            LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl, isDecoration: true);
         }
         else
         {
@@ -550,7 +551,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private static void LoadImage(Image targetImage, string url)
+    private static async void LoadImage(Image targetImage, string url, bool isDecoration = false)
     {
         try
         {
@@ -564,31 +565,50 @@ public partial class MainWindow : Window
 
             var uri = new Uri(url, UriKind.Absolute);
 
-            // AnimatedImage.Wpf により APNG (Discord アバターデコレーション) および GIF/PNG のアニメーションを自動ループ再生
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = uri;
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
+            if (isDecoration)
+            {
+                // アバターデコレーション (APNG)
+                // .NET 8 の HttpBaseStream はシーク不可でクラッシュするため、MemoryStream で安全に読み込む
+                try
+                {
+                    var bytes = await _imageClient.GetByteArrayAsync(uri);
+                    var ms = new MemoryStream(bytes);
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = ms;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    ms.Position = 0;
 
-            AnimatedImage.Wpf.ImageBehavior.SetRepeatBehavior(targetImage, System.Windows.Media.Animation.RepeatBehavior.Forever);
-            AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, bitmap);
+                    AnimatedImage.Wpf.ImageBehavior.SetRepeatBehavior(targetImage, System.Windows.Media.Animation.RepeatBehavior.Forever);
+                    AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, bitmap);
+                    return;
+                }
+                catch
+                {
+                    // フォールバック: 静止画として安全に表示
+                    try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+                    var fallbackBitmap = new BitmapImage();
+                    fallbackBitmap.BeginInit();
+                    fallbackBitmap.UriSource = uri;
+                    fallbackBitmap.EndInit();
+                    targetImage.Source = fallbackBitmap;
+                    return;
+                }
+            }
+
+            // 通常アバター & バナー (GIF / PNG)
+            // 安定したループ再生実績のある XamlAnimatedGif を使用
+            try { AnimatedImage.Wpf.ImageBehavior.SetAnimatedSource(targetImage, null!); } catch { }
+            XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, uri);
         }
         catch
         {
             try
             {
-                var uri = new Uri(url, UriKind.Absolute);
-                XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, uri);
+                targetImage.Source = null;
             }
-            catch
-            {
-                try
-                {
-                    targetImage.Source = null;
-                }
-                catch { }
-            }
+            catch { }
         }
     }
 
