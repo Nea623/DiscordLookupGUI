@@ -554,28 +554,19 @@
                                                 <Image x:Name="PlateAvatarDecoImage" Width="44" Height="44" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality" />
                                             </Grid>
 
-                                            <!-- 2. 右側: ユーザー情報 & アクティビティ -->
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0">
-                                                <!-- 上段: 表示名 + クランバッジのみ -->
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <!-- 表示名 (Nea) -->
-                                                    <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="13.5" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="130" TextTrimming="CharacterEllipsis" />
+                                            <!-- 2. 右側: ユーザー情報 (表示名 + クランバッジ) -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                <!-- 表示名 -->
+                                                <TextBlock x:Name="PlateDisplayName" Text="Nea" FontSize="14" FontWeight="Bold" Foreground="#8EB4FF" VerticalAlignment="Center" MaxWidth="145" TextTrimming="CharacterEllipsis" />
 
-                                                    <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
-                                                    <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <Image x:Name="PlateClanBadgeImage" Width="11" Height="11" Margin="0,0,3,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                            <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="9.5" Margin="0,0,2,0" VerticalAlignment="Center" />
-                                                            <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="10.5" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                                                        </StackPanel>
-                                                    </Border>
-                                                </StackPanel>
-
-                                                <!-- 下段: 🎮 Visual Studio (アクティビティ) -->
-                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="🎮" FontSize="11" Foreground="#57F287" Margin="0,0,4,0" VerticalAlignment="Center" />
-                                                    <TextBlock x:Name="PlateActivityText" Text="Visual Studio" FontSize="11" FontWeight="SemiBold" Foreground="#DBDEE1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="170" />
-                                                </StackPanel>
+                                                <!-- クランバッジ (角丸ピル: 🤍 ZETA) -->
+                                                <Border x:Name="PlateClanContainer" Background="#2B2D31" CornerRadius="4" Padding="5,2" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Image x:Name="PlateClanBadgeImage" Width="12" Height="12" Margin="0,0,3,0" Stretch="Uniform" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                        <TextBlock x:Name="PlateClanHeart" Text="🤍" FontSize="10" Margin="0,0,2,0" VerticalAlignment="Center" />
+                                                        <TextBlock x:Name="PlateClanTag" Text="ZETA" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Border>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
