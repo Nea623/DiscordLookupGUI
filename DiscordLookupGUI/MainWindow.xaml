@@ -691,13 +691,17 @@
                                                 </Grid>
 
                                                 <!-- 下段: sku_id ＋ asset (コンパクトに横並び・個別クリックでSKUコピー可能) -->
-                                                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" Background="Transparent"
-                                                            ToolTip="クリックで SKU ID をコピー" MouseLeftButtonUp="CopyPlateSkuId_Click">
-                                                    <TextBlock Text="SKU:" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,3,0" VerticalAlignment="Center" />
-                                                    <TextBlock x:Name="TxtPlateSkuId" Text="--" FontSize="9.5" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="110" VerticalAlignment="Center" />
+                                                <Grid Grid.Row="1" VerticalAlignment="Center" Background="Transparent"
+                                                      ToolTip="クリックで SKU ID をコピー" MouseLeftButtonUp="CopyPlateSkuId_Click">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="SKU:" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,3,0" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" x:Name="TxtPlateSkuId" Text="--" FontSize="9.5" FontFamily="Consolas" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                                     <!-- asset 内部バインディング -->
                                                     <TextBlock x:Name="TxtPlateAsset" Text="--" Visibility="Collapsed" />
-                                                </StackPanel>
+                                                </Grid>
                                             </Grid>
                                         </Border>
                                     </Grid>

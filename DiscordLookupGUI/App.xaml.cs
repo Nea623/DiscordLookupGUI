@@ -22,8 +22,25 @@ public partial class App : Application
     );
     private static readonly string ErrorLogBackupFilePath = ErrorLogFilePath + ".old";
 
-    private static bool IsFatalException(Exception? ex) =>
-        ex is OutOfMemoryException or StackOverflowException or AccessViolationException;
+    private static bool IsFatalException(Exception? ex)
+    {
+        while (ex != null)
+        {
+            if (ex is OutOfMemoryException or StackOverflowException or AccessViolationException)
+            {
+                return true;
+            }
+            if (ex is AggregateException agg)
+            {
+                foreach (var inner in agg.InnerExceptions)
+                {
+                    if (IsFatalException(inner)) return true;
+                }
+            }
+            ex = ex.InnerException;
+        }
+        return false;
+    }
 
     protected override void OnStartup(StartupEventArgs e)
     {

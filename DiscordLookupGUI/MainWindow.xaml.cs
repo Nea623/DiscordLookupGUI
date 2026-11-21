@@ -47,6 +47,7 @@ public partial class MainWindow : Window
     private bool _isRgbBorderRunning;
     private bool _isRgbSearchIconRunning;
     private bool _isClosing;
+    private bool _isClosed;
 
     private CancellationTokenSource? _lookupCts;
     private int _lookupVersion = 0;
@@ -153,6 +154,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _isClosed = true;
         ThemeManager.ThemeChanged -= OnThemeChanged;
         UserIdInput.TextChanged -= UserIdInput_TextChanged;
         StateChanged -= MainWindow_StateChanged;
@@ -400,7 +402,7 @@ public partial class MainWindow : Window
         sb.Children.Add(animOpacity);
         sb.Children.Add(animScaleX);
         sb.Children.Add(animScaleY);
-        sb.Completed += (s, ev) => Close();
+        sb.Completed += (s, ev) => { if (!_isClosed) Close(); };
         sb.Begin();
     }
 
@@ -422,12 +424,16 @@ public partial class MainWindow : Window
     // ─────────────────────────────────────────────
     private static string NormalizeToken(string? raw)
     {
-        var token = raw?.Trim() ?? string.Empty;
+        var token = raw?.TrimStart() ?? string.Empty;
         if (token.StartsWith("Bot ", StringComparison.OrdinalIgnoreCase))
         {
-            token = token.Substring(4).Trim();
+            token = token.Substring(4);
         }
-        return token;
+        else if (string.Equals(token.TrimEnd(), "Bot", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+        return token.Trim();
     }
 
     private static bool IsValidTokenFormat(string token)
@@ -915,6 +921,8 @@ public partial class MainWindow : Window
 
             if (myVersion != _lookupVersion || ct.IsCancellationRequested) return;
 
+            TxtRawJson.Text = formattedJson;
+
             if (user == null)
             {
                 SetStatus("PARSE ERROR", false);
@@ -925,7 +933,6 @@ public partial class MainWindow : Window
                 return;
             }
 
-            TxtRawJson.Text = formattedJson;
             user.Id = userId.ToString();
             DisplayUser(user, userId, ct);
             SetStatus("USER LOADED SUCCESSFULLY", true);
@@ -1031,7 +1038,7 @@ public partial class MainWindow : Window
         }
 
         // アクセントカラー
-        if (user.AccentColor.HasValue)
+        if (user.AccentColor.HasValue && user.AccentColor.Value is >= 0 and <= 0xFFFFFF)
         {
             var hex = $"#{user.AccentColor.Value:X6}";
             TxtAccentColor.Text = hex;
@@ -1137,66 +1144,68 @@ public partial class MainWindow : Window
     private async Task LoadNameplateAsync(DiscordUser user, CancellationToken ct)
     {
         int currentVersion = ++_nameplateLoadVersion;
-        AdvanceImageToken(PlateBackgroundStaticImage);
-        _nameplateApngController?.Dispose();
-        _nameplateApngController = null;
-        ClearImageControl(PlateBackgroundStaticImage);
-
-        if (string.IsNullOrEmpty(user.NameplateSkuId))
-        {
-            // ネームプレート未装備時はデフォルトのDiscordダーク背景に戻す
-            var defaultBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#313338"));
-            defaultBg.Freeze();
-            NameplateCard.Background = defaultBg;
-            PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
-
-            TxtPlateSkuId.Text = "なし";
-            TxtPlateLabel.Text = "未装備";
-            TxtPlateAsset.Text = "なし";
-            TxtPlatePalette.Text = "なし";
-            PlatePaletteIndicator.Visibility = Visibility.Collapsed;
-
-            TxtTipSkuId.Text = "なし";
-            TxtTipLabel.Text = "未装備";
-            TxtTipAsset.Text = "なし";
-            TxtTipPalette.Text = "なし";
-            return;
-        }
-
-        // ネームプレート詳細メタ情報 (sku_id, label, asset, palette) の反映
-        string sku = user.NameplateSkuId;
-        string lbl = !string.IsNullOrEmpty(user.NameplateLabel) ? user.NameplateLabel : "(None)";
-        string ast = !string.IsNullOrEmpty(user.NameplateAsset) ? user.NameplateAsset : "(None)";
-        string pal = !string.IsNullOrEmpty(user.NameplatePalette) ? user.NameplatePalette : "(None)";
-
-        TxtPlateSkuId.Text = sku;
-        TxtPlateLabel.Text = lbl;
-        TxtPlateAsset.Text = ast;
-        TxtPlatePalette.Text = pal;
-
-        TxtTipSkuId.Text = sku;
-        TxtTipLabel.Text = lbl;
-        TxtTipAsset.Text = ast;
-        TxtTipPalette.Text = pal;
-
-        var paletteColor = GetNameplatePaletteColor(user.NameplatePalette);
-        var indicatorBrush = new SolidColorBrush(paletteColor);
-        indicatorBrush.Freeze();
-        PlatePaletteIndicator.Background = indicatorBrush;
-        PlatePaletteIndicator.Visibility = Visibility.Visible;
-
-        // パレットに応じた公式ダーク背景トーンを設定
-        var cardBg = new SolidColorBrush(paletteColor);
-        cardBg.Freeze();
-        NameplateCard.Background = cardBg;
-        PlateBackgroundStaticImage.Visibility = Visibility.Visible;
-
-        string skuId = user.NameplateSkuId;
-        string? animatedUrl = user.NameplateAnimatedUrl;
-        string? staticUrl = user.NameplateStaticUrl;
+        string? staticUrl = null;
 
         try
         {
+            AdvanceImageToken(PlateBackgroundStaticImage);
+            _nameplateApngController?.Dispose();
+            _nameplateApngController = null;
+            ClearImageControl(PlateBackgroundStaticImage);
+
+            if (string.IsNullOrEmpty(user.NameplateSkuId))
+            {
+                // ネームプレート未装備時はデフォルトのDiscordダーク背景に戻す
+                var defaultBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#313338"));
+                defaultBg.Freeze();
+                NameplateCard.Background = defaultBg;
+                PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
+
+                TxtPlateSkuId.Text = "なし";
+                TxtPlateLabel.Text = "未装備";
+                TxtPlateAsset.Text = "なし";
+                TxtPlatePalette.Text = "なし";
+                PlatePaletteIndicator.Visibility = Visibility.Collapsed;
+
+                TxtTipSkuId.Text = "なし";
+                TxtTipLabel.Text = "未装備";
+                TxtTipAsset.Text = "なし";
+                TxtTipPalette.Text = "なし";
+                return;
+            }
+
+            // ネームプレート詳細メタ情報 (sku_id, label, asset, palette) の反映
+            string sku = user.NameplateSkuId;
+            string lbl = !string.IsNullOrEmpty(user.NameplateLabel) ? user.NameplateLabel : "(None)";
+            string ast = !string.IsNullOrEmpty(user.NameplateAsset) ? user.NameplateAsset : "(None)";
+            string pal = !string.IsNullOrEmpty(user.NameplatePalette) ? user.NameplatePalette : "(None)";
+
+            TxtPlateSkuId.Text = sku;
+            TxtPlateLabel.Text = lbl;
+            TxtPlateAsset.Text = ast;
+            TxtPlatePalette.Text = pal;
+
+            TxtTipSkuId.Text = sku;
+            TxtTipLabel.Text = lbl;
+            TxtTipAsset.Text = ast;
+            TxtTipPalette.Text = pal;
+
+            var paletteColor = GetNameplatePaletteColor(user.NameplatePalette);
+            var indicatorBrush = new SolidColorBrush(paletteColor);
+            indicatorBrush.Freeze();
+            PlatePaletteIndicator.Background = indicatorBrush;
+            PlatePaletteIndicator.Visibility = Visibility.Visible;
+
+            // パレットに応じた公式ダーク背景トーンを設定
+            var cardBg = new SolidColorBrush(paletteColor);
+            cardBg.Freeze();
+            NameplateCard.Background = cardBg;
+            PlateBackgroundStaticImage.Visibility = Visibility.Visible;
+
+            string skuId = user.NameplateSkuId;
+            string? animatedUrl = user.NameplateAnimatedUrl;
+            staticUrl = user.NameplateStaticUrl;
+
             TryGetNameplateCache(skuId, out var frames);
 
             if (frames == null && !string.IsNullOrEmpty(animatedUrl))
@@ -1258,8 +1267,9 @@ public partial class MainWindow : Window
         {
             // キャンセル時は何もしない
         }
-        catch
+        catch (Exception ex)
         {
+            App.LogException("LoadNameplateAsync", ex);
             if (_nameplateLoadVersion == currentVersion && !ct.IsCancellationRequested && !string.IsNullOrEmpty(staticUrl))
             {
                 _ = LoadImageAsync(PlateBackgroundStaticImage, staticUrl, ct: ct);
@@ -1520,6 +1530,7 @@ public partial class MainWindow : Window
 
     private void AccentColor_Click(object sender, MouseButtonEventArgs e)
     {
+        if (_currentUser == null) return;
         CopyToClipboard(TxtAccentColor.Text, "Accent Color");
     }
 
@@ -1553,11 +1564,13 @@ public partial class MainWindow : Window
 
     private void CreatedAtJst_Click(object sender, MouseButtonEventArgs e)
     {
+        if (_currentUser == null) return;
         CopyToClipboard(TxtCreatedAtJst.Text, "Created At (JST)");
     }
 
     private void CreatedAtUtc_Click(object sender, MouseButtonEventArgs e)
     {
+        if (_currentUser == null) return;
         var text = TxtCreatedAtUtc.Text;
         if (text.StartsWith("UTC: ")) text = text.Substring(5).Trim();
         CopyToClipboard(text, "Created At (UTC)");
@@ -1591,6 +1604,7 @@ public partial class MainWindow : Window
 
     private void CopyRawJson_Click(object sender, RoutedEventArgs e)
     {
+        if (_isHidingResult) return;
         CopyToClipboard(TxtRawJson.Text, "Raw JSON");
     }
 }

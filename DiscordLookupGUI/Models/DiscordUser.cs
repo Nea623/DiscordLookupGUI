@@ -56,7 +56,7 @@ public class DiscordUser
     {
         get
         {
-            if (!ulong.TryParse(Id, out var id)) return DateTimeOffset.MinValue;
+            if (!ulong.TryParse(Id, out var id) || id == 0) return DateTimeOffset.MinValue;
             var timestamp = id >> 22;
             return DateTimeOffset.FromUnixTimeMilliseconds((long)(timestamp + 1420070400000UL));
         }
@@ -75,12 +75,22 @@ public class DiscordUser
     /// <summary>作成からの経過年数</summary>
     public double ElapsedYears => ElapsedDays / 365.2425;
 
+    internal static bool IsSafeAssetSegment(string? value) =>
+        !string.IsNullOrEmpty(value) &&
+        value != "." &&
+        value != ".." &&
+        !value.Contains('/') &&
+        !value.Contains('\\');
+
     /// <summary>アバターURL（null の場合はデフォルトアバター）</summary>
     public string AvatarUrl
     {
         get
         {
-            if (string.IsNullOrEmpty(Avatar))
+            if (string.IsNullOrEmpty(Avatar) ||
+                !ulong.TryParse(Id, out var avatarUserId) ||
+                avatarUserId == 0 ||
+                !IsSafeAssetSegment(Avatar))
             {
                 // デフォルトアバター (レガシー/Bot は discriminator % 5、Pomelo は (id >> 22) % 6)
                 ulong index;
@@ -90,12 +100,12 @@ public class DiscordUser
                 }
                 else
                 {
-                    index = ulong.TryParse(Id, out var id) ? (id >> 22) % 6 : 0;
+                    index = ulong.TryParse(Id, out var id) && id != 0 ? (id >> 22) % 6 : 0;
                 }
                 return $"https://cdn.discordapp.com/embed/avatars/{index}.png";
             }
             var ext = Avatar.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/avatars/{Uri.EscapeDataString(Id)}/{Uri.EscapeDataString(Avatar)}.{ext}?size=256";
+            return $"https://cdn.discordapp.com/avatars/{avatarUserId}/{Uri.EscapeDataString(Avatar)}.{ext}?size=256";
         }
     }
 
@@ -104,9 +114,15 @@ public class DiscordUser
     {
         get
         {
-            if (string.IsNullOrEmpty(Banner)) return null;
+            if (string.IsNullOrEmpty(Banner) ||
+                !ulong.TryParse(Id, out var bannerUserId) ||
+                bannerUserId == 0 ||
+                !IsSafeAssetSegment(Banner))
+            {
+                return null;
+            }
             var ext = Banner.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/banners/{Uri.EscapeDataString(Id)}/{Uri.EscapeDataString(Banner)}.{ext}?size=600";
+            return $"https://cdn.discordapp.com/banners/{bannerUserId}/{Uri.EscapeDataString(Banner)}.{ext}?size=600";
         }
     }
 
@@ -125,8 +141,8 @@ public class DiscordUser
     {
         get
         {
-            if (string.IsNullOrEmpty(AvatarDecorationData?.Asset)) return null;
-            return $"https://cdn.discordapp.com/avatar-decoration-presets/{Uri.EscapeDataString(AvatarDecorationData.Asset)}.png?size=240&passthrough=true";
+            if (!IsSafeAssetSegment(AvatarDecorationData?.Asset)) return null;
+            return $"https://cdn.discordapp.com/avatar-decoration-presets/{Uri.EscapeDataString(AvatarDecorationData!.Asset!)}.png?size=240&passthrough=true";
         }
     }
 
@@ -143,18 +159,18 @@ public class DiscordUser
     public string? NameplatePalette => Collectibles?.Nameplate?.Palette;
 
     /// <summary>ネームプレート装飾 静止画URL（448x84 PNG）</summary>
-    public string? NameplateStaticUrl => !string.IsNullOrEmpty(NameplateSkuId)
-        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{Uri.EscapeDataString(NameplateSkuId)}/static"
+    public string? NameplateStaticUrl => ulong.TryParse(NameplateSkuId, out var skuId) && skuId != 0
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{skuId}/static"
         : null;
 
     /// <summary>ネームプレート装飾 アニメーションAPNG URL（448x84 フルアルファ APNG）</summary>
-    public string? NameplateAnimatedUrl => !string.IsNullOrEmpty(NameplateSkuId)
-        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{Uri.EscapeDataString(NameplateSkuId)}/animated"
+    public string? NameplateAnimatedUrl => ulong.TryParse(NameplateSkuId, out var skuId) && skuId != 0
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{skuId}/animated"
         : null;
 
     /// <summary>ネームプレート装飾 動画URL（アルファ透過 WebM ループ）</summary>
-    public string? NameplateVideoUrl => !string.IsNullOrEmpty(NameplateSkuId)
-        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{Uri.EscapeDataString(NameplateSkuId)}/video"
+    public string? NameplateVideoUrl => ulong.TryParse(NameplateSkuId, out var skuId) && skuId != 0
+        ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{skuId}/video"
         : null;
 }
 
@@ -202,7 +218,7 @@ public class ClanInfo
     [Newtonsoft.Json.JsonProperty("badge")]
     public string? Badge { get; set; }
 
-    public string? BadgeUrl => !string.IsNullOrEmpty(IdentityGuildId) && !string.IsNullOrEmpty(Badge)
-        ? $"https://cdn.discordapp.com/guild-tag-badges/{Uri.EscapeDataString(IdentityGuildId)}/{Uri.EscapeDataString(Badge)}.png"
+    public string? BadgeUrl => ulong.TryParse(IdentityGuildId, out var guildId) && guildId != 0 && DiscordUser.IsSafeAssetSegment(Badge)
+        ? $"https://cdn.discordapp.com/guild-tag-badges/{guildId}/{Uri.EscapeDataString(Badge!)}.png"
         : null;
 }
