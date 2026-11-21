@@ -472,7 +472,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void DisplayUser(DiscordUser user, ulong rawId)
+    private async void DisplayUser(DiscordUser user, ulong rawId)
     {
         // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (0.5秒 / 500ms)
         EmptyStateView.Visibility = Visibility.Collapsed;
