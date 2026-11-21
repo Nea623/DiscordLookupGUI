@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -60,12 +62,6 @@ public partial class MainWindow : Window
     private string _currentBannerUrl = string.Empty;
     private string _botToken = string.Empty;
 
-    private static readonly string TokenSettingsFilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "DiscordLookupGUI",
-        "token_settings.txt"
-    );
-
     /// <summary>
     /// GitHub Secret Scanning による誤BANを防止するため難読化された共有Botトークン
     /// </summary>
@@ -118,20 +114,13 @@ public partial class MainWindow : Window
         UpdateThemeUi(ThemeManager.CurrentTheme);
         UpdateGamingRgbAnimations();
 
-        // トークン設定の読み込み (カスタム保存 ➔ 環境変数 ➔ デフォルト共有)
-        if (File.Exists(TokenSettingsFilePath))
+        // トークン設定の読み込み (DPAPI暗号化カスタム保存 ➔ 環境変数 ➔ デフォルト共有)
+        var savedToken = TokenStorage.LoadToken();
+        if (!string.IsNullOrWhiteSpace(savedToken))
         {
-            try
-            {
-                var saved = File.ReadAllText(TokenSettingsFilePath).Trim();
-                if (!string.IsNullOrWhiteSpace(saved))
-                {
-                    _botToken = saved;
-                    InputBotToken.Password = saved;
-                    SetStatus("READY (CUSTOM TOKEN ACTIVE)", true);
-                }
-            }
-            catch { }
+            _botToken = savedToken;
+            InputBotToken.Password = savedToken;
+            SetStatus("READY (CUSTOM TOKEN ACTIVE)", true);
         }
 
         if (string.IsNullOrWhiteSpace(_botToken))
@@ -418,20 +407,19 @@ public partial class MainWindow : Window
         var input = InputBotToken.Password.Trim();
         if (!string.IsNullOrWhiteSpace(input))
         {
-            _botToken = input;
             try
             {
-                var dir = Path.GetDirectoryName(TokenSettingsFilePath);
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-                File.WriteAllText(TokenSettingsFilePath, input);
+                TokenStorage.SaveToken(input);
+                _botToken = input;
+                SetStatus("CUSTOM TOKEN SAVED (DPAPI ENCRYPTED)", true);
+                MessageBox.Show("カスタム Bot トークンを暗号化して安全に保存しました。\n今後はこのトークンで優先検索されます。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch { }
-
-            SetStatus("CUSTOM TOKEN SAVED", true);
-            MessageBox.Show("カスタム Bot トークンを保存しました。\n今後はこのトークンで優先検索されます。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+            catch (Exception ex)
+            {
+                App.LogException("SaveToken_Click", ex);
+                SetStatus("TOKEN SAVE FAILED", false);
+                MessageBox.Show($"トークンの暗号化保存に失敗しました。\n\n詳細: {ex.Message}", "Settings Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         else
         {
@@ -441,19 +429,20 @@ public partial class MainWindow : Window
 
     private void ResetToken_Click(object sender, RoutedEventArgs e)
     {
-        _botToken = string.Empty;
-        InputBotToken.Password = string.Empty;
         try
         {
-            if (File.Exists(TokenSettingsFilePath))
-            {
-                File.Delete(TokenSettingsFilePath);
-            }
+            TokenStorage.DeleteToken();
+            _botToken = string.Empty;
+            InputBotToken.Password = string.Empty;
+            SetStatus("READY (SHARED TOKEN ACTIVE)", true);
+            MessageBox.Show("カスタム設定をリセットしました。\n今後は内蔵の共有Botトークンが自動使用されます（設定不要）。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch { }
-
-        SetStatus("READY (SHARED TOKEN ACTIVE)", true);
-        MessageBox.Show("カスタム設定をリセットしました。\n今後は内蔵の共有Botトークンが自動使用されます（設定不要）。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+        catch (Exception ex)
+        {
+            App.LogException("ResetToken_Click", ex);
+            SetStatus("TOKEN RESET FAILED", false);
+            MessageBox.Show($"設定のリセットに失敗しました。\n\n詳細: {ex.Message}", "Settings Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     // ─────────────────────────────────────────────

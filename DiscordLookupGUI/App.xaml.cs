@@ -22,17 +22,17 @@ public partial class App : Application
         // 未処理の例外でアプリケーションが突然クラッシュするのを防止しつつログを記録
         DispatcherUnhandledException += (s, args) =>
         {
-            LogUnhandledException("DispatcherUnhandledException", args.Exception);
+            LogException("DispatcherUnhandledException", args.Exception);
             args.Handled = true;
         };
 
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
-            LogUnhandledException("AppDomainUnhandledException", args.ExceptionObject as Exception);
+            LogException("AppDomainUnhandledException", args.ExceptionObject as Exception);
         };
     }
 
-    private static void LogUnhandledException(string source, Exception? ex)
+    public static void LogException(string source, Exception? ex)
     {
         try
         {
