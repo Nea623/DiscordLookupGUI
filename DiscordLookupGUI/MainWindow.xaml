@@ -440,20 +440,21 @@
                                         </Border>
 
                                         <!-- アバター画像 & デコレーション (真円クリップ + 発光シアン外枠 + デコレーションオーバーレイ) -->
-                                        <Grid Width="96" Height="96" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,-34">
+                                        <!-- アバター中心(54, 14)を保ちつつ、デコレーションを116x116に拡大してアイコンの顔の被りを完全解消 -->
+                                        <Grid Width="116" Height="116" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-4,0,0,-44">
                                             <Ellipse x:Name="AvatarRing" Width="80" Height="80" Stroke="{DynamicResource AccentCyanBrush}" StrokeThickness="3" Fill="{DynamicResource CardInnerBgBrush}" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <Ellipse.Effect>
                                                     <DropShadowEffect x:Name="AvatarShadow" Color="{DynamicResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.65" />
                                                 </Ellipse.Effect>
                                             </Ellipse>
-                                            <!-- アバター本体 (80x80 の内径穴にピッタリ合わせてデコレーション枠との隙間を完全に解消) -->
+                                            <!-- アバター本体 (80x80) -->
                                             <Image x:Name="AvatarImage" Width="80" Height="80" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
                                                 <Image.Clip>
                                                     <EllipseGeometry Center="40,40" RadiusX="38.5" RadiusY="38.5" />
                                                 </Image.Clip>
                                             </Image>
-                                            <!-- アバターデコレーション (高品質バイキュービック縮小 + アンチエイリアスで透明度の濁り・ジャギーを完全除去) -->
-                                            <Image x:Name="AvatarDecorationImage" Width="96" Height="96" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Unspecified" />
+                                            <!-- アバターデコレーション (116x116 に最適化してアバターの顔を隠さず外周を豪華に装飾) -->
+                                            <Image x:Name="AvatarDecorationImage" Width="116" Height="116" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Unspecified" />
                                         </Grid>
                                     </Grid>
 
