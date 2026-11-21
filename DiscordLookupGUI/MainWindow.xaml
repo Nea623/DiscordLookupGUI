@@ -323,9 +323,9 @@
                                  KeyDown="UserIdInput_KeyDown"
                                  VerticalContentAlignment="Center"
                                  Padding="36,8,12,8" />
-                        <!-- モダンベクター虫眼鏡アイコン (テーマごとにクッキリ単色連動・グローなし) -->
-                        <Path Data="M 14.5 14.5 L 10.5 10.5 M 12 6.5 A 5.5 5.5 0 1 1 1 6.5 A 5.5 5.5 0 1 1 12 6.5 Z"
-                              Stroke="{DynamicResource SearchIconBrush}" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                        <!-- Discord公式クライアント本物の検索アイコン (絶妙な太さと親しみやすいシルエット) -->
+                        <Path Data="F0 M 15.62 17.03 a 9 9 0 1 1 1.41 -1.41 l 4.68 4.67 a 1 1 0 0 1 -1.42 1.42 l -4.67 -4.68 Z M 17 10 a 7 7 0 1 1 -14 0 a 7 7 0 0 1 14 0 Z"
+                              Fill="{DynamicResource SearchIconBrush}"
                               VerticalAlignment="Center" Margin="14,0,0,0" IsHitTestVisible="False" Width="14" Height="14" Stretch="Uniform" />
                         <TextBlock x:Name="UserIdPlaceholder" Text="Discord ユーザーID (Snowflake) を入力して Enter..." 
                                    Foreground="#556987" FontSize="13" VerticalAlignment="Center" Margin="40,0,0,0" IsHitTestVisible="False" />
@@ -351,8 +351,8 @@
                             <Grid Width="72" Height="72" HorizontalAlignment="Center" Margin="0,0,0,18">
                                 <!-- ① 通常テーマ用ベースサークル (Dark, Light, Sunset, StarryNight: 他テーマ本来の美しさを100%完全維持) -->
                                 <Border CornerRadius="36" Background="{DynamicResource AccentGlowLowBrush}" BorderBrush="{DynamicResource AccentCyanBrush}" BorderThickness="2">
-                                    <Path Data="M 20 20 L 14.5 14.5 M 16.5 9 A 7.5 7.5 0 1 1 1.5 9 A 7.5 7.5 0 1 1 16.5 9 Z"
-                                          Stroke="{DynamicResource SearchIconBrush}" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                    <Path Data="F0 M 15.62 17.03 a 9 9 0 1 1 1.41 -1.41 l 4.68 4.67 a 1 1 0 0 1 -1.42 1.42 l -4.67 -4.68 Z M 17 10 a 7 7 0 1 1 -14 0 a 7 7 0 0 1 14 0 Z"
+                                          Fill="{DynamicResource SearchIconBrush}"
                                           HorizontalAlignment="Center" VerticalAlignment="Center" Width="28" Height="28" Stretch="Uniform" />
                                 </Border>
 
@@ -379,8 +379,8 @@
                                         </Border.Effect>
                                     </Border>
                                     <!-- 虫眼鏡アイコン (Gaming RGB 専用) -->
-                                    <Path Data="M 20 20 L 14.5 14.5 M 16.5 9 A 7.5 7.5 0 1 1 1.5 9 A 7.5 7.5 0 1 1 16.5 9 Z"
-                                          Stroke="{DynamicResource AccentBrush}" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                    <Path Data="F0 M 15.62 17.03 a 9 9 0 1 1 1.41 -1.41 l 4.68 4.67 a 1 1 0 0 1 -1.42 1.42 l -4.67 -4.68 Z M 17 10 a 7 7 0 1 1 -14 0 a 7 7 0 0 1 14 0 Z"
+                                          Fill="{DynamicResource AccentBrush}"
                                           HorizontalAlignment="Center" VerticalAlignment="Center" Width="28" Height="28" Stretch="Uniform" />
                                 </Grid>
                             </Grid>
