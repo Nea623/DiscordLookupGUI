@@ -30,6 +30,7 @@ public partial class MainWindow : Window
     private static ApngAnimationController? _nameplateApngController;
     private static readonly Dictionary<string, List<ApngFrame>> _nameplateCache = new();
     private int _nameplateLoadVersion = 0;
+    private static readonly Dictionary<Image, int> _imageLoadTokens = new();
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
@@ -747,6 +748,12 @@ public partial class MainWindow : Window
         {
             if (string.IsNullOrEmpty(url))
             {
+                // 読み込み中の古い画像が後から表示されないようトークンを進める
+                lock (_imageLoadTokens)
+                {
+                    _imageLoadTokens.TryGetValue(targetImage, out var cur);
+                    _imageLoadTokens[targetImage] = cur + 1;
+                }
                 if (isDecoration)
                 {
                     _currentApngController?.Stop();
@@ -816,13 +823,55 @@ public partial class MainWindow : Window
             }
 
             // 通常アバター & バナー (GIF / PNG)
-            // 安定したループ再生実績のある XamlAnimatedGif を使用
-            try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
-            XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, uri);
-            if (extraTargetImage != null)
+            // 同一URLを XamlAnimatedGif に同時に2回渡すと内部キャッシュが衝突して片方が表示されないため、
+            // 1回だけダウンロードしたバイト列を各ターゲットに個別ストリームで配る
+            var targetsAll = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
+            int token;
+            lock (_imageLoadTokens)
             {
-                try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, null); } catch { }
-                XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, uri);
+                foreach (var t in targetsAll)
+                {
+                    _imageLoadTokens.TryGetValue(t, out var cur);
+                    _imageLoadTokens[t] = cur + 1;
+                }
+                token = _imageLoadTokens[targetImage];
+            }
+
+            var data = await _imageClient.GetByteArrayAsync(uri);
+
+            // 連続検索時に古い画像で上書きしないようにガード
+            lock (_imageLoadTokens)
+            {
+                if (_imageLoadTokens[targetImage] != token) return;
+            }
+
+            bool isGif = data.Length >= 3 && data[0] == 'G' && data[1] == 'I' && data[2] == 'F';
+            if (isGif)
+            {
+                foreach (var t in targetsAll)
+                {
+                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(t, null); } catch { }
+                    try { XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, null); } catch { }
+                    XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, new MemoryStream(data));
+                }
+            }
+            else
+            {
+                var bmp = new BitmapImage();
+                using (var ms = new MemoryStream(data))
+                {
+                    bmp.BeginInit();
+                    bmp.StreamSource = ms;
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.EndInit();
+                }
+                bmp.Freeze();
+                foreach (var t in targetsAll)
+                {
+                    try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(t, null); } catch { }
+                    try { XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, null); } catch { }
+                    t.Source = bmp;
+                }
             }
         }
         catch
