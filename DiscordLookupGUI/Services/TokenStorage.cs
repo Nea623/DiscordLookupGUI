@@ -33,13 +33,14 @@ public static class TokenStorage
         // 1. 暗号化ファイルの読み込み
         if (File.Exists(EncryptedFilePath))
         {
+            byte[]? decryptedBytes = null;
             try
             {
                 var base64 = File.ReadAllText(EncryptedFilePath).Trim();
                 if (!string.IsNullOrWhiteSpace(base64))
                 {
                     var encryptedBytes = Convert.FromBase64String(base64);
-                    var decryptedBytes = ProtectedData.Unprotect(
+                    decryptedBytes = ProtectedData.Unprotect(
                         encryptedBytes,
                         Entropy,
                         DataProtectionScope.CurrentUser
@@ -54,6 +55,13 @@ public static class TokenStorage
             catch (Exception ex)
             {
                 App.LogException("TokenStorage.LoadToken (Encrypted)", ex);
+            }
+            finally
+            {
+                if (decryptedBytes != null)
+                {
+                    CryptographicOperations.ZeroMemory(decryptedBytes);
+                }
             }
         }
 
@@ -103,14 +111,38 @@ public static class TokenStorage
         }
 
         var plainBytes = Encoding.UTF8.GetBytes(token.Trim());
-        var encryptedBytes = ProtectedData.Protect(
-            plainBytes,
-            Entropy,
-            DataProtectionScope.CurrentUser
-        );
+        string base64;
+        try
+        {
+            var encryptedBytes = ProtectedData.Protect(
+                plainBytes,
+                Entropy,
+                DataProtectionScope.CurrentUser
+            );
+            base64 = Convert.ToBase64String(encryptedBytes);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plainBytes);
+        }
 
-        var base64 = Convert.ToBase64String(encryptedBytes);
-        File.WriteAllText(EncryptedFilePath, base64, Encoding.UTF8);
+        var tempPath = Path.Combine(SettingsDirectory, $"token_{Guid.NewGuid():N}.tmp");
+        try
+        {
+            File.WriteAllText(tempPath, base64, Encoding.UTF8);
+            File.Move(tempPath, EncryptedFilePath, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+            {
+                try
+                {
+                    File.Delete(tempPath);
+                }
+                catch { }
+            }
+        }
 
         // 旧平文ファイルが残っていれば安全に消去
         if (File.Exists(LegacyFilePath))
@@ -119,7 +151,10 @@ public static class TokenStorage
             {
                 File.Delete(LegacyFilePath);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                App.LogException("TokenStorage.DeleteLegacyAfterSave", ex);
+            }
         }
     }
 

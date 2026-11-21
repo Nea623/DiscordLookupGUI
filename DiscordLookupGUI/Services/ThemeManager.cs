@@ -115,8 +115,9 @@ public static class ThemeManager
         {
             newDict = new ResourceDictionary { Source = themeUri };
         }
-        catch
+        catch (Exception ex)
         {
+            App.LogException("ThemeManager.ApplyTheme", ex);
             return;
         }
 

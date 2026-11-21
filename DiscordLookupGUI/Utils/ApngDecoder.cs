@@ -123,8 +123,7 @@ public static class ApngDecoder
             {
                 if (length != 26)
                 {
-                    pos = nextPos;
-                    continue;
+                    return null;
                 }
                 if (rawFrames.Count >= MaxFrameCount) break;
 
@@ -385,7 +384,13 @@ public static class ApngDecoder
                 }
                 finally
                 {
-                    Dispatcher.FromThread(Thread.CurrentThread)?.InvokeShutdown();
+                    try
+                    {
+                        Dispatcher.FromThread(Thread.CurrentThread)?.InvokeShutdown();
+                    }
+                    catch
+                    {
+                    }
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
@@ -413,6 +418,8 @@ public class ApngAnimationController : IDisposable
     private readonly System.Diagnostics.Stopwatch _stopwatch = new();
     private int _lastFrameIndex = -1;
     private bool _isRunning;
+    private bool _isPaused;
+    private bool _disposed;
 
     public ApngAnimationController(System.Windows.Controls.Image target, List<ApngFrame> frames)
         : this(new[] { target }, frames)
@@ -435,31 +442,65 @@ public class ApngAnimationController : IDisposable
 
     public void Start()
     {
-        if (_isRunning || _frames.Count <= 1 || _targets.Count == 0) return;
+        if (_disposed || _isRunning || _frames.Count <= 1 || _targets.Count == 0) return;
         _isRunning = true;
+        _isPaused = false;
         _stopwatch.Restart();
         _lastFrameIndex = -1;
+        CompositionTarget.Rendering += OnRendering;
+    }
+
+    public void Pause()
+    {
+        if (_disposed || !_isRunning || _isPaused) return;
+        _isPaused = true;
+        _stopwatch.Stop();
+        CompositionTarget.Rendering -= OnRendering;
+    }
+
+    public void Resume()
+    {
+        if (_disposed || !_isRunning || !_isPaused) return;
+        _isPaused = false;
+        _stopwatch.Start();
         CompositionTarget.Rendering += OnRendering;
     }
 
     public void Stop()
     {
         if (!_isRunning) return;
+        if (!_isPaused)
+        {
+            CompositionTarget.Rendering -= OnRendering;
+        }
         _isRunning = false;
+        _isPaused = false;
         _stopwatch.Stop();
-        CompositionTarget.Rendering -= OnRendering;
     }
 
     public void Dispose()
     {
+        if (_disposed) return;
         Stop();
+        _disposed = true;
+        _targets.Clear();
         GC.SuppressFinalize(this);
     }
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        if (!_isRunning || _frames.Count == 0) return;
-        if (_targets.All(t => !t.IsVisible)) return;
+        if (_disposed || !_isRunning || _isPaused || _frames.Count == 0) return;
+
+        bool anyVisible = false;
+        for (int i = 0; i < _targets.Count; i++)
+        {
+            if (_targets[i].IsVisible)
+            {
+                anyVisible = true;
+                break;
+            }
+        }
+        if (!anyVisible) return;
 
         double elapsed = _stopwatch.Elapsed.TotalMilliseconds % _totalDurationMs;
         int frameIndex = 0;

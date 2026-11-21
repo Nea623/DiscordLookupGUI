@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -164,6 +162,7 @@ public partial class MainWindow : Window
         }
         StopGamingRgbAnimations();
         CancelActiveLookup();
+        ++_nameplateLoadVersion;
         ClearAllResultImages();
         _imageLoadTokens.Clear();
         ClearNameplateCache();
@@ -266,11 +265,29 @@ public partial class MainWindow : Window
     private void MainWindow_StateChanged(object? sender, EventArgs e)
     {
         UpdateGamingRgbAnimations();
+        UpdateApngAnimationsPlayback();
     }
 
     private void EmptyStateView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         UpdateGamingRgbAnimations();
+    }
+
+    private void UpdateApngAnimationsPlayback()
+    {
+        bool shouldPlay = WindowState != WindowState.Minimized
+            && (TabMain == null || TabMain.IsChecked == true);
+
+        if (shouldPlay)
+        {
+            _currentApngController?.Resume();
+            _nameplateApngController?.Resume();
+        }
+        else
+        {
+            _currentApngController?.Pause();
+            _nameplateApngController?.Pause();
+        }
     }
 
     private void UpdateGamingRgbAnimations()
@@ -397,33 +414,58 @@ public partial class MainWindow : Window
         ViewMain.Visibility = TabMain.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         ViewRaw.Visibility = TabRaw.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         ViewSettings.Visibility = TabSettings.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        UpdateApngAnimationsPlayback();
     }
 
     // ─────────────────────────────────────────────
     // 設定保存
     // ─────────────────────────────────────────────
+    private static string NormalizeToken(string? raw)
+    {
+        var token = raw?.Trim() ?? string.Empty;
+        if (token.StartsWith("Bot ", StringComparison.OrdinalIgnoreCase))
+        {
+            token = token.Substring(4).Trim();
+        }
+        return token;
+    }
+
+    private static bool IsValidTokenFormat(string token)
+    {
+        return !string.IsNullOrWhiteSpace(token)
+            && !token.Any(c => char.IsControl(c) || char.IsWhiteSpace(c) || c > 0x7F);
+    }
+
     private void SaveToken_Click(object sender, RoutedEventArgs e)
     {
-        var input = InputBotToken.Password.Trim();
-        if (!string.IsNullOrWhiteSpace(input))
-        {
-            try
-            {
-                TokenStorage.SaveToken(input);
-                _botToken = input;
-                SetStatus("CUSTOM TOKEN SAVED (DPAPI ENCRYPTED)", true);
-                MessageBox.Show("カスタム Bot トークンを暗号化して安全に保存しました。\n今後はこのトークンで優先検索されます。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                App.LogException("SaveToken_Click", ex);
-                SetStatus("TOKEN SAVE FAILED", false);
-                MessageBox.Show($"トークンの暗号化保存に失敗しました。\n\n詳細: {ex.Message}", "Settings Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        else
+        var rawInput = InputBotToken.Password;
+        if (string.IsNullOrWhiteSpace(rawInput))
         {
             ResetToken_Click(sender, e);
+            return;
+        }
+
+        var normalized = NormalizeToken(rawInput);
+        if (!IsValidTokenFormat(normalized))
+        {
+            SetStatus("INVALID TOKEN FORMAT", false);
+            MessageBox.Show("Bot トークンの形式が不正です（空、または空白・改行・非ASCII文字が含まれています）。\n正しい Bot トークンを入力してください。", "Settings Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            TokenStorage.SaveToken(normalized);
+            _botToken = normalized;
+            InputBotToken.Password = normalized;
+            SetStatus("CUSTOM TOKEN SAVED (DPAPI ENCRYPTED)", true);
+            MessageBox.Show("カスタム Bot トークンを暗号化して安全に保存しました。\n今後はこのトークンで優先検索されます。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            App.LogException("SaveToken_Click", ex);
+            SetStatus("TOKEN SAVE FAILED", false);
+            MessageBox.Show($"トークンの暗号化保存に失敗しました。\n\n詳細: {ex.Message}", "Settings Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -432,10 +474,21 @@ public partial class MainWindow : Window
         try
         {
             TokenStorage.DeleteToken();
-            _botToken = string.Empty;
-            InputBotToken.Password = string.Empty;
-            SetStatus("READY (SHARED TOKEN ACTIVE)", true);
-            MessageBox.Show("カスタム設定をリセットしました。\n今後は内蔵の共有Botトークンが自動使用されます（設定不要）。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+            var envToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN")?.Trim();
+            if (!string.IsNullOrWhiteSpace(envToken))
+            {
+                _botToken = envToken;
+                InputBotToken.Password = envToken;
+                SetStatus("READY (TOKEN LOADED FROM ENV)", true);
+                MessageBox.Show("カスタム保存設定をリセットしました。\n環境変数 DISCORD_BOT_TOKEN が設定されているため、環境変数のトークンを使用します。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                _botToken = string.Empty;
+                InputBotToken.Password = string.Empty;
+                SetStatus("READY (SHARED TOKEN ACTIVE)", true);
+                MessageBox.Show("カスタム設定をリセットしました。\n今後は内蔵の共有Botトークンが自動使用されます（設定不要）。", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
         catch (Exception ex)
         {
@@ -569,9 +622,9 @@ public partial class MainWindow : Window
 
     private void ClearAllResultImages()
     {
-        _currentApngController?.Stop();
+        _currentApngController?.Dispose();
         _currentApngController = null;
-        _nameplateApngController?.Stop();
+        _nameplateApngController?.Dispose();
         _nameplateApngController = null;
 
         Image?[] allImages =
@@ -625,9 +678,9 @@ public partial class MainWindow : Window
         ++_nameplateLoadVersion;
         _currentUser = null;
 
-        _currentApngController?.Stop();
+        _currentApngController?.Dispose();
         _currentApngController = null;
-        _nameplateApngController?.Stop();
+        _nameplateApngController?.Dispose();
         _nameplateApngController = null;
 
         _currentAvatarUrl = string.Empty;
@@ -765,18 +818,14 @@ public partial class MainWindow : Window
             }
 
             // トークン取得 (カスタム ➔ 環境変数 ➔ 共有トークン)
-            var token = GetEffectiveToken()?.Trim() ?? string.Empty;
-            if (token.StartsWith("Bot ", StringComparison.OrdinalIgnoreCase))
-            {
-                token = token.Substring(4).Trim();
-            }
+            var token = NormalizeToken(GetEffectiveToken());
             if (string.IsNullOrWhiteSpace(token))
             {
                 MessageBox.Show("Bot トークンを取得できませんでした。\nSettings からトークンを設定してください。", "トークン未設定", MessageBoxButton.OK, MessageBoxImage.Warning);
                 TabSettings.IsChecked = true;
                 return;
             }
-            if (token.Any(c => char.IsControl(c) || char.IsWhiteSpace(c) || c > 0x7F))
+            if (!IsValidTokenFormat(token))
             {
                 MessageBox.Show("Bot トークンの形式が不正です（空白・改行・非ASCII文字が含まれています）。\nSettings のトークン設定を確認してください。", "トークン形式エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
                 TabSettings.IsChecked = true;
@@ -1089,7 +1138,7 @@ public partial class MainWindow : Window
     {
         int currentVersion = ++_nameplateLoadVersion;
         AdvanceImageToken(PlateBackgroundStaticImage);
-        _nameplateApngController?.Stop();
+        _nameplateApngController?.Dispose();
         _nameplateApngController = null;
         ClearImageControl(PlateBackgroundStaticImage);
 
@@ -1193,11 +1242,12 @@ public partial class MainWindow : Window
 
             if (frames != null && frames.Count > 1)
             {
-                _nameplateApngController?.Stop();
+                _nameplateApngController?.Dispose();
                 _nameplateApngController = null;
                 PlateBackgroundStaticImage.Source = frames[0].Image;
                 _nameplateApngController = new ApngAnimationController(PlateBackgroundStaticImage, frames);
                 _nameplateApngController.Start();
+                UpdateApngAnimationsPlayback();
             }
             else if (!string.IsNullOrEmpty(staticUrl))
             {
@@ -1268,7 +1318,7 @@ public partial class MainWindow : Window
         {
             if (isDecoration)
             {
-                _currentApngController?.Stop();
+                _currentApngController?.Dispose();
                 _currentApngController = null;
             }
 
@@ -1297,7 +1347,7 @@ public partial class MainWindow : Window
                 if (frames != null && frames.Count > 1)
                 {
                     // 60FPS 完全同期アニメーションコントローラーで再生 (再代入直前にも既存コントローラーを必ず停止)
-                    _currentApngController?.Stop();
+                    _currentApngController?.Dispose();
                     _currentApngController = null;
 
                     foreach (var t in targetsAll)
@@ -1307,6 +1357,7 @@ public partial class MainWindow : Window
 
                     _currentApngController = new ApngAnimationController(targetsAll, frames);
                     _currentApngController.Start();
+                    UpdateApngAnimationsPlayback();
                     return;
                 }
 
