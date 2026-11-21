@@ -27,6 +27,7 @@ public partial class MainWindow : Window
         Timeout = TimeSpan.FromSeconds(10)
     };
     private static ApngAnimationController? _currentApngController;
+    private static ApngAnimationController? _nameplateApngController;
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
@@ -378,6 +379,8 @@ public partial class MainWindow : Window
         }
         _currentApngController?.Stop();
         _currentApngController = null;
+        _nameplateApngController?.Stop();
+        _nameplateApngController = null;
 
         SetStatus("READY", true);
     }
@@ -555,16 +558,36 @@ public partial class MainWindow : Window
             PlateClanContainer.Visibility = Visibility.Collapsed;
         }
 
-        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映 (動くアニメーションGIFループ再生)
+        // ネームプレート公式装飾 (Nameplate Collectible) の自動反映 (32bit完全透明度 APNG エンジン再生)
         if (!string.IsNullOrEmpty(user.NameplateSkuId))
         {
             PlateBackgroundStaticImage.Visibility = Visibility.Visible;
+            _nameplateApngController?.Stop();
+            _nameplateApngController = null;
+            try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
+
             try
             {
-                // 動くネームプレートアニメーションGIFを適用してループ再生
-                var animUri = new Uri("pack://application:,,,/Assets/nameplate_rocketfuel.gif", UriKind.Absolute);
-                XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null);
-                XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, animUri);
+                // アプリ内リソースの 32bit フルアルファ APNG (煙の半透明フェード完全再現) を非同期デコードして再生
+                var resUri = new Uri("pack://application:,,,/Assets/nameplate_rocketfuel.png", UriKind.Absolute);
+                var streamInfo = Application.GetResourceStream(resUri);
+                if (streamInfo != null)
+                {
+                    using var ms = new MemoryStream();
+                    streamInfo.Stream.CopyTo(ms);
+                    var bytes = ms.ToArray();
+                    var frames = await ApngDecoder.DecodeAsync(bytes);
+                    if (frames != null && frames.Count > 1)
+                    {
+                        PlateBackgroundStaticImage.Source = frames[0].Image;
+                        _nameplateApngController = new ApngAnimationController(PlateBackgroundStaticImage, frames);
+                        _nameplateApngController.Start();
+                    }
+                    else if (frames != null && frames.Count == 1)
+                    {
+                        PlateBackgroundStaticImage.Source = frames[0].Image;
+                    }
+                }
             }
             catch
             {
@@ -576,6 +599,8 @@ public partial class MainWindow : Window
         }
         else
         {
+            _nameplateApngController?.Stop();
+            _nameplateApngController = null;
             try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(PlateBackgroundStaticImage, null); } catch { }
             PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
             PlateBackgroundStaticImage.Source = null;
