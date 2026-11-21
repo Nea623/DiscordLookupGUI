@@ -41,7 +41,6 @@ public partial class MainWindow : Window
     private ApngAnimationController? _currentApngController;
     private ApngAnimationController? _nameplateApngController;
     private readonly Dictionary<Image, int> _imageLoadTokens = new();
-    private readonly Dictionary<Image, MemoryStream> _activeGifStreams = new();
 
     private CancellationTokenSource? _lookupCts;
     private int _lookupVersion = 0;
@@ -432,7 +431,6 @@ public partial class MainWindow : Window
         if (_lookupCts != null)
         {
             try { _lookupCts.Cancel(); } catch { }
-            try { _lookupCts.Dispose(); } catch { }
             _lookupCts = null;
         }
     }
@@ -467,15 +465,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ClearImageControl(Image? img)
+    private static void ClearImageControl(Image? img)
     {
         if (img == null) return;
         try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(img, null); } catch { }
         try { XamlAnimatedGif.AnimationBehavior.SetSourceStream(img, null); } catch { }
-        if (_activeGifStreams.Remove(img, out var oldStream))
-        {
-            try { oldStream.Dispose(); } catch { }
-        }
         img.Source = null;
     }
 
@@ -505,6 +499,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ResetDecorationVisibility()
+    {
+        if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
+        if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
+        if (AvatarDecorationImage != null) AvatarDecorationImage.Visibility = Visibility.Collapsed;
+        if (PlateAvatarDecoImage != null) PlateAvatarDecoImage.Visibility = Visibility.Collapsed;
+        if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
+    }
+
     // ─────────────────────────────────────────────
     // ユーザー検索処理
     // ─────────────────────────────────────────────
@@ -524,6 +527,7 @@ public partial class MainWindow : Window
     private void HideSearchResult(bool withAnimation = true)
     {
         CancelActiveLookup();
+        if (SearchButton != null) SearchButton.IsEnabled = true;
         ++_nameplateLoadVersion;
         _currentUser = null;
 
@@ -550,6 +554,7 @@ public partial class MainWindow : Window
         if (!isMainVisible && !isRawVisible && !_isHidingResult)
         {
             ClearAllResultImages();
+            ResetDecorationVisibility();
             SetStatus("READY", true);
             return;
         }
@@ -586,6 +591,7 @@ public partial class MainWindow : Window
                 }
                 if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
                 ClearAllResultImages();
+                ResetDecorationVisibility();
 
                 if (EmptyStateView != null)
                 {
@@ -636,20 +642,15 @@ public partial class MainWindow : Window
             }
             if (TxtRawJson != null) TxtRawJson.Text = string.Empty;
             ClearAllResultImages();
+            ResetDecorationVisibility();
         }
-
-        if (AvatarRing != null) AvatarRing.StrokeThickness = 3;
-        if (AvatarShadow != null) AvatarShadow.Opacity = 0.65;
-        if (AvatarDecorationImage != null) AvatarDecorationImage.Visibility = Visibility.Collapsed;
-        if (PlateAvatarDecoImage != null) PlateAvatarDecoImage.Visibility = Visibility.Collapsed;
-        if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
 
         SetStatus("READY", true);
     }
 
     private async Task ExecuteLookupAsync()
     {
-        CancellationTokenSource? cts = null;
+        CancellationToken ct = default;
         int myVersion = -1;
 
         try
@@ -689,10 +690,10 @@ public partial class MainWindow : Window
             }
 
             CancelActiveLookup();
-            cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
             _lookupCts = cts;
             myVersion = _lookupVersion;
-            var ct = cts.Token;
+            ct = cts.Token;
 
             SearchButton.IsEnabled = false;
             SetStatus("LOOKING UP USER...", true);
@@ -788,7 +789,7 @@ public partial class MainWindow : Window
         }
         catch (OperationCanceledException)
         {
-            if (myVersion != _lookupVersion || (cts != null && cts.IsCancellationRequested))
+            if (myVersion != _lookupVersion || ct.IsCancellationRequested)
             {
                 return;
             }
@@ -1074,7 +1075,6 @@ public partial class MainWindow : Window
                     {
                         ClearImageControl(PlateBackgroundStaticImage);
                         var msGif = new MemoryStream(bytes);
-                        _activeGifStreams[PlateBackgroundStaticImage] = msGif;
                         XamlAnimatedGif.AnimationBehavior.SetSourceStream(PlateBackgroundStaticImage, msGif);
                     }
                     else
@@ -1243,9 +1243,7 @@ public partial class MainWindow : Window
                 foreach (var t in targetsAll)
                 {
                     ClearImageControl(t);
-                    var ms = new MemoryStream(data);
-                    _activeGifStreams[t] = ms;
-                    XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, ms);
+                    XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, new MemoryStream(data));
                 }
             }
             else

@@ -84,9 +84,9 @@ public class DiscordUser
             {
                 // デフォルトアバター (レガシー/Bot は discriminator % 5、Pomelo は (id >> 22) % 6)
                 ulong index;
-                if (!string.IsNullOrEmpty(Discriminator) && Discriminator != "0" && int.TryParse(Discriminator, out var disc))
+                if (!string.IsNullOrEmpty(Discriminator) && Discriminator != "0" && uint.TryParse(Discriminator, out var disc))
                 {
-                    index = (ulong)(Math.Abs(disc) % 5);
+                    index = disc % 5;
                 }
                 else
                 {
