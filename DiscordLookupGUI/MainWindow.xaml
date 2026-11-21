@@ -541,21 +541,17 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- 1. 左側: アバター + デコレーション + ステータス -->
+                                            <!-- 1. 左側: アバター + デコレーション (ステータスバッジ廃止・完全円形クリップ) -->
                                             <Grid Grid.Column="0" Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <!-- 円形アバター (直径34px) -->
-                                                <Border Width="34" Height="34" CornerRadius="17" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#1E1F22">
-                                                    <Image x:Name="PlateAvatarImage" Width="34" Height="34" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
-                                                </Border>
+                                                <!-- 円形アバター (直径34px / EllipseGeometryで真円クリップ) -->
+                                                <Image x:Name="PlateAvatarImage" Width="34" Height="34" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
+                                                    <Image.Clip>
+                                                        <EllipseGeometry Center="17,17" RadiusX="17" RadiusY="17" />
+                                                    </Image.Clip>
+                                                </Image>
 
                                                 <!-- アバターデコレーション (幅44px, 高さ44px - 自前APNGエンジンで同期再生) -->
                                                 <Image x:Name="PlateAvatarDecoImage" Width="44" Height="44" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality" />
-
-                                                <!-- ステータスバッジ: dnd (赤丸に白バー、直径13px) -->
-                                                <Grid Width="13" Height="13" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,3,3">
-                                                    <Ellipse Fill="#F23F43" Stroke="#313338" StrokeThickness="1.5" />
-                                                    <Rectangle Width="6.5" Height="2" Fill="#FFFFFF" RadiusX="0.8" RadiusY="0.8" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Grid>
                                             </Grid>
 
                                             <!-- 2. 右側: ユーザー情報 & アクティビティ -->
