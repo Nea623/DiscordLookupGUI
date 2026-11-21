@@ -439,9 +439,9 @@
                                             </Grid>
                                         </Border>
 
-                                        <!-- アバター画像 (真円クリップ + 発光シアン外枠で絶対にはみ出さない設計) -->
-                                        <Grid Width="80" Height="80" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="14,0,0,-26">
-                                            <Ellipse Width="80" Height="80" Stroke="{DynamicResource AccentCyanBrush}" StrokeThickness="3" Fill="{DynamicResource CardInnerBgBrush}">
+                                        <!-- アバター画像 & デコレーション (真円クリップ + 発光シアン外枠 + デコレーションオーバーレイ) -->
+                                        <Grid Width="96" Height="96" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,-34">
+                                            <Ellipse Width="80" Height="80" Stroke="{DynamicResource AccentCyanBrush}" StrokeThickness="3" Fill="{DynamicResource CardInnerBgBrush}" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <Ellipse.Effect>
                                                     <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.65" />
                                                 </Ellipse.Effect>
@@ -451,6 +451,8 @@
                                                     <EllipseGeometry Center="37,37" RadiusX="37" RadiusY="37" />
                                                 </Image.Clip>
                                             </Image>
+                                            <!-- アバターデコレーション (飾り枠オーバーレイ) -->
+                                            <Image x:Name="AvatarDecorationImage" Width="96" Height="96" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" />
                                         </Grid>
                                     </Grid>
 
@@ -518,11 +520,14 @@
                                     <Grid Margin="0,4,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" x:Name="BtnOpenAvatar" Content="Open Avatar" Style="{StaticResource GlowButton}" FontSize="12" Padding="6,6" Click="BtnOpenAvatar_Click" IsEnabled="False" />
-                                        <Button Grid.Column="2" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="12" Padding="6,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
+                                        <Button Grid.Column="0" x:Name="BtnOpenAvatar" Content="Open Avatar" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenAvatar_Click" IsEnabled="False" />
+                                        <Button Grid.Column="2" x:Name="BtnOpenDecoration" Content="Open Deco" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenDecoration_Click" IsEnabled="False" />
+                                        <Button Grid.Column="4" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
                                     </Grid>
 
                                     <!-- 🌟 ユーザー要望: Open Avatar/Banner 下の星座アート (さらに左寄せ & スクロールが出ないジャストサイズ) 🌟 -->

@@ -14,6 +14,9 @@ public class DiscordUser
     public string? BannerColor { get; set; }
     public ClanInfo? Clan { get; set; }
 
+    [Newtonsoft.Json.JsonProperty("avatar_decoration_data")]
+    public AvatarDecorationData? AvatarDecorationData { get; set; }
+
     // ── 算出プロパティ ──
 
     /// <summary>Snowflake IDからアカウント作成日時を算出</summary>
@@ -68,6 +71,25 @@ public class DiscordUser
 
     /// <summary>クランバッジ画像URL（なし → null）</summary>
     public string? ClanBadgeUrl => Clan?.BadgeUrl;
+
+    /// <summary>アバターデコレーション画像URL（なし → null）</summary>
+    public string? AvatarDecorationUrl
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(AvatarDecorationData?.Asset)) return null;
+            return $"https://cdn.discordapp.com/avatar-decoration-presets/{AvatarDecorationData.Asset}.png?size=160&passthrough=true";
+        }
+    }
+}
+
+public class AvatarDecorationData
+{
+    [Newtonsoft.Json.JsonProperty("asset")]
+    public string Asset { get; set; } = string.Empty;
+
+    [Newtonsoft.Json.JsonProperty("sku_id")]
+    public string? SkuId { get; set; }
 }
 
 public class ClanInfo

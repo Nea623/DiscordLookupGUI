@@ -18,6 +18,7 @@ public partial class MainWindow : Window
 {
     private readonly DiscordApiService _apiService = new();
     private string _currentAvatarUrl = string.Empty;
+    private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
     private string _botToken = string.Empty;
 
@@ -497,6 +498,21 @@ public partial class MainWindow : Window
         BtnOpenAvatar.IsEnabled = !string.IsNullOrEmpty(_currentAvatarUrl);
         LoadImage(AvatarImage, _currentAvatarUrl);
 
+        // アバターデコレーション（飾り枠）読み込み
+        _currentAvatarDecorationUrl = user.AvatarDecorationUrl ?? string.Empty;
+        if (!string.IsNullOrEmpty(_currentAvatarDecorationUrl))
+        {
+            AvatarDecorationImage.Visibility = Visibility.Visible;
+            BtnOpenDecoration.IsEnabled = true;
+            LoadImage(AvatarDecorationImage, _currentAvatarDecorationUrl);
+        }
+        else
+        {
+            AvatarDecorationImage.Visibility = Visibility.Collapsed;
+            BtnOpenDecoration.IsEnabled = false;
+            LoadImage(AvatarDecorationImage, string.Empty);
+        }
+
         // バナー読み込み
         _currentBannerUrl = user.BannerUrl ?? string.Empty;
         BtnOpenBanner.IsEnabled = !string.IsNullOrEmpty(_currentBannerUrl);
@@ -540,14 +556,29 @@ public partial class MainWindow : Window
         {
             if (string.IsNullOrEmpty(url))
             {
-                AnimationBehavior.SetSourceUri(targetImage, null);
+                try { AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
                 targetImage.Source = null;
                 return;
             }
 
             var uri = new Uri(url, UriKind.Absolute);
-            // XamlAnimatedGif を使用して GIF アニメーションを滑らかにループ再生
-            AnimationBehavior.SetSourceUri(targetImage, uri);
+
+            // GIF アニメーション対応
+            if (url.Contains(".gif", StringComparison.OrdinalIgnoreCase))
+            {
+                AnimationBehavior.SetSourceUri(targetImage, uri);
+            }
+            else
+            {
+                // 静止画 / APNG / 通常 PNG
+                try { AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = uri;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                targetImage.Source = bitmap;
+            }
         }
         catch
         {
@@ -565,6 +596,14 @@ public partial class MainWindow : Window
         if (!string.IsNullOrEmpty(_currentAvatarUrl))
         {
             OpenInBrowser(_currentAvatarUrl);
+        }
+    }
+
+    private void BtnOpenDecoration_Click(object sender, RoutedEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(_currentAvatarDecorationUrl))
+        {
+            OpenInBrowser(_currentAvatarDecorationUrl);
         }
     }
 
