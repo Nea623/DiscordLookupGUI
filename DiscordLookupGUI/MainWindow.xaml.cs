@@ -18,7 +18,14 @@ namespace DiscordLookup;
 public partial class MainWindow : Window
 {
     private readonly DiscordApiService _apiService = new();
-    private static readonly HttpClient _imageClient = new();
+    private static readonly HttpClient _discordApiClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
+    private static readonly HttpClient _imageClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
     private static ApngAnimationController? _currentApngController;
     private string _currentAvatarUrl = string.Empty;
     private string _currentAvatarDecorationUrl = string.Empty;
@@ -403,13 +410,15 @@ public partial class MainWindow : Window
             SearchButton.IsEnabled = false;
             SetStatus("LOOKING UP USER...", true);
 
-            // API リクエスト
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", token);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("DiscordLookupGUI/2.3");
+            // API リクエスト (静的 HttpClient を再利用して Keep-Alive 接続により超高速化)
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://discord.com/api/v10/users/{userId}");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", token);
+            if (!request.Headers.UserAgent.Any())
+            {
+                request.Headers.UserAgent.ParseAdd("DiscordLookupGUI/2.3");
+            }
 
-            var response = await client.GetAsync($"https://discord.com/api/v10/users/{userId}");
+            var response = await _discordApiClient.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -419,12 +428,24 @@ public partial class MainWindow : Window
                 return;
             }
 
-            // Raw JSON をインデントして整形表示
-            var parsedJson = JToken.Parse(content);
-            TxtRawJson.Text = parsedJson.ToString(Formatting.Indented);
+            // Raw JSON 整形とモデルデシリアライズをバックグラウンドで並行実行 (UIスレッド完全解放)
+            var (formattedJson, user) = await Task.Run(() =>
+            {
+                string json;
+                try
+                {
+                    json = JToken.Parse(content).ToString(Formatting.Indented);
+                }
+                catch
+                {
+                    json = content;
+                }
+                var parsedUser = JsonConvert.DeserializeObject<DiscordUser>(content);
+                return (json, parsedUser);
+            });
 
-            // モデルへデシリアライズ
-            var user = JsonConvert.DeserializeObject<DiscordUser>(content);
+            TxtRawJson.Text = formattedJson;
+
             if (user != null)
             {
                 user.Id = userId.ToString();
@@ -532,8 +553,7 @@ public partial class MainWindow : Window
         // アバター読み込み
         _currentAvatarUrl = user.AvatarUrl;
         BtnOpenAvatar.IsEnabled = !string.IsNullOrEmpty(_currentAvatarUrl);
-        LoadImage(AvatarImage, _currentAvatarUrl);
-        LoadImage(PlateAvatarImage, _currentAvatarUrl);
+        LoadImage(AvatarImage, _currentAvatarUrl, extraTargetImage: PlateAvatarImage);
 
         // アバターデコレーション（飾り枠）読み込み
         _currentAvatarDecorationUrl = user.AvatarDecorationUrl ?? string.Empty;
@@ -632,8 +652,8 @@ public partial class MainWindow : Window
                 {
                     var bytes = await _imageClient.GetByteArrayAsync(uri);
 
-                    // APNG マルチフレームの解析
-                    var frames = ApngDecoder.Decode(bytes);
+                    // APNG マルチフレームの非同期解析 (STAスレッドで処理しUIスレッドを1ミリ秒も止めない)
+                    var frames = await ApngDecoder.DecodeAsync(bytes);
                     if (frames != null && frames.Count > 1)
                     {
                         // 60FPS 完全同期アニメーションコントローラーで再生
@@ -671,6 +691,11 @@ public partial class MainWindow : Window
             // 安定したループ再生実績のある XamlAnimatedGif を使用
             try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, null); } catch { }
             XamlAnimatedGif.AnimationBehavior.SetSourceUri(targetImage, uri);
+            if (extraTargetImage != null)
+            {
+                try { XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, null); } catch { }
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(extraTargetImage, uri);
+            }
         }
         catch
         {

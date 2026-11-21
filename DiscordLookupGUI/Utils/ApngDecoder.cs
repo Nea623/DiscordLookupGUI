@@ -242,6 +242,31 @@ public static class ApngDecoder
 
         return frames.Count > 1 ? frames : null;
     }
+
+    /// <summary>
+    /// STAバックグラウンドスレッドでAPNGの全フレームを非同期デコード・事前合成・Freezeして返し、
+    /// UIスレッドの同期ブロック（フリーズ・ラグ）を完全にゼロにする非同期デコーダー
+    /// </summary>
+    public static Task<List<ApngFrame>?> DecodeAsync(byte[] bytes)
+    {
+        var tcs = new TaskCompletionSource<List<ApngFrame>?>();
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var result = Decode(bytes);
+                tcs.SetResult(result);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.IsBackground = true;
+        thread.Start();
+        return tcs.Task;
+    }
 }
 
 /// <summary>
