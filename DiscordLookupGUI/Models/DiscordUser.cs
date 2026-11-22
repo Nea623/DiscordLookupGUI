@@ -41,18 +41,6 @@ public class DiscordUser
     [Newtonsoft.Json.JsonProperty("collectibles")]
     public CollectiblesInfo? Collectibles { get; set; }
 
-    [Newtonsoft.Json.JsonProperty("public_flags")]
-    public long? PublicFlags { get; set; }
-
-    [Newtonsoft.Json.JsonProperty("flags")]
-    public long? Flags { get; set; }
-
-    [Newtonsoft.Json.JsonProperty("bot")]
-    public bool? Bot { get; set; }
-
-    [Newtonsoft.Json.JsonProperty("premium_type")]
-    public int? PremiumType { get; set; }
-
     // ── 算出プロパティ ──
 
     private ClanInfo? EffectiveClan => PrimaryGuild ?? Clan;
@@ -184,82 +172,6 @@ public class DiscordUser
     public string? NameplateVideoUrl => ulong.TryParse(NameplateSkuId, out var skuId) && skuId != 0
         ? $"https://cdn.discordapp.com/media/v1/collectibles-shop/{skuId}/video"
         : null;
-
-    /// <summary>所持しているDiscord公式バッジ一覧</summary>
-    public List<UserBadge> Badges
-    {
-        get
-        {
-            var list = new List<UserBadge>();
-            long f = (PublicFlags ?? 0) | (Flags ?? 0);
-
-            // 1 << 0: Discord Staff
-            if ((f & (1L << 0)) != 0)
-                list.Add(new UserBadge("staff", "Discord Staff", "Discord スタッフ", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/staff.png"));
-
-            // 1 << 1: Partnered Server Owner
-            if ((f & (1L << 1)) != 0)
-                list.Add(new UserBadge("partnered_server_owner", "Partnered Server Owner", "パートナーサーバーオーナー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/partnered_server_owner.png"));
-
-            // 1 << 2: HypeSquad Events
-            if ((f & (1L << 2)) != 0)
-                list.Add(new UserBadge("hypesquad_events", "HypeSquad Events", "HypeSquad Events メンバー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_events.png"));
-
-            // 1 << 3: Bug Hunter Level 1
-            if ((f & (1L << 3)) != 0)
-                list.Add(new UserBadge("bug_hunter_level_1", "Bug Hunter Level 1", "Discord Bug Hunter (Level 1)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/bug_hunter_level_1.png"));
-
-            // 1 << 6: HypeSquad Bravery
-            if ((f & (1L << 6)) != 0)
-                list.Add(new UserBadge("hypesquad_bravery", "HypeSquad Bravery", "HypeSquad Bravery ハウス", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_bravery.png"));
-
-            // 1 << 7: HypeSquad Brilliance
-            if ((f & (1L << 7)) != 0)
-                list.Add(new UserBadge("hypesquad_brilliance", "HypeSquad Brilliance", "HypeSquad Brilliance ハウス", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_brilliance.png"));
-
-            // 1 << 8: HypeSquad Balance
-            if ((f & (1L << 8)) != 0)
-                list.Add(new UserBadge("hypesquad_balance", "HypeSquad Balance", "HypeSquad Balance ハウス", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_balance.png"));
-
-            // 1 << 9: Early Supporter
-            if ((f & (1L << 9)) != 0)
-                list.Add(new UserBadge("early_supporter", "Early Supporter", "初期サポーター (Early Supporter)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/early_supporter.png"));
-
-            // 1 << 14: Bug Hunter Level 2
-            if ((f & (1L << 14)) != 0)
-                list.Add(new UserBadge("bug_hunter_level_2", "Bug Hunter Level 2", "Discord Bug Hunter (Level 2)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/bug_hunter_level_2.png"));
-
-            // 1 << 16: Verified Bot
-            if ((f & (1L << 16)) != 0)
-                list.Add(new UserBadge("verified_bot", "Verified Bot", "認証済みボット (Verified Bot)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/early_verified_developer.png"));
-
-            // 1 << 17: Early Verified Bot Developer
-            if ((f & (1L << 17)) != 0)
-                list.Add(new UserBadge("early_verified_developer", "Early Verified Bot Developer", "初期認証済みBot開発者", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/early_verified_developer.png"));
-
-            // 1 << 18: Certified Moderator
-            if ((f & (1L << 18)) != 0)
-                list.Add(new UserBadge("certified_moderator", "Discord Certified Moderator", "Discord認定モデレーター (ALUMNI)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/certified_moderator.png"));
-
-            // 1 << 22: Active Developer
-            if ((f & (1L << 22)) != 0)
-                list.Add(new UserBadge("active_developer", "Active Developer", "アクティブ開発者 (Active Developer)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/active_developer.png"));
-
-            // Nitro 判定 (PremiumType > 0、またはアニメーションアバター/アニメーションバナー/デコレーション/ネームプレート所持)
-            bool isNitro = (PremiumType.HasValue && PremiumType.Value > 0) ||
-                           (!string.IsNullOrEmpty(Avatar) && Avatar.StartsWith("a_", StringComparison.Ordinal)) ||
-                           (!string.IsNullOrEmpty(Banner) && Banner.StartsWith("a_", StringComparison.Ordinal)) ||
-                           (AvatarDecorationData != null && !string.IsNullOrEmpty(AvatarDecorationData.Asset)) ||
-                           (!string.IsNullOrEmpty(NameplateSkuId));
-
-            if (isNitro)
-            {
-                list.Add(new UserBadge("nitro", "Discord Nitro", "Discord Nitro サブスクライバー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/nitro.png"));
-            }
-
-            return list;
-        }
-    }
 }
 
 public class CollectiblesInfo
@@ -309,22 +221,4 @@ public class ClanInfo
     public string? BadgeUrl => ulong.TryParse(IdentityGuildId, out var guildId) && guildId != 0 && DiscordUser.IsSafeAssetSegment(Badge)
         ? $"https://cdn.discordapp.com/guild-tag-badges/{guildId}/{Uri.EscapeDataString(Badge!)}.png"
         : null;
-}
-
-public class UserBadge
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string IconAssetPath { get; set; } = string.Empty;
-
-    public UserBadge() { }
-
-    public UserBadge(string id, string name, string description, string iconAssetPath)
-    {
-        Id = id;
-        Name = name;
-        Description = description;
-        IconAssetPath = iconAssetPath;
-    }
 }

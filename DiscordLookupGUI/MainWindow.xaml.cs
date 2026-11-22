@@ -661,9 +661,6 @@ public partial class MainWindow : Window
         if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
         if (BannerContainer != null) BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
         if (BannerImage != null) BannerImage.Visibility = Visibility.Visible;
-        if (BadgeBot != null) BadgeBot.Visibility = Visibility.Collapsed;
-        if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Collapsed;
-        if (BadgesPanel != null) BadgesPanel.Children.Clear();
     }
 
     // ─────────────────────────────────────────────
@@ -1042,45 +1039,6 @@ public partial class MainWindow : Window
             BadgeClan.Visibility = Visibility.Collapsed;
         }
 
-        // Bot タグ表示
-        if (BadgeBot != null)
-        {
-            BadgeBot.Visibility = user.Bot == true ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        // 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等)
-        if (BadgesPanel != null && BorderBadgesContainer != null)
-        {
-            BadgesPanel.Children.Clear();
-            var badges = user.Badges;
-            if (badges.Count > 0)
-            {
-                foreach (var badge in badges)
-                {
-                    var bmp = LoadBadgeBitmap(badge.IconAssetPath);
-                    var badgeImg = new Image
-                    {
-                        Width = 16,
-                        Height = 16,
-                        Margin = new Thickness(2, 0, 2, 0),
-                        Stretch = Stretch.Uniform,
-                        Source = bmp,
-                        ToolTip = new ToolTip
-                        {
-                            Content = $"{badge.Name}\n{badge.Description}"
-                        }
-                    };
-                    RenderOptions.SetBitmapScalingMode(badgeImg, BitmapScalingMode.HighQuality);
-                    BadgesPanel.Children.Add(badgeImg);
-                }
-                BorderBadgesContainer.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                BorderBadgesContainer.Visibility = Visibility.Collapsed;
-            }
-        }
-
         // アクセントカラー (accent_color 優先、未設定時は banner_color)
         Color? resolvedAccentColor = null;
         string resolvedAccentHex = string.Empty;
@@ -1399,46 +1357,6 @@ public partial class MainWindow : Window
             clip.Freeze();
             BannerContainer.Clip = clip;
         }
-    }
-
-    /// <summary>
-    /// バッジアイコン画像をリソースから安全かつ同期的に読み込む (Pack URI &amp; ストリーム解決)
-    /// </summary>
-    private static BitmapImage? LoadBadgeBitmap(string uriString)
-    {
-        if (string.IsNullOrWhiteSpace(uriString)) return null;
-
-        try
-        {
-            var uri = new Uri(uriString, UriKind.RelativeOrAbsolute);
-            var streamInfo = Application.GetResourceStream(uri);
-            if (streamInfo != null)
-            {
-                using var stream = streamInfo.Stream;
-                var bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.StreamSource = stream;
-                bmp.EndInit();
-                bmp.Freeze();
-                return bmp;
-            }
-        }
-        catch { }
-
-        try
-        {
-            var bmp = new BitmapImage();
-            bmp.BeginInit();
-            bmp.UriSource = new Uri(uriString, UriKind.RelativeOrAbsolute);
-            bmp.CacheOption = BitmapCacheOption.OnLoad;
-            bmp.EndInit();
-            bmp.Freeze();
-            return bmp;
-        }
-        catch { }
-
-        return null;
     }
 
     private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default)
