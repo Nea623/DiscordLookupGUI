@@ -442,7 +442,7 @@
 
                                 <!-- プロフィール詳細 -->
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                    <StackPanel Margin="16,0,16,10">
+                                    <StackPanel Margin="16,0,16,16">
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
@@ -480,24 +480,24 @@
 
                                         <StackPanel Grid.Column="0" Margin="0,18,0,0">
                                             <emoji:TextBlock x:Name="TxtGlobalName" Text="ユーザー未検索" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,0,0">
-                                                <emoji:TextBlock x:Name="TxtUsername" Text="@username" FontSize="13" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" />
-                                                <!-- BOT タグ -->
-                                                <Border x:Name="BadgeBot" Margin="6,0,0,0" Background="#5865F2" CornerRadius="4" Padding="5,1" VerticalAlignment="Center" Visibility="Collapsed">
-                                                    <TextBlock Text="BOT" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                                                </Border>
-                                                <!-- クランタグ -->
-                                                <Border x:Name="BadgeClan" Margin="6,0,0,0" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="6" Padding="6,2" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <Grid HorizontalAlignment="Left" Margin="0,4,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <emoji:TextBlock Grid.Column="0" x:Name="TxtUsername" Text="@username" FontSize="13" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                <Border Grid.Column="1" x:Name="BadgeClan" Margin="10,0,0,0" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="6" Padding="6,2" VerticalAlignment="Center" Visibility="Collapsed">
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Image x:Name="ImgClanBadge" Width="13" Height="13" Margin="0,0,4,0" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                        <emoji:TextBlock x:Name="TxtClanTag" Text="CLAN" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentBlueBrush}" VerticalAlignment="Center" />
+                                                        <Image x:Name="ImgClanBadge" Width="14" Height="14" Margin="0,0,5,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                        <emoji:TextBlock x:Name="TxtClanTag" Text="CLAN" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBlueBrush}" VerticalAlignment="Center" />
                                                     </StackPanel>
                                                 </Border>
-                                                <!-- 公式バッジ一覧 (ユーザー名の右横にインライン配置 / 縦幅の圧迫を完全防止) -->
-                                                <Border x:Name="BorderBadgesContainer" Margin="6,0,0,0" Background="{DynamicResource CardInnerBgBrush}" CornerRadius="6" Padding="4,2" VerticalAlignment="Center" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Visibility="Collapsed">
-                                                    <StackPanel x:Name="BadgesPanel" Orientation="Horizontal" VerticalAlignment="Center" />
-                                                </Border>
-                                            </WrapPanel>
+                                            </Grid>
+
+                                            <!-- 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等) -->
+                                            <Border x:Name="BorderBadgesContainer" Margin="0,8,0,0" Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="6,4" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Visibility="Collapsed">
+                                                <WrapPanel x:Name="BadgesPanel" Orientation="Horizontal" VerticalAlignment="Center" />
+                                            </Border>
                                         </StackPanel>
 
                                         <!-- 🌟 ユーザー考案: バナー右下のリング付き三日月 ＋ きらめき星屑 🌟 -->
@@ -516,12 +516,12 @@
                                         </Grid>
                                     </Grid>
 
-                                    <!-- 各種情報リスト (下部の間隔をキュッとスリム化) -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="12,8" Margin="0,0,0,6" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
+                                    <!-- 各種情報リスト -->
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="6" />
+                                                <RowDefinition Height="8" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
@@ -542,7 +542,7 @@
                                     </Border>
 
                                     <!-- アセットリンクボタン -->
-                                    <Grid Margin="0,0,0,0">
+                                    <Grid Margin="0,4,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="6" />
@@ -550,13 +550,13 @@
                                             <ColumnDefinition Width="6" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" x:Name="BtnOpenAvatar" Content="Open Avatar" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,5" Click="BtnOpenAvatar_Click" IsEnabled="False" />
-                                        <Button Grid.Column="2" x:Name="BtnOpenDecoration" Content="Open Deco" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,5" Click="BtnOpenDecoration_Click" IsEnabled="False" />
-                                        <Button Grid.Column="4" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,5" Click="BtnOpenBanner_Click" IsEnabled="False" />
+                                        <Button Grid.Column="0" x:Name="BtnOpenAvatar" Content="Open Avatar" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenAvatar_Click" IsEnabled="False" />
+                                        <Button Grid.Column="2" x:Name="BtnOpenDecoration" Content="Open Deco" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenDecoration_Click" IsEnabled="False" />
+                                        <Button Grid.Column="4" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
                                     </Grid>
 
                                     <!-- ── Discord 公式メンバーリスト原寸 ネームプレート (248x42px) & 詳細メタ情報 ── -->
-                                    <TextBlock Text="Nameplate" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,6,0,2" HorizontalAlignment="Left" />
+                                    <TextBlock Text="Nameplate" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,12,0,4" HorizontalAlignment="Left" />
                                     <Grid Margin="0,0,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
