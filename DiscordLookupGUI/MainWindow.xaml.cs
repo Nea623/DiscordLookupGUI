@@ -1062,9 +1062,9 @@ public partial class MainWindow : Window
                 {
                     var pImg = new Image
                     {
-                        Width = 20,
-                        Height = 20,
-                        Margin = new Thickness(3, 2, 3, 2),
+                        Width = 16,
+                        Height = 16,
+                        Margin = new Thickness(2, 0, 2, 0),
                         Stretch = Stretch.Uniform,
                         Source = bmp,
                         ToolTip = new ToolTip { Content = $"{badge.Name}\n{badge.Description}" }
