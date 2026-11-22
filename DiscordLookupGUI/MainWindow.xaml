@@ -442,7 +442,7 @@
 
                                 <!-- プロフィール詳細 -->
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                    <StackPanel Margin="16,0,16,12">
+                                    <StackPanel Margin="16,0,16,7">
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
@@ -740,7 +740,7 @@
 
                             <!-- メトリクス詳細 -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="16,0,16,12">
+                                <StackPanel Margin="16,0,16,7">
 
                                     <!-- メトリクス行 1: アカウント作成日 (クリックでコピー可能) -->
                                     <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
