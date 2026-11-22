@@ -835,7 +835,7 @@ public partial class MainWindow : Window
             return dmUrlMatch.Groups[1].Value;
 
         // 5. テキスト内に含まれる 17〜20 桁の Snowflake を検索
-        var generalMatch = Regex.Match(s, @"(\d{17,20})");
+        var generalMatch = Regex.Match(s, @"(?<!\d)(\d{17,20})(?!\d)");
         if (generalMatch.Success)
             return generalMatch.Groups[1].Value;
 
