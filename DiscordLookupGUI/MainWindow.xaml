@@ -529,8 +529,6 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="8" />
                                                 <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="8" />
-                                                <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
@@ -545,12 +543,6 @@
                                                         Cursor="Hand" ToolTip="クリックでカラーコードをコピー" MouseLeftButtonUp="AccentColor_Click">
                                                 <Border x:Name="RectAccentColor" Width="14" Height="14" CornerRadius="3" Background="Transparent" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" Margin="0,0,6,0" />
                                                 <TextBlock x:Name="TxtAccentColor" Text="なし" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" />
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Badges" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-                                            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                <TextBlock x:Name="TxtInfoBadgesEmpty" Text="なし" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" VerticalAlignment="Center" Visibility="Visible" />
-                                                <WrapPanel x:Name="InfoBadgesPanel" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed" />
                                             </StackPanel>
                                         </Grid>
                                     </Border>

@@ -664,12 +664,6 @@ public partial class MainWindow : Window
         if (BadgeBot != null) BadgeBot.Visibility = Visibility.Collapsed;
         if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Collapsed;
         if (BadgesPanel != null) BadgesPanel.Children.Clear();
-        if (TxtInfoBadgesEmpty != null) TxtInfoBadgesEmpty.Visibility = Visibility.Visible;
-        if (InfoBadgesPanel != null)
-        {
-            InfoBadgesPanel.Children.Clear();
-            InfoBadgesPanel.Visibility = Visibility.Collapsed;
-        }
     }
 
     // ─────────────────────────────────────────────
@@ -1057,7 +1051,6 @@ public partial class MainWindow : Window
         // 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等)
         var badges = user.Badges;
         if (BadgesPanel != null) BadgesPanel.Children.Clear();
-        if (InfoBadgesPanel != null) InfoBadgesPanel.Children.Clear();
 
         if (badges.Count > 0)
         {
@@ -1065,7 +1058,6 @@ public partial class MainWindow : Window
             {
                 var bmp = LoadBadgeBitmap(badge.IconAssetPath);
 
-                // 1. プロフィール名直下のバッジピル
                 if (BadgesPanel != null)
                 {
                     var pImg = new Image
@@ -1080,33 +1072,13 @@ public partial class MainWindow : Window
                     RenderOptions.SetBitmapScalingMode(pImg, BitmapScalingMode.HighQuality);
                     BadgesPanel.Children.Add(pImg);
                 }
-
-                // 2. 情報リスト内のバッジ一覧
-                if (InfoBadgesPanel != null)
-                {
-                    var infoImg = new Image
-                    {
-                        Width = 18,
-                        Height = 18,
-                        Margin = new Thickness(3, 0, 3, 0),
-                        Stretch = Stretch.Uniform,
-                        Source = bmp,
-                        ToolTip = new ToolTip { Content = $"{badge.Name}\n{badge.Description}" }
-                    };
-                    RenderOptions.SetBitmapScalingMode(infoImg, BitmapScalingMode.HighQuality);
-                    InfoBadgesPanel.Children.Add(infoImg);
-                }
             }
 
             if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Visible;
-            if (TxtInfoBadgesEmpty != null) TxtInfoBadgesEmpty.Visibility = Visibility.Collapsed;
-            if (InfoBadgesPanel != null) InfoBadgesPanel.Visibility = Visibility.Visible;
         }
         else
         {
             if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Collapsed;
-            if (TxtInfoBadgesEmpty != null) TxtInfoBadgesEmpty.Visibility = Visibility.Visible;
-            if (InfoBadgesPanel != null) InfoBadgesPanel.Visibility = Visibility.Collapsed;
         }
 
         // アクセントカラー (accent_color 優先、未設定時は banner_color)
