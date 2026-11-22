@@ -212,6 +212,59 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <!-- サイバー風トグルスイッチ (CheckBox) -->
+            <Style x:Key="CyberToggleSwitch" TargetType="CheckBox">
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid Width="46" Height="24" Background="Transparent">
+                                <!-- トラック外枠 -->
+                                <Border x:Name="TrackBorder"
+                                        Width="46" Height="24"
+                                        CornerRadius="12"
+                                        Background="#1FFFFFFF"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1.5">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.3" />
+                                    </Border.Effect>
+                                </Border>
+                                <!-- つまみ (Thumb) -->
+                                <Ellipse x:Name="Thumb"
+                                         Width="16" Height="16"
+                                         Fill="{DynamicResource TextMutedBrush}"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Center"
+                                         Margin="4,0,0,0">
+                                    <Ellipse.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.4" />
+                                    </Ellipse.Effect>
+                                </Ellipse>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="TrackBorder" Property="Background" Value="{DynamicResource AccentGlowMidBrush}" />
+                                    <Setter TargetName="TrackBorder" Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
+                                    <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                                    <Setter TargetName="Thumb" Property="Margin" Value="0,0,4,0" />
+                                    <Setter TargetName="Thumb" Property="Fill" Value="{DynamicResource AccentCyanBrush}" />
+                                    <Setter TargetName="Thumb" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="#00E5FF" BlurRadius="6" ShadowDepth="0" Opacity="0.8" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="TrackBorder" Property="BorderBrush" Value="{DynamicResource AccentCyanBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

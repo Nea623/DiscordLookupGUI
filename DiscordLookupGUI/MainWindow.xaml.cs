@@ -2,9 +2,11 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DiscordLookup.Models;
@@ -61,6 +63,20 @@ public partial class MainWindow : Window
     private string _currentAvatarDecorationUrl = string.Empty;
     private string _currentBannerUrl = string.Empty;
     private string _botToken = string.Empty;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool AddClipboardFormatListener(IntPtr hwnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
+
+    private const int WM_CLIPBOARDUPDATE = 0x031D;
+
+    private bool _isClipboardListenerRegistered = false;
+    private bool _isAutoLookupEnabled = false;
+    private string _lastAutoLookupId = string.Empty;
+    private int _suppressClipboardEvents = 0;
+    private HwndSource? _hwndSource = null;
 
     /// <summary>
     /// GitHub Secret Scanning による誤BANを防止するため難読化された共有Botトークン
@@ -142,6 +158,24 @@ public partial class MainWindow : Window
         // プレースホルダーの初期状態 & 入力空欄時の自動フェードアウト復帰
         UpdatePlaceholder();
         UserIdInput.TextChanged += UserIdInput_TextChanged;
+
+        // クリップボード監視用 HwndSource フック & 設定初期化
+        var helper = new WindowInteropHelper(this);
+        var hwnd = helper.Handle;
+        if (hwnd != IntPtr.Zero)
+        {
+            _hwndSource = HwndSource.FromHwnd(hwnd);
+            _hwndSource?.AddHook(WndProc);
+        }
+        Activated += MainWindow_Activated;
+
+        var config = AppSettingsStorage.LoadConfig();
+        _isAutoLookupEnabled = config.AutoLookupEnabled;
+        UpdateAutoLookupUi(_isAutoLookupEnabled);
+        if (_isAutoLookupEnabled)
+        {
+            RegisterClipboardListener();
+        }
     }
 
     private void UserIdInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -156,6 +190,13 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _isClosed = true;
+        UnregisterClipboardListener();
+        if (_hwndSource != null)
+        {
+            _hwndSource.RemoveHook(WndProc);
+            _hwndSource = null;
+        }
+        Activated -= MainWindow_Activated;
         ThemeManager.ThemeChanged -= OnThemeChanged;
         UserIdInput.TextChanged -= UserIdInput_TextChanged;
         StateChanged -= MainWindow_StateChanged;
@@ -1684,6 +1725,7 @@ public partial class MainWindow : Window
         {
             try
             {
+                _suppressClipboardEvents = 1;
                 Clipboard.SetDataObject(text, true);
                 SetStatus($"COPIED: {description}", true);
                 return;
@@ -1778,4 +1820,168 @@ public partial class MainWindow : Window
         if (_isHidingResult) return;
         CopyToClipboard(TxtRawJson.Text, "Raw JSON");
     }
+
+    #region クリップボード自動検知 (Auto-Lookup) ロジック
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WM_CLIPBOARDUPDATE)
+        {
+            OnClipboardChanged();
+            handled = true;
+        }
+        return IntPtr.Zero;
+    }
+
+    private void MainWindow_Activated(object? sender, EventArgs e)
+    {
+        if (_isAutoLookupEnabled)
+        {
+            CheckClipboardForDiscordId();
+        }
+    }
+
+    private void OnClipboardChanged()
+    {
+        if (!_isAutoLookupEnabled) return;
+        if (_suppressClipboardEvents > 0)
+        {
+            _suppressClipboardEvents--;
+            return;
+        }
+        CheckClipboardForDiscordId();
+    }
+
+    private void CheckClipboardForDiscordId()
+    {
+        if (!_isAutoLookupEnabled) return;
+
+        string? text = null;
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            try
+            {
+                if (Clipboard.ContainsText())
+                {
+                    text = Clipboard.GetText();
+                    break;
+                }
+                return;
+            }
+            catch
+            {
+                Thread.Sleep(30);
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        var extractedId = ExtractUserId(text);
+        if (string.IsNullOrEmpty(extractedId)) return;
+        if (!ulong.TryParse(extractedId, out _)) return;
+
+        // 同一IDの連続自動検索を抑制
+        if (extractedId == _lastAutoLookupId) return;
+
+        // すでに対象IDのユーザーが表示中かつ入力欄に同一IDが入っている場合はスキップ
+        if (UserIdInput.Text.Trim() == extractedId && _currentUser != null && _currentUser.Id.ToString() == extractedId)
+        {
+            return;
+        }
+
+        _lastAutoLookupId = extractedId;
+
+        Dispatcher.InvokeAsync(async () =>
+        {
+            // 他のタブが開かれていた場合はMainタブに切り替えて結果を見せる
+            if (TabMain.IsChecked != true)
+            {
+                TabMain.IsChecked = true;
+            }
+
+            UserIdInput.Text = extractedId;
+            UserIdInput.CaretIndex = extractedId.Length;
+            SetStatus($"AUTO-LOOKUP (CLIPBOARD): {extractedId}", true);
+            await ExecuteLookupAsync();
+        });
+    }
+
+    private void RegisterClipboardListener()
+    {
+        if (_isClipboardListenerRegistered) return;
+        try
+        {
+            var helper = new WindowInteropHelper(this);
+            if (helper.Handle != IntPtr.Zero)
+            {
+                _isClipboardListenerRegistered = AddClipboardFormatListener(helper.Handle);
+            }
+        }
+        catch (Exception ex)
+        {
+            App.LogException("RegisterClipboardListener", ex);
+        }
+    }
+
+    private void UnregisterClipboardListener()
+    {
+        if (!_isClipboardListenerRegistered) return;
+        try
+        {
+            var helper = new WindowInteropHelper(this);
+            if (helper.Handle != IntPtr.Zero)
+            {
+                RemoveClipboardFormatListener(helper.Handle);
+                _isClipboardListenerRegistered = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            App.LogException("UnregisterClipboardListener", ex);
+        }
+    }
+
+    private void ToggleAutoLookup_Checked(object sender, RoutedEventArgs e)
+    {
+        _isAutoLookupEnabled = true;
+        UpdateAutoLookupUi(true);
+        RegisterClipboardListener();
+        AppSettingsStorage.SaveConfig(new AppConfig { AutoLookupEnabled = true });
+        SetStatus("CLIPBOARD AUTO-LOOKUP: ACTIVATED", true);
+        CheckClipboardForDiscordId();
+    }
+
+    private void ToggleAutoLookup_Unchecked(object sender, RoutedEventArgs e)
+    {
+        _isAutoLookupEnabled = false;
+        UpdateAutoLookupUi(false);
+        UnregisterClipboardListener();
+        AppSettingsStorage.SaveConfig(new AppConfig { AutoLookupEnabled = false });
+        SetStatus("CLIPBOARD AUTO-LOOKUP: DEACTIVATED", true);
+    }
+
+    private void UpdateAutoLookupUi(bool isEnabled)
+    {
+        if (ToggleAutoLookup.IsChecked != isEnabled)
+        {
+            ToggleAutoLookup.IsChecked = isEnabled;
+        }
+
+        if (isEnabled)
+        {
+            TxtAutoLookupStatus.Text = "ON (Active)";
+            TxtAutoLookupStatus.SetResourceReference(TextBlock.ForegroundProperty, "AccentCyanBrush");
+            BadgeAutoLookupStatus.SetResourceReference(Border.BorderBrushProperty, "AccentCyanBrush");
+            BadgeAutoLookupStatus.SetResourceReference(Border.BackgroundProperty, "AccentGlowMidBrush");
+        }
+        else
+        {
+            TxtAutoLookupStatus.Text = "OFF (Inactive)";
+            TxtAutoLookupStatus.SetResourceReference(TextBlock.ForegroundProperty, "TextMutedBrush");
+            BadgeAutoLookupStatus.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+            BadgeAutoLookupStatus.SetResourceReference(Border.BackgroundProperty, "CardInnerBgBrush");
+        }
+    }
+
+    #endregion
 }

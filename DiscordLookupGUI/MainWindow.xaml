@@ -918,6 +918,21 @@
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>
+
+                                <!-- クリップボード自動検索設定 -->
+                                <TextBlock Text="Clipboard Auto-Lookup" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" Margin="0,22,0,8" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <CheckBox x:Name="ToggleAutoLookup" Style="{StaticResource CyberToggleSwitch}"
+                                              Checked="ToggleAutoLookup_Checked" Unchecked="ToggleAutoLookup_Unchecked"
+                                              VerticalAlignment="Center" Cursor="Hand" />
+                                    <Border x:Name="BadgeAutoLookupStatus" Margin="12,0,0,0" CornerRadius="8" Padding="10,4"
+                                            Background="{DynamicResource CardInnerBgBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1"
+                                            VerticalAlignment="Center">
+                                        <TextBlock x:Name="TxtAutoLookupStatus" Text="OFF (Inactive)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="クリップボードにコピーされたDiscord ID・メンション・URLを自動検知して即座に検索します。"
+                                           FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </ScrollViewer>
                     </Border>
