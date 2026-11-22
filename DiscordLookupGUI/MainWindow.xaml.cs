@@ -661,8 +661,15 @@ public partial class MainWindow : Window
         if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
         if (BannerContainer != null) BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
         if (BannerImage != null) BannerImage.Visibility = Visibility.Visible;
+        if (BadgeBot != null) BadgeBot.Visibility = Visibility.Collapsed;
         if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Collapsed;
         if (BadgesPanel != null) BadgesPanel.Children.Clear();
+        if (TxtInfoBadgesEmpty != null) TxtInfoBadgesEmpty.Visibility = Visibility.Visible;
+        if (InfoBadgesPanel != null)
+        {
+            InfoBadgesPanel.Children.Clear();
+            InfoBadgesPanel.Visibility = Visibility.Collapsed;
+        }
     }
 
     // ─────────────────────────────────────────────
@@ -1041,41 +1048,65 @@ public partial class MainWindow : Window
             BadgeClan.Visibility = Visibility.Collapsed;
         }
 
-        // 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等)
-        if (BadgesPanel != null && BorderBadgesContainer != null)
+        // Bot タグ表示
+        if (BadgeBot != null)
         {
-            BadgesPanel.Children.Clear();
-            var badges = user.Badges;
-            if (badges.Count > 0)
+            BadgeBot.Visibility = user.Bot == true ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等)
+        var badges = user.Badges;
+        if (BadgesPanel != null) BadgesPanel.Children.Clear();
+        if (InfoBadgesPanel != null) InfoBadgesPanel.Children.Clear();
+
+        if (badges.Count > 0)
+        {
+            foreach (var badge in badges)
             {
-                foreach (var badge in badges)
+                var bmp = LoadBadgeBitmap(badge.IconAssetPath);
+
+                // 1. プロフィール名直下のバッジピル
+                if (BadgesPanel != null)
                 {
-                    var badgeImg = new Image
+                    var pImg = new Image
                     {
                         Width = 20,
                         Height = 20,
                         Margin = new Thickness(3, 2, 3, 2),
                         Stretch = Stretch.Uniform,
-                        ToolTip = new ToolTip
-                        {
-                            Content = $"{badge.Name}\n{badge.Description}"
-                        }
+                        Source = bmp,
+                        ToolTip = new ToolTip { Content = $"{badge.Name}\n{badge.Description}" }
                     };
-                    RenderOptions.SetBitmapScalingMode(badgeImg, BitmapScalingMode.HighQuality);
-                    try
-                    {
-                        var uri = new Uri(badge.IconAssetPath, UriKind.Absolute);
-                        badgeImg.Source = new BitmapImage(uri);
-                    }
-                    catch { }
-                    BadgesPanel.Children.Add(badgeImg);
+                    RenderOptions.SetBitmapScalingMode(pImg, BitmapScalingMode.HighQuality);
+                    BadgesPanel.Children.Add(pImg);
                 }
-                BorderBadgesContainer.Visibility = Visibility.Visible;
+
+                // 2. 情報リスト内のバッジ一覧
+                if (InfoBadgesPanel != null)
+                {
+                    var infoImg = new Image
+                    {
+                        Width = 18,
+                        Height = 18,
+                        Margin = new Thickness(3, 0, 3, 0),
+                        Stretch = Stretch.Uniform,
+                        Source = bmp,
+                        ToolTip = new ToolTip { Content = $"{badge.Name}\n{badge.Description}" }
+                    };
+                    RenderOptions.SetBitmapScalingMode(infoImg, BitmapScalingMode.HighQuality);
+                    InfoBadgesPanel.Children.Add(infoImg);
+                }
             }
-            else
-            {
-                BorderBadgesContainer.Visibility = Visibility.Collapsed;
-            }
+
+            if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Visible;
+            if (TxtInfoBadgesEmpty != null) TxtInfoBadgesEmpty.Visibility = Visibility.Collapsed;
+            if (InfoBadgesPanel != null) InfoBadgesPanel.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Collapsed;
+            if (TxtInfoBadgesEmpty != null) TxtInfoBadgesEmpty.Visibility = Visibility.Visible;
+            if (InfoBadgesPanel != null) InfoBadgesPanel.Visibility = Visibility.Collapsed;
         }
 
         // アクセントカラー (accent_color 優先、未設定時は banner_color)
@@ -1396,6 +1427,46 @@ public partial class MainWindow : Window
             clip.Freeze();
             BannerContainer.Clip = clip;
         }
+    }
+
+    /// <summary>
+    /// バッジアイコン画像をリソースから安全かつ同期的に読み込む (Pack URI &amp; ストリーム解決)
+    /// </summary>
+    private static BitmapImage? LoadBadgeBitmap(string uriString)
+    {
+        if (string.IsNullOrWhiteSpace(uriString)) return null;
+
+        try
+        {
+            var uri = new Uri(uriString, UriKind.RelativeOrAbsolute);
+            var streamInfo = Application.GetResourceStream(uri);
+            if (streamInfo != null)
+            {
+                using var stream = streamInfo.Stream;
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.StreamSource = stream;
+                bmp.EndInit();
+                bmp.Freeze();
+                return bmp;
+            }
+        }
+        catch { }
+
+        try
+        {
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.UriSource = new Uri(uriString, UriKind.RelativeOrAbsolute);
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.EndInit();
+            bmp.Freeze();
+            return bmp;
+        }
+        catch { }
+
+        return null;
     }
 
     private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default)

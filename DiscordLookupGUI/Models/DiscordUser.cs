@@ -195,51 +195,55 @@ public class DiscordUser
 
             // 1 << 0: Discord Staff
             if ((f & (1L << 0)) != 0)
-                list.Add(new UserBadge("staff", "Discord Staff", "Discord スタッフ", "pack://application:,,,/Assets/Badges/staff.png"));
+                list.Add(new UserBadge("staff", "Discord Staff", "Discord スタッフ", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/staff.png"));
 
             // 1 << 1: Partnered Server Owner
             if ((f & (1L << 1)) != 0)
-                list.Add(new UserBadge("partnered_server_owner", "Partnered Server Owner", "パートナーサーバーオーナー", "pack://application:,,,/Assets/Badges/partnered_server_owner.png"));
+                list.Add(new UserBadge("partnered_server_owner", "Partnered Server Owner", "パートナーサーバーオーナー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/partnered_server_owner.png"));
 
             // 1 << 2: HypeSquad Events
             if ((f & (1L << 2)) != 0)
-                list.Add(new UserBadge("hypesquad_events", "HypeSquad Events", "HypeSquad Events メンバー", "pack://application:,,,/Assets/Badges/hypesquad_events.png"));
+                list.Add(new UserBadge("hypesquad_events", "HypeSquad Events", "HypeSquad Events メンバー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_events.png"));
 
             // 1 << 3: Bug Hunter Level 1
             if ((f & (1L << 3)) != 0)
-                list.Add(new UserBadge("bug_hunter_level_1", "Bug Hunter Level 1", "Discord Bug Hunter (Level 1)", "pack://application:,,,/Assets/Badges/bug_hunter_level_1.png"));
+                list.Add(new UserBadge("bug_hunter_level_1", "Bug Hunter Level 1", "Discord Bug Hunter (Level 1)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/bug_hunter_level_1.png"));
 
             // 1 << 6: HypeSquad Bravery
             if ((f & (1L << 6)) != 0)
-                list.Add(new UserBadge("hypesquad_bravery", "HypeSquad Bravery", "HypeSquad Bravery ハウス", "pack://application:,,,/Assets/Badges/hypesquad_bravery.png"));
+                list.Add(new UserBadge("hypesquad_bravery", "HypeSquad Bravery", "HypeSquad Bravery ハウス", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_bravery.png"));
 
             // 1 << 7: HypeSquad Brilliance
             if ((f & (1L << 7)) != 0)
-                list.Add(new UserBadge("hypesquad_brilliance", "HypeSquad Brilliance", "HypeSquad Brilliance ハウス", "pack://application:,,,/Assets/Badges/hypesquad_brilliance.png"));
+                list.Add(new UserBadge("hypesquad_brilliance", "HypeSquad Brilliance", "HypeSquad Brilliance ハウス", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_brilliance.png"));
 
             // 1 << 8: HypeSquad Balance
             if ((f & (1L << 8)) != 0)
-                list.Add(new UserBadge("hypesquad_balance", "HypeSquad Balance", "HypeSquad Balance ハウス", "pack://application:,,,/Assets/Badges/hypesquad_balance.png"));
+                list.Add(new UserBadge("hypesquad_balance", "HypeSquad Balance", "HypeSquad Balance ハウス", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/hypesquad_balance.png"));
 
             // 1 << 9: Early Supporter
             if ((f & (1L << 9)) != 0)
-                list.Add(new UserBadge("early_supporter", "Early Supporter", "初期サポーター (Early Supporter)", "pack://application:,,,/Assets/Badges/early_supporter.png"));
+                list.Add(new UserBadge("early_supporter", "Early Supporter", "初期サポーター (Early Supporter)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/early_supporter.png"));
 
             // 1 << 14: Bug Hunter Level 2
             if ((f & (1L << 14)) != 0)
-                list.Add(new UserBadge("bug_hunter_level_2", "Bug Hunter Level 2", "Discord Bug Hunter (Level 2)", "pack://application:,,,/Assets/Badges/bug_hunter_level_2.png"));
+                list.Add(new UserBadge("bug_hunter_level_2", "Bug Hunter Level 2", "Discord Bug Hunter (Level 2)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/bug_hunter_level_2.png"));
+
+            // 1 << 16: Verified Bot
+            if ((f & (1L << 16)) != 0)
+                list.Add(new UserBadge("verified_bot", "Verified Bot", "認証済みボット (Verified Bot)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/early_verified_developer.png"));
 
             // 1 << 17: Early Verified Bot Developer
             if ((f & (1L << 17)) != 0)
-                list.Add(new UserBadge("early_verified_developer", "Early Verified Bot Developer", "初期認証済みBot開発者", "pack://application:,,,/Assets/Badges/early_verified_developer.png"));
+                list.Add(new UserBadge("early_verified_developer", "Early Verified Bot Developer", "初期認証済みBot開発者", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/early_verified_developer.png"));
 
             // 1 << 18: Certified Moderator
             if ((f & (1L << 18)) != 0)
-                list.Add(new UserBadge("certified_moderator", "Discord Certified Moderator", "Discord認定モデレーター (ALUMNI)", "pack://application:,,,/Assets/Badges/certified_moderator.png"));
+                list.Add(new UserBadge("certified_moderator", "Discord Certified Moderator", "Discord認定モデレーター (ALUMNI)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/certified_moderator.png"));
 
             // 1 << 22: Active Developer
             if ((f & (1L << 22)) != 0)
-                list.Add(new UserBadge("active_developer", "Active Developer", "アクティブ開発者 (Active Developer)", "pack://application:,,,/Assets/Badges/active_developer.png"));
+                list.Add(new UserBadge("active_developer", "Active Developer", "アクティブ開発者 (Active Developer)", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/active_developer.png"));
 
             // Nitro 判定 (PremiumType > 0、またはアニメーションアバター/アニメーションバナー/デコレーション/ネームプレート所持)
             bool isNitro = (PremiumType.HasValue && PremiumType.Value > 0) ||
@@ -250,7 +254,7 @@ public class DiscordUser
 
             if (isNitro)
             {
-                list.Add(new UserBadge("nitro", "Discord Nitro", "Discord Nitro サブスクライバー", "pack://application:,,,/Assets/Badges/nitro.png"));
+                list.Add(new UserBadge("nitro", "Discord Nitro", "Discord Nitro サブスクライバー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/nitro.png"));
             }
 
             return list;
