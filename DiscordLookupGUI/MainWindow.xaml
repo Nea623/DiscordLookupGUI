@@ -493,6 +493,11 @@
                                                     </StackPanel>
                                                 </Border>
                                             </Grid>
+
+                                            <!-- 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等) -->
+                                            <Border x:Name="BorderBadgesContainer" Margin="0,8,0,0" Background="{DynamicResource CardInnerBgBrush}" CornerRadius="8" Padding="6,4" HorizontalAlignment="Left" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}" Visibility="Collapsed">
+                                                <WrapPanel x:Name="BadgesPanel" Orientation="Horizontal" VerticalAlignment="Center" />
+                                            </Border>
                                         </StackPanel>
 
                                         <!-- 🌟 ユーザー考案: バナー右下のリング付き三日月 ＋ きらめき星屑 🌟 -->

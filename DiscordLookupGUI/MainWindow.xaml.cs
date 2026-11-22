@@ -661,6 +661,8 @@ public partial class MainWindow : Window
         if (PlateBackgroundStaticImage != null) PlateBackgroundStaticImage.Visibility = Visibility.Collapsed;
         if (BannerContainer != null) BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
         if (BannerImage != null) BannerImage.Visibility = Visibility.Visible;
+        if (BorderBadgesContainer != null) BorderBadgesContainer.Visibility = Visibility.Collapsed;
+        if (BadgesPanel != null) BadgesPanel.Children.Clear();
     }
 
     // ─────────────────────────────────────────────
@@ -1037,6 +1039,43 @@ public partial class MainWindow : Window
             ClearImageControl(ImgClanBadge);
             ImgClanBadge.Visibility = Visibility.Collapsed;
             BadgeClan.Visibility = Visibility.Collapsed;
+        }
+
+        // 公式バッジ一覧 (HypeSquad, Active Developer, Nitro 等)
+        if (BadgesPanel != null && BorderBadgesContainer != null)
+        {
+            BadgesPanel.Children.Clear();
+            var badges = user.Badges;
+            if (badges.Count > 0)
+            {
+                foreach (var badge in badges)
+                {
+                    var badgeImg = new Image
+                    {
+                        Width = 20,
+                        Height = 20,
+                        Margin = new Thickness(3, 2, 3, 2),
+                        Stretch = Stretch.Uniform,
+                        ToolTip = new ToolTip
+                        {
+                            Content = $"{badge.Name}\n{badge.Description}"
+                        }
+                    };
+                    RenderOptions.SetBitmapScalingMode(badgeImg, BitmapScalingMode.HighQuality);
+                    try
+                    {
+                        var uri = new Uri(badge.IconAssetPath, UriKind.Absolute);
+                        badgeImg.Source = new BitmapImage(uri);
+                    }
+                    catch { }
+                    BadgesPanel.Children.Add(badgeImg);
+                }
+                BorderBadgesContainer.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                BorderBadgesContainer.Visibility = Visibility.Collapsed;
+            }
         }
 
         // アクセントカラー (accent_color 優先、未設定時は banner_color)
