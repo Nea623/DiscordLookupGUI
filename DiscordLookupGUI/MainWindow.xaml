@@ -333,7 +333,7 @@
                                  KeyDown="UserIdInput_KeyDown"
                                  VerticalContentAlignment="Center"
                                  Padding="14,8,12,8" />
-                        <TextBlock x:Name="UserIdPlaceholder" Text="Discord ユーザーID (Snowflake) を入力して Enter..." 
+                        <TextBlock x:Name="UserIdPlaceholder" Text="Discord ユーザーID、メンション、URLを入力して Enter..." 
                                    Foreground="{DynamicResource InputPlaceholderBrush}" FontSize="13" VerticalAlignment="Center" Margin="14,0,0,0" IsHitTestVisible="False" />
                     </Grid>
 

@@ -806,6 +806,41 @@ public partial class MainWindow : Window
         SetStatus("READY", true);
     }
 
+    /// <summary>
+    /// 入力文字列（メンション &lt;@ID&gt;、ユーザーURL、または純粋なSnowflake）からDiscordユーザーIDを自動抽出
+    /// </summary>
+    private static string ExtractUserId(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+        var s = input.Trim();
+
+        // 1. 純粋な 17〜20 桁の数値
+        if (Regex.IsMatch(s, @"^\d{17,20}$"))
+            return s;
+
+        // 2. メンション形式: <@123456789012345678> または <@!123456789012345678>
+        var mentionMatch = Regex.Match(s, @"<@!?(\d{17,20})>");
+        if (mentionMatch.Success)
+            return mentionMatch.Groups[1].Value;
+
+        // 3. プロフィールURL: discord.com/users/{id}
+        var userUrlMatch = Regex.Match(s, @"discord(?:app)?\.com/users/(\d{17,20})", RegexOptions.IgnoreCase);
+        if (userUrlMatch.Success)
+            return userUrlMatch.Groups[1].Value;
+
+        // 4. DMリンク: discord.com/channels/@me/{id}
+        var dmUrlMatch = Regex.Match(s, @"discord(?:app)?\.com/channels/@me/(\d{17,20})", RegexOptions.IgnoreCase);
+        if (dmUrlMatch.Success)
+            return dmUrlMatch.Groups[1].Value;
+
+        // 5. テキスト内に含まれる 17〜20 桁の Snowflake を検索
+        var generalMatch = Regex.Match(s, @"(\d{17,20})");
+        if (generalMatch.Success)
+            return generalMatch.Groups[1].Value;
+
+        return s;
+    }
+
     private async Task ExecuteLookupAsync()
     {
         CancellationToken ct = default;
@@ -822,9 +857,17 @@ public partial class MainWindow : Window
                 return;
             }
 
-            if (!ulong.TryParse(rawInput, out var userId) || userId == 0)
+            // メンション (<@ID>) や プロフィールURL からユーザーIDを自動抽出
+            var extractedId = ExtractUserId(rawInput);
+            if (!string.IsNullOrEmpty(extractedId) && extractedId != rawInput)
             {
-                MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                UserIdInput.Text = extractedId;
+                UserIdInput.CaretIndex = extractedId.Length;
+            }
+
+            if (!ulong.TryParse(extractedId, out var userId) || userId == 0)
+            {
+                MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。\n※ メンション <@ID> や プロフィールURL にも対応しています。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
