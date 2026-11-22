@@ -1067,7 +1067,7 @@ public partial class MainWindow : Window
                         Source = bmp,
                         ToolTip = new ToolTip
                         {
-                            Content = $"{badge.Name}\n{badge.Description}"
+                            Content = badge.Name
                         }
                     };
                     RenderOptions.SetBitmapScalingMode(badgeImg, BitmapScalingMode.HighQuality);
