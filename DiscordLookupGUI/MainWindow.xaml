@@ -959,7 +959,7 @@
                                 <Button Style="{StaticResource GlowButton}" Margin="0,0,0,8" Click="BtnOpenDiscordCommunity_Click" HorizontalAlignment="Stretch" ToolTip="公式コミュニティサーバーに参加 (https://discord.gg/R7SjWSHkjR)">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="🌐 " FontSize="13" />
-                                        <TextBlock Text="⚡DLG Community (Official Discord)" FontWeight="Bold" FontSize="12" />
+                                        <TextBlock Text="⚡DLG Community (Official Discord)" FontSize="12" />
                                     </StackPanel>
                                 </Button>
 
