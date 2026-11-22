@@ -1584,6 +1584,11 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnOpenDiscordCommunity_Click(object sender, RoutedEventArgs e)
+    {
+        OpenInBrowser("https://discord.gg/R7SjWSHkjR");
+    }
+
     private void BtnOpenGitHub_Click(object sender, RoutedEventArgs e)
     {
         OpenInBrowser("https://github.com/Nea623/DiscordLookupGUI");
