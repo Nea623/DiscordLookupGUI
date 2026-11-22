@@ -254,7 +254,7 @@ public class DiscordUser
 
             if (isNitro)
             {
-                list.Add(new UserBadge("nitro", "Discord Nitro", "Discord Nitro サブスクライバー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/nitro.png"));
+                list.Add(new UserBadge("nitro", "Discord Nitro サブスクライバー", "Discord Nitro サブスクライバー", "pack://application:,,,/DiscordLookupGUI;component/Assets/Badges/nitro.png"));
             }
 
             return list;
