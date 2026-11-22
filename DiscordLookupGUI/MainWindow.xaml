@@ -442,7 +442,7 @@
 
                                 <!-- プロフィール詳細 -->
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                    <StackPanel Margin="16,0,16,6">
+                                    <StackPanel Margin="16,0,16,14">
                                     
                                     <!-- バナー & アバターのコンテナ -->
                                     <Grid Margin="0,0,0,16">
@@ -472,13 +472,13 @@
                                     </Grid>
 
                                     <!-- ユーザー名など & 惑星リング付き三日月 (ユーザー考案) -->
-                                    <Grid Margin="0,8,0,4">
+                                    <Grid Margin="0,14,0,12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0" Margin="0,12,0,0">
+                                        <StackPanel Grid.Column="0" Margin="0,18,0,0">
                                             <emoji:TextBlock x:Name="TxtGlobalName" Text="ユーザー未検索" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                             <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,0,0">
                                                 <!-- @username -->
@@ -518,11 +518,11 @@
                                     </Grid>
 
                                     <!-- 各種情報リスト -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="12,6" Margin="0,0,0,4" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,11" Margin="0,0,0,12" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="5" />
+                                                <RowDefinition Height="9" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
@@ -543,7 +543,7 @@
                                     </Border>
 
                                     <!-- アセットリンクボタン -->
-                                    <Grid Margin="0,0,0,0">
+                                    <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="6" />
@@ -551,14 +551,14 @@
                                             <ColumnDefinition Width="6" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" x:Name="BtnOpenAvatar" Content="Open Avatar" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenAvatar_Click" IsEnabled="False" />
-                                        <Button Grid.Column="2" x:Name="BtnOpenDecoration" Content="Open Deco" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenDecoration_Click" IsEnabled="False" />
-                                        <Button Grid.Column="4" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,6" Click="BtnOpenBanner_Click" IsEnabled="False" />
+                                        <Button Grid.Column="0" x:Name="BtnOpenAvatar" Content="Open Avatar" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,8" Click="BtnOpenAvatar_Click" IsEnabled="False" />
+                                        <Button Grid.Column="2" x:Name="BtnOpenDecoration" Content="Open Deco" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,8" Click="BtnOpenDecoration_Click" IsEnabled="False" />
+                                        <Button Grid.Column="4" x:Name="BtnOpenBanner" Content="Open Banner" Style="{StaticResource GlowButton}" FontSize="11" Padding="4,8" Click="BtnOpenBanner_Click" IsEnabled="False" />
                                     </Grid>
 
                                     <!-- ── Discord 公式メンバーリスト原寸 ネームプレート (248x42px) & 詳細メタ情報 ── -->
-                                    <TextBlock Text="Nameplate" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,5,0,2" HorizontalAlignment="Left" />
-                                    <Grid Margin="0,0,0,0">
+                                    <TextBlock Text="Nameplate" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="2,12,0,5" HorizontalAlignment="Left" />
+                                    <Grid Margin="0,0,0,6">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
@@ -740,7 +740,7 @@
 
                             <!-- メトリクス詳細 -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                <StackPanel Margin="16,0,16,6">
+                                <StackPanel Margin="16,0,16,14">
 
                                     <!-- メトリクス行 1: アカウント作成日 (クリックでコピー可能) -->
                                     <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" Margin="0,0,0,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
