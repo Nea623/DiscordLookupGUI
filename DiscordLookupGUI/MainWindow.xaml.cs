@@ -1305,11 +1305,17 @@ public partial class MainWindow : Window
         TxtElapsedDays.Text = $"{user.ElapsedDays:N0} 日経過";
         ProgAccountAge.Value = Math.Clamp(user.ElapsedYears, 0.0, 10.0);
 
-        // Snowflake 内部ID
+        // Snowflake 詳細解析
+        var timestampMs = (long)((rawId >> 22) + 1420070400000UL);
         var workerId = (rawId & 0x3E0000) >> 17;
         var processId = (rawId & 0x1F000) >> 12;
+        var binary = Convert.ToString((long)rawId, 2).PadLeft(64, '0');
+
+        TxtCreationTimestamp.Text = $"{timestampMs} ms";
         TxtWorkerId.Text = $"{workerId}";
         TxtProcessId.Text = $"{processId}";
+        TxtBinary.Text = binary;
+        TxtBinary.ToolTip = $"64-bit Binary:\n{binary}\n(クリックでコピー)";
     }
 
     private async Task LoadNameplateAsync(DiscordUser user, CancellationToken ct)
@@ -1797,7 +1803,8 @@ public partial class MainWindow : Window
     {
         e.Handled = true;
         if (_currentUser == null || TxtWorkerId.Text == "--") return;
-        var text = $"Epoch Offset: 1420070400000 ms\nInternal Worker ID: {TxtWorkerId.Text}\nInternal Process ID: {TxtProcessId.Text}";
+        var timestamp = TxtCreationTimestamp.Text.Replace(" ms", "").Trim();
+        var text = $"Epoch Offset: 1420070400000 ms\nCreation Timestamp: {timestamp}\nInternal Worker ID: {TxtWorkerId.Text}\nInternal Process ID: {TxtProcessId.Text}\nBinary Representation: {TxtBinary.Text}";
         CopyToClipboard(text, "Snowflake Decoding");
     }
 
@@ -1805,6 +1812,26 @@ public partial class MainWindow : Window
     {
         if (_currentUser == null) return;
         CopyToClipboard("1420070400000", "Epoch Offset");
+    }
+
+    private void CopyCreationTimestamp_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (_currentUser == null || TxtCreationTimestamp.Text == "-- ms") return;
+        var text = TxtCreationTimestamp.Text.Replace(" ms", "").Trim();
+        CopyToClipboard(text, "Creation Timestamp");
+    }
+
+    private void CopyWorkerProcess_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (_currentUser == null || TxtWorkerId.Text == "--") return;
+        var text = $"Internal Worker ID: {TxtWorkerId.Text}\nInternal Process ID: {TxtProcessId.Text}";
+        CopyToClipboard(text, "Worker / Process ID");
+    }
+
+    private void CopyBinary_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (_currentUser == null || string.IsNullOrWhiteSpace(TxtBinary.Text)) return;
+        CopyToClipboard(TxtBinary.Text, "Binary Representation");
     }
 
     private void CopyWorkerId_Click(object sender, MouseButtonEventArgs e)

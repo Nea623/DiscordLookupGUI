@@ -791,9 +791,10 @@
                                     </Border>
 
                                     <!-- メトリクス行 3: Snowflake 解析情報 (すべてコピー & 個別コピー可能) -->
-                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,12" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
+                                    <Border Background="{DynamicResource CardInnerBgBrush}" CornerRadius="10" Padding="14,10" BorderThickness="1" BorderBrush="{DynamicResource CardBorderBrush}">
                                         <StackPanel>
-                                            <Grid Margin="0,0,0,8">
+                                            <!-- ヘッダー & Copy All -->
+                                            <Grid Margin="0,0,0,6">
                                                 <TextBlock Text="Snowflake Decoding" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
                                                 <!-- Snowflake全項目一括コピーボタン -->
                                                 <Border HorizontalAlignment="Right" Background="{DynamicResource AccentGlowLowBrush}" CornerRadius="6" Padding="6,2" Cursor="Hand"
@@ -802,17 +803,38 @@
                                                 </Border>
                                             </Grid>
                                             
-                                            <Grid Margin="0,0,0,4" Background="Transparent" Cursor="Hand" ToolTip="クリックで Epoch Offset をコピー" MouseLeftButtonUp="CopyEpoch_Click">
+                                            <!-- 1. Epoch Offset -->
+                                            <Grid Margin="0,0,0,3" Background="Transparent" Cursor="Hand" ToolTip="クリックで Epoch Offset をコピー" MouseLeftButtonUp="CopyEpoch_Click">
                                                 <TextBlock Text="Epoch Offset" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                                 <TextBlock Text="1420070400000 ms" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
-                                            <Grid Margin="0,0,0,4" Background="Transparent" Cursor="Hand" ToolTip="クリックで Worker ID をコピー" MouseLeftButtonUp="CopyWorkerId_Click">
-                                                <TextBlock Text="Internal Worker ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock x:Name="TxtWorkerId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
+
+                                            <!-- 2. Creation Timestamp -->
+                                            <Grid Margin="0,0,0,3" Background="Transparent" Cursor="Hand" ToolTip="クリックで Creation Timestamp (ms) をコピー" MouseLeftButtonUp="CopyCreationTimestamp_Click">
+                                                <TextBlock Text="Creation Timestamp" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <TextBlock x:Name="TxtCreationTimestamp" Text="-- ms" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
                                             </Grid>
-                                            <Grid Background="Transparent" Cursor="Hand" ToolTip="クリックで Process ID をコピー" MouseLeftButtonUp="CopyProcessId_Click">
-                                                <TextBlock Text="Internal Process ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock x:Name="TxtProcessId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" FontFamily="Consolas" />
+
+                                            <!-- 3. Worker & Process ID -->
+                                            <Grid Margin="0,0,0,3" Background="Transparent" Cursor="Hand" ToolTip="クリックで Worker / Process ID をコピー" MouseLeftButtonUp="CopyWorkerProcess_Click">
+                                                <TextBlock Text="Worker / Process ID" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                    <TextBlock Text="Worker: " FontSize="11" Foreground="{DynamicResource TextMutedBrush}" FontFamily="Consolas" />
+                                                    <TextBlock x:Name="TxtWorkerId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" FontFamily="Consolas" />
+                                                    <TextBlock Text="  •  Process: " FontSize="11" Foreground="{DynamicResource TextMutedBrush}" FontFamily="Consolas" />
+                                                    <TextBlock x:Name="TxtProcessId" Text="--" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" FontFamily="Consolas" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- 4. Binary Representation (64-bit) -->
+                                            <Grid Background="Transparent" Cursor="Hand" ToolTip="クリックで Binary Representation (64-bit) をコピー" MouseLeftButtonUp="CopyBinary_Click" Margin="0,1,0,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Grid.Row="0" Text="Binary Representation (64-bit)" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,1" />
+                                                <TextBlock Grid.Row="1" x:Name="TxtBinary" Text="0000000000000000000000000000000000000000000000000000000000000000"
+                                                           FontSize="9.5" Foreground="{DynamicResource AccentCyanBrush}" FontFamily="Consolas" TextTrimming="CharacterEllipsis" />
                                             </Grid>
                                         </StackPanel>
                                     </Border>
