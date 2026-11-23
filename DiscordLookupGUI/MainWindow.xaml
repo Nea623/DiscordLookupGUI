@@ -322,10 +322,11 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!-- ID入力欄 -->
-                    <Grid Grid.Column="0" Margin="0,0,12,0">
+                    <Grid Grid.Column="0" Margin="0,0,10,0">
                         <TextBox x:Name="UserIdInput" 
                                  Style="{StaticResource CyberTextBox}" 
                                  Text=""
@@ -337,8 +338,21 @@
                                    Foreground="{DynamicResource InputPlaceholderBrush}" FontSize="13" VerticalAlignment="Center" Margin="14,0,0,0" IsHitTestVisible="False" />
                     </Grid>
 
+                    <!-- 🕒 履歴ドロップダウンボタン -->
+                    <Button Grid.Column="1" x:Name="BtnRecentLookups" Style="{StaticResource GlowButton}"
+                            Click="BtnRecentLookups_Click" ToolTip="検索履歴 (Recent Lookups)"
+                            Padding="12,8" Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="🕒" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text=" ▾" FontSize="10" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" Margin="2,0,0,0" />
+                        </StackPanel>
+                        <Button.ContextMenu>
+                            <ContextMenu x:Name="MenuRecentLookups" Style="{StaticResource CyberContextMenu}" />
+                        </Button.ContextMenu>
+                    </Button>
+
                     <!-- 検索ボタン -->
-                    <Button Grid.Column="1" x:Name="SearchButton" Style="{StaticResource GlowButton}" Content="LOOKUP USER" Click="SearchButton_Click" MinWidth="130" />
+                    <Button Grid.Column="2" x:Name="SearchButton" Style="{StaticResource GlowButton}" Content="LOOKUP USER" Click="SearchButton_Click" MinWidth="130" />
                 </Grid>
             </Border>
 

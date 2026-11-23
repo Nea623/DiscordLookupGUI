@@ -1063,6 +1063,9 @@ public partial class MainWindow : Window
         _isHidingResult = false;
         _currentUser = user;
 
+        // 検索成功したユーザーを検索履歴 (Recent Lookups) に追加
+        RecentLookupsStorage.AddOrUpdate(user.Id, user.Username, user.GlobalName, user.AvatarUrl);
+
         // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (0.5秒 / 500ms)
         EmptyStateView.Visibility = Visibility.Collapsed;
         SearchResultGrid.BeginAnimation(UIElement.OpacityProperty, null);
@@ -1981,6 +1984,217 @@ public partial class MainWindow : Window
             BadgeAutoLookupStatus.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
             BadgeAutoLookupStatus.SetResourceReference(Border.BackgroundProperty, "CardInnerBgBrush");
         }
+    }
+
+    #endregion
+
+    #region 検索履歴 (Recent Lookups) ロジック
+
+    private void BtnRecentLookups_Click(object sender, RoutedEventArgs e)
+    {
+        PopulateRecentLookupsMenu();
+        if (MenuRecentLookups != null)
+        {
+            MenuRecentLookups.PlacementTarget = BtnRecentLookups;
+            MenuRecentLookups.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            MenuRecentLookups.IsOpen = true;
+        }
+    }
+
+    private void PopulateRecentLookupsMenu()
+    {
+        if (MenuRecentLookups == null) return;
+        MenuRecentLookups.Items.Clear();
+
+        var list = RecentLookupsStorage.Load();
+        if (list.Count == 0)
+        {
+            var emptyItem = new MenuItem
+            {
+                Header = "履歴はありません (No recent lookups)",
+                IsEnabled = false,
+                Style = (Style)FindResource("CyberMenuItem")
+            };
+            emptyItem.SetResourceReference(MenuItem.ForegroundProperty, "TextMutedBrush");
+            MenuRecentLookups.Items.Add(emptyItem);
+            return;
+        }
+
+        // ヘッダーラベル
+        var headerBorder = new Border
+        {
+            Padding = new Thickness(12, 6, 12, 6),
+            BorderThickness = new Thickness(0, 0, 0, 1)
+        };
+        headerBorder.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
+        var headerText = new TextBlock
+        {
+            Text = $"🕒 最近検索したユーザー ({list.Count}件)",
+            FontSize = 11,
+            FontWeight = FontWeights.Bold
+        };
+        headerText.SetResourceReference(TextBlock.ForegroundProperty, "AccentCyanBrush");
+        headerBorder.Child = headerText;
+        MenuRecentLookups.Items.Add(headerBorder);
+
+        foreach (var item in list)
+        {
+            var menuItem = new MenuItem
+            {
+                Style = (Style)FindResource("CyberMenuItem"),
+                Cursor = Cursors.Hand,
+                Padding = new Thickness(8, 4, 10, 4)
+            };
+
+            var grid = new Grid { MinWidth = 250 };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            // 1. アバター画像
+            var avatarBorder = new Border
+            {
+                Width = 26,
+                Height = 26,
+                CornerRadius = new CornerRadius(13),
+                Margin = new Thickness(0, 0, 10, 0),
+                BorderThickness = new Thickness(1),
+                ClipToBounds = true
+            };
+            avatarBorder.SetResourceReference(Border.BackgroundProperty, "AccentGlowMidBrush");
+            avatarBorder.SetResourceReference(Border.BorderBrushProperty, "AccentCyanBrush");
+
+            if (!string.IsNullOrWhiteSpace(item.AvatarUrl))
+            {
+                var img = new Image { Stretch = Stretch.UniformToFill };
+                try
+                {
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.UriSource = new Uri(item.AvatarUrl);
+                    bmp.DecodePixelWidth = 52;
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.EndInit();
+                    img.Source = bmp;
+                }
+                catch
+                {
+                    // 読み込み失敗時はプレースホルダー
+                }
+                avatarBorder.Child = img;
+            }
+            else
+            {
+                var fallbackText = new TextBlock
+                {
+                    Text = "👤",
+                    FontSize = 12,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                avatarBorder.Child = fallbackText;
+            }
+            Grid.SetColumn(avatarBorder, 0);
+            grid.Children.Add(avatarBorder);
+
+            // 2. ユーザー名 ＆ ID
+            var textStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            var displayName = !string.IsNullOrWhiteSpace(item.GlobalName) ? item.GlobalName : item.Username;
+            var nameBlock = new TextBlock
+            {
+                Text = displayName,
+                FontWeight = FontWeights.Bold,
+                FontSize = 12,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                MaxWidth = 135
+            };
+            nameBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+
+            var subBlock = new TextBlock
+            {
+                Text = $"@{item.Username} • {item.UserId}",
+                FontSize = 10,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                MaxWidth = 135
+            };
+            subBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextMutedBrush");
+
+            textStack.Children.Add(nameBlock);
+            textStack.Children.Add(subBlock);
+            Grid.SetColumn(textStack, 1);
+            grid.Children.Add(textStack);
+
+            // 3. 相対時間
+            var timeBlock = new TextBlock
+            {
+                Text = FormatRelativeTime(item.LookedUpAt),
+                FontSize = 10,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+            timeBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+            Grid.SetColumn(timeBlock, 2);
+            grid.Children.Add(timeBlock);
+
+            menuItem.Header = grid;
+
+            // クリック時: 検索バーにセットして即座に検索
+            var targetUserId = item.UserId;
+            menuItem.Click += async (s, ev) =>
+            {
+                if (TabMain.IsChecked != true)
+                {
+                    TabMain.IsChecked = true;
+                }
+                UserIdInput.Text = targetUserId;
+                UserIdInput.CaretIndex = targetUserId.Length;
+                SetStatus($"LOOKUP FROM HISTORY: {targetUserId}", true);
+                await ExecuteLookupAsync();
+            };
+
+            MenuRecentLookups.Items.Add(menuItem);
+        }
+
+        // セパレーター
+        var sep = new Separator
+        {
+            Margin = new Thickness(6, 4, 6, 4)
+        };
+        sep.SetResourceReference(Separator.BackgroundProperty, "CardBorderBrush");
+        MenuRecentLookups.Items.Add(sep);
+
+        // 🗑️ 履歴クリア項目
+        var clearItem = new MenuItem
+        {
+            Style = (Style)FindResource("CyberMenuItem"),
+            Cursor = Cursors.Hand,
+            Padding = new Thickness(10, 6, 10, 6)
+        };
+        var clearStack = new StackPanel { Orientation = Orientation.Horizontal };
+        var clearIcon = new TextBlock { Text = "🗑️ ", FontSize = 12 };
+        var clearText = new TextBlock { Text = "履歴をすべて消去 (Clear All)", FontSize = 12, FontWeight = FontWeights.SemiBold };
+        clearText.SetResourceReference(TextBlock.ForegroundProperty, "DangerRedBrush");
+        clearStack.Children.Add(clearIcon);
+        clearStack.Children.Add(clearText);
+        clearItem.Header = clearStack;
+
+        clearItem.Click += (s, ev) =>
+        {
+            RecentLookupsStorage.Clear();
+            SetStatus("RECENT LOOKUPS CLEARED", true);
+        };
+
+        MenuRecentLookups.Items.Add(clearItem);
+    }
+
+    private static string FormatRelativeTime(DateTime timeUtc)
+    {
+        var span = DateTime.UtcNow - timeUtc;
+        if (span.TotalSeconds < 60) return "たった今";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}分前";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours}時間前";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays}日前";
+        return timeUtc.ToLocalTime().ToString("MM/dd");
     }
 
     #endregion
