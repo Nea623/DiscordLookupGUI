@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v2.4-4DF2D3?style=for-the-badge&logo=discord&logoColor=black)
+![Version](https://img.shields.io/badge/version-v2.5-4DF2D3?style=for-the-badge&logo=discord&logoColor=black)
 ![.NET 8](https://img.shields.io/badge/.NET-8.0_WPF-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D4?style=for-the-badge&logo=windows&logoColor=white)
 ![Single File](https://img.shields.io/badge/Release-Single--File_exe-10B981?style=for-the-badge)
@@ -11,7 +11,7 @@
 
 **近未来サイバーパンク調の洗練された Discord ユーザー情報検索（OSINT）デスクトップクライアント**
 
-[ダウンロード (Releases)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) • [機能紹介](#-主な機能) • [使い方](#-使い方) • [v2.4 徹底改修ログ](#-v24-徹底改修ログ修正に修正を重ねまくった完全版) • [クレジット](#-クレジット)
+[ダウンロード (Releases)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) • [機能紹介](#-主な機能) • [使い方](#-使い方) • [v2.5 アップデート内容](#-v25-アップデート内容) • [クレジット](#-クレジット)
 
 <br />
 
@@ -80,7 +80,7 @@
 ## 🚀 使い方
 
 ### 1. ダウンロード
-[GitHub Releases (v2.4)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookupGUI.exe`** をダウンロードします。
+[GitHub Releases (v2.5)](https://github.com/Nea623/DiscordLookupGUI/releases/latest) から **`DiscordLookupGUI.exe`** をダウンロードします。
 
 > [!NOTE]
 > **Windows SmartScreen の警告が表示された場合**  
@@ -100,7 +100,26 @@
 
 ---
 
-## 🔧 v2.4 徹底改修ログ（修正に修正を重ねまくった完全版）
+## ⚡ v2.5 アップデート内容
+
+- 📋 **クリップボード自動検知（Auto-Lookup）＆ 設定記憶**:
+  - DiscordやWebブラウザでID・メンション・URLをコピー（`Ctrl+C`）した瞬間、Win32 APIイベント駆動で即座に検知し自動検索！
+  - `Settings` タブのサイバー風トグルスイッチでいつでも ON/OFF 可能（設定はローカルに自動保存）。自前コピー誤爆防止・重複ガード完備。
+- 🕒 **検索履歴（Recent Lookups）クイックドロップダウン**:
+  - 検索バー横の「🕒」ボタンから、直近最大20件の履歴を丸型アバターサムネイル・表示名・ID・相対時間付きで一覧表示。
+  - ワンクリックで即座再検索＆全消去機能付き（プライバシー配慮）。
+- 🔍 **メンション・URL・テキストからのID自動抽出**:
+  - `<@ID>`, `<@!ID>`, `discord.com/users/{id}`, `ユーザー: {id}` など、あらゆるテキストからSnowflake IDを瞬時に自動抽出。
+- 🟣 **公式Discordコミュニティ（⚡DLG Community）招待ボタン**:
+  - `Settings` ➔ `About` に公式コミュニティサーバーへのワンクリック招待ボタンを新設。
+- ⚡ **Snowflake Decoding の強化**:
+  - `Creation Timestamp (ms)`（UNIX絶対ミリ秒）の解析表示を追加。
+- 🎨 **バナー読み込み時のチラつき（フラッシュ）完全解消**:
+  - バナー画像があるユーザーを表示する際、画像のダウンロード完了前にアクセントカラーが一瞬パッと光る現象を根治。
+
+---
+
+## 🔧 過去の徹底改修ログ (v2.4)
 
 > **v2.4 リリース後、「潜在バグは1つ残らず叩き潰す！」の勢いで全コードを総点検＆分散監査し、修正に修正を重ねまくって極限まで磨き上げた改訂版です。** 🛠️🔥
 
