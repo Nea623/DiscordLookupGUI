@@ -305,6 +305,7 @@
                                     <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌌  Stargazer Theme" Click="SelectThemeStargazer_Click" Style="{StaticResource CyberMenuItem}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -938,6 +939,7 @@
                                             <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
                                             <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
                                             <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
+                                            <MenuItem Header="🌌  Stargazer Theme" Click="SelectThemeStargazer_Click" Style="{StaticResource CyberMenuItem}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>
