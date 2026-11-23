@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 
@@ -26,6 +27,7 @@ public static class ThemeManager
         "DiscordLookupGUI",
         "theme_settings.json"
     );
+    private static readonly object _saveLock = new();
 
     /// <summary>
     /// 保存されているテーマを読み込んで適用する
@@ -146,21 +148,40 @@ public static class ThemeManager
 
     private static void SaveTheme(AppTheme theme)
     {
-        try
+        lock (_saveLock)
         {
             var dir = Path.GetDirectoryName(SettingsFilePath);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
+            var tempPath = string.IsNullOrEmpty(dir)
+                ? $"theme_settings_{Guid.NewGuid():N}.tmp"
+                : Path.Combine(dir, $"theme_settings_{Guid.NewGuid():N}.tmp");
 
-            var settings = new ThemeSettings { SelectedTheme = theme.ToString() };
-            var json = JsonSerializer.Serialize(settings);
-            File.WriteAllText(SettingsFilePath, json);
-        }
-        catch
-        {
-            // 保存失敗時は無視
+            try
+            {
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                var settings = new ThemeSettings { SelectedTheme = theme.ToString() };
+                var json = JsonSerializer.Serialize(settings);
+                File.WriteAllText(tempPath, json, Encoding.UTF8);
+                File.Move(tempPath, SettingsFilePath, overwrite: true);
+            }
+            catch (Exception ex)
+            {
+                App.LogException("ThemeManager.SaveTheme", ex);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch { }
+                }
+            }
         }
     }
 

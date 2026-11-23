@@ -73,9 +73,26 @@ public partial class MainWindow : Window
 
     private const int WM_CLIPBOARDUPDATE = 0x031D;
 
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(200);
+    private static readonly Regex PureSnowflakeRegex = new(@"^\d{17,20}$", RegexOptions.Compiled, RegexTimeout);
+    private static readonly Regex MentionRegex = new(@"<@!?(\d{17,20})>", RegexOptions.Compiled, RegexTimeout);
+    private static readonly Regex UserUrlRegex = new(@"discord(?:app)?\.com/users/(\d{17,20})", RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
+    private static readonly Regex DmUrlRegex = new(@"discord(?:app)?\.com/channels/@me/(\d{17,20})", RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
+    private static readonly Regex GuildChannelUrlRegex = new(@"discord(?:app)?\.com/channels/\d{17,20}/", RegexOptions.Compiled | RegexOptions.IgnoreCase, RegexTimeout);
+    private static readonly Regex GeneralSnowflakeRegex = new(@"(?<!\d)(\d{17,20})(?!\d)", RegexOptions.Compiled, RegexTimeout);
+
+    private const int MaxHistoryAvatarCacheItems = 40;
+    private readonly Dictionary<string, LinkedListNode<(string Url, BitmapSource Image)>> _historyAvatarCache = new();
+    private readonly LinkedList<(string Url, BitmapSource Image)> _historyAvatarCacheLru = new();
+    private int _recentMenuVersion = 0;
+
     private bool _isClipboardListenerRegistered = false;
     private bool _isAutoLookupEnabled = false;
+    private bool _isInitializingAutoLookup = false;
     private string _lastAutoLookupId = string.Empty;
+    private string _lastClipboardText = string.Empty;
+    private string _lastSuppressedClipboardText = string.Empty;
+    private int _clipboardCheckVersion = 0;
     private int _suppressClipboardEvents = 0;
     private HwndSource? _hwndSource = null;
 
@@ -171,11 +188,19 @@ public partial class MainWindow : Window
         Activated += MainWindow_Activated;
 
         var config = AppSettingsStorage.LoadConfig();
-        _isAutoLookupEnabled = config.AutoLookupEnabled;
-        UpdateAutoLookupUi(_isAutoLookupEnabled);
-        if (_isAutoLookupEnabled)
+        _isInitializingAutoLookup = true;
+        try
         {
-            RegisterClipboardListener();
+            _isAutoLookupEnabled = config.AutoLookupEnabled;
+            UpdateAutoLookupUi(_isAutoLookupEnabled);
+            if (_isAutoLookupEnabled)
+            {
+                RegisterClipboardListener();
+            }
+        }
+        finally
+        {
+            _isInitializingAutoLookup = false;
         }
     }
 
@@ -191,6 +216,8 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _isClosed = true;
+        ++_clipboardCheckVersion;
+        ++_recentMenuVersion;
         UnregisterClipboardListener();
         if (_hwndSource != null)
         {
@@ -211,6 +238,7 @@ public partial class MainWindow : Window
         ClearAllResultImages();
         _imageLoadTokens.Clear();
         ClearNameplateCache();
+        ClearHistoryAvatarCache();
         base.OnClosed(e);
     }
 
@@ -621,6 +649,54 @@ public partial class MainWindow : Window
         }
     }
 
+    private bool TryGetHistoryAvatarCache(string url, out BitmapSource? image)
+    {
+        lock (_historyAvatarCache)
+        {
+            if (_historyAvatarCache.TryGetValue(url, out var node))
+            {
+                _historyAvatarCacheLru.Remove(node);
+                _historyAvatarCacheLru.AddFirst(node);
+                image = node.Value.Image;
+                return true;
+            }
+            image = null;
+            return false;
+        }
+    }
+
+    private void AddHistoryAvatarCache(string url, BitmapSource image)
+    {
+        lock (_historyAvatarCache)
+        {
+            if (_historyAvatarCache.TryGetValue(url, out var existing))
+            {
+                _historyAvatarCacheLru.Remove(existing);
+                _historyAvatarCache.Remove(url);
+            }
+
+            while (_historyAvatarCache.Count >= MaxHistoryAvatarCacheItems && _historyAvatarCacheLru.Last != null)
+            {
+                var tail = _historyAvatarCacheLru.Last;
+                _historyAvatarCache.Remove(tail.Value.Url);
+                _historyAvatarCacheLru.RemoveLast();
+            }
+
+            var node = new LinkedListNode<(string Url, BitmapSource Image)>((url, image));
+            _historyAvatarCacheLru.AddFirst(node);
+            _historyAvatarCache[url] = node;
+        }
+    }
+
+    private void ClearHistoryAvatarCache()
+    {
+        lock (_historyAvatarCache)
+        {
+            _historyAvatarCache.Clear();
+            _historyAvatarCacheLru.Clear();
+        }
+    }
+
     private void CancelActiveLookup()
     {
         ++_lookupVersion;
@@ -850,41 +926,110 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// 入力文字列（メンション &lt;@ID&gt;、ユーザーURL、または純粋なSnowflake）からDiscordユーザーIDを自動抽出
+    /// 抽出された数値が有効な Discord Snowflake ID の範囲内かを検証
     /// </summary>
-    private static string ExtractUserId(string input)
+    private static bool IsValidDiscordSnowflake(string id)
     {
-        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-        var s = input.Trim();
+        if (string.IsNullOrEmpty(id) || id.Length is < 17 or > 20) return false;
+        if (!ulong.TryParse(id, out var raw) || raw < (1UL << 22)) return false;
 
-        // 1. 純粋な 17〜20 桁の数値
-        if (Regex.IsMatch(s, @"^\d{17,20}$"))
-            return s;
-
-        // 2. メンション形式: <@123456789012345678> または <@!123456789012345678>
-        var mentionMatch = Regex.Match(s, @"<@!?(\d{17,20})>");
-        if (mentionMatch.Success)
-            return mentionMatch.Groups[1].Value;
-
-        // 3. プロフィールURL: discord.com/users/{id}
-        var userUrlMatch = Regex.Match(s, @"discord(?:app)?\.com/users/(\d{17,20})", RegexOptions.IgnoreCase);
-        if (userUrlMatch.Success)
-            return userUrlMatch.Groups[1].Value;
-
-        // 4. DMリンク: discord.com/channels/@me/{id}
-        var dmUrlMatch = Regex.Match(s, @"discord(?:app)?\.com/channels/@me/(\d{17,20})", RegexOptions.IgnoreCase);
-        if (dmUrlMatch.Success)
-            return dmUrlMatch.Groups[1].Value;
-
-        // 5. テキスト内に含まれる 17〜20 桁の Snowflake を検索
-        var generalMatch = Regex.Match(s, @"(?<!\d)(\d{17,20})(?!\d)");
-        if (generalMatch.Success)
-            return generalMatch.Groups[1].Value;
-
-        return s;
+        long timestampMs = (long)((raw >> 22) + 1420070400000UL);
+        long maxAllowedMs = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds();
+        return timestampMs <= maxAllowedMs;
     }
 
-    private async Task ExecuteLookupAsync()
+    /// <summary>
+    /// 入力文字列（メンション &lt;@ID&gt;、ユーザーURL、または純粋なSnowflake）からDiscordユーザーIDを自動抽出
+    /// </summary>
+    private static bool TryExtractUserId(string input, out string extractedId, bool strictForClipboard = false)
+    {
+        extractedId = string.Empty;
+        if (string.IsNullOrWhiteSpace(input)) return false;
+        if (strictForClipboard && input.Length > 2048) return false;
+
+        var s = input.Trim();
+        try
+        {
+            // 1. 純粋な 17〜20 桁の数値
+            if (PureSnowflakeRegex.IsMatch(s))
+            {
+                if (!strictForClipboard || IsValidDiscordSnowflake(s))
+                {
+                    extractedId = s;
+                    return true;
+                }
+                return false;
+            }
+
+            // 2. メンション形式: <@123456789012345678> または <@!123456789012345678>
+            var mentionMatch = MentionRegex.Match(s);
+            if (mentionMatch.Success)
+            {
+                var candidate = mentionMatch.Groups[1].Value;
+                if (!strictForClipboard || IsValidDiscordSnowflake(candidate))
+                {
+                    extractedId = candidate;
+                    return true;
+                }
+            }
+
+            // 3. プロフィールURL: discord.com/users/{id}
+            var userUrlMatch = UserUrlRegex.Match(s);
+            if (userUrlMatch.Success)
+            {
+                var candidate = userUrlMatch.Groups[1].Value;
+                if (!strictForClipboard || IsValidDiscordSnowflake(candidate))
+                {
+                    extractedId = candidate;
+                    return true;
+                }
+            }
+
+            // 4. DMリンク: discord.com/channels/@me/{id}
+            var dmUrlMatch = DmUrlRegex.Match(s);
+            if (dmUrlMatch.Success)
+            {
+                var candidate = dmUrlMatch.Groups[1].Value;
+                if (!strictForClipboard || IsValidDiscordSnowflake(candidate))
+                {
+                    extractedId = candidate;
+                    return true;
+                }
+            }
+
+            // 5. クリップボード厳格モードではサーバー/チャンネル/メッセージURLからの誤爆をブロック
+            if (strictForClipboard && GuildChannelUrlRegex.IsMatch(s))
+            {
+                return false;
+            }
+
+            // 6. テキスト内に含まれる 17〜20 桁の Snowflake を検索
+            var generalMatch = GeneralSnowflakeRegex.Match(s);
+            if (generalMatch.Success)
+            {
+                var candidate = generalMatch.Groups[1].Value;
+                if (!strictForClipboard || IsValidDiscordSnowflake(candidate))
+                {
+                    extractedId = candidate;
+                    return true;
+                }
+            }
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            extractedId = string.Empty;
+            return false;
+        }
+
+        return false;
+    }
+
+    private static string ExtractUserId(string input)
+    {
+        return TryExtractUserId(input, out var id, strictForClipboard: false) ? id : (input?.Trim() ?? string.Empty);
+    }
+
+    private async Task ExecuteLookupAsync(bool isAutoLookup = false)
     {
         CancellationToken ct = default;
         int myVersion = -1;
@@ -910,7 +1055,14 @@ public partial class MainWindow : Window
 
             if (!ulong.TryParse(extractedId, out var userId) || userId == 0)
             {
-                MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。\n※ メンション <@ID> や プロフィールURL にも対応しています。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (isAutoLookup)
+                {
+                    SetStatus("AUTO-LOOKUP SKIPPED: 無効な ID 形式", false);
+                }
+                else
+                {
+                    MessageBox.Show("有効な数値のユーザーID（Snowflake）を入力してください。\n※ メンション <@ID> や プロフィールURL にも対応しています。", "フォーマットエラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
                 return;
             }
 
@@ -918,14 +1070,28 @@ public partial class MainWindow : Window
             var token = NormalizeToken(GetEffectiveToken());
             if (string.IsNullOrWhiteSpace(token))
             {
-                MessageBox.Show("Bot トークンを取得できませんでした。\nSettings からトークンを設定してください。", "トークン未設定", MessageBoxButton.OK, MessageBoxImage.Warning);
-                TabSettings.IsChecked = true;
+                if (isAutoLookup)
+                {
+                    SetStatus("TOKEN NOT SET: Settings でトークンを設定してください", false);
+                }
+                else
+                {
+                    MessageBox.Show("Bot トークンを取得できませんでした。\nSettings からトークンを設定してください。", "トークン未設定", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    TabSettings.IsChecked = true;
+                }
                 return;
             }
             if (!IsValidTokenFormat(token))
             {
-                MessageBox.Show("Bot トークンの形式が不正です（空白・改行・非ASCII文字が含まれています）。\nSettings のトークン設定を確認してください。", "トークン形式エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
-                TabSettings.IsChecked = true;
+                if (isAutoLookup)
+                {
+                    SetStatus("INVALID TOKEN FORMAT", false);
+                }
+                else
+                {
+                    MessageBox.Show("Bot トークンの形式が不正です（空白・改行・非ASCII文字が含まれています）。\nSettings のトークン設定を確認してください。", "トークン形式エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    TabSettings.IsChecked = true;
+                }
                 return;
             }
 
@@ -936,7 +1102,7 @@ public partial class MainWindow : Window
             ct = cts.Token;
 
             SearchButton.IsEnabled = false;
-            SetStatus("LOOKING UP USER...", true);
+            SetStatus(isAutoLookup ? "AUTO-LOOKING UP USER..." : "LOOKING UP USER...", true);
 
             // API リクエスト (静的 HttpClient を再利用して Keep-Alive 接続により超高速化)
             using var request = new HttpRequestMessage(HttpMethod.Get, $"https://discord.com/api/v10/users/{userId}");
@@ -954,32 +1120,35 @@ public partial class MainWindow : Window
             if (!response.IsSuccessStatusCode)
             {
                 int code = (int)response.StatusCode;
-                SetStatus($"API ERROR: {code}", false);
-                if (code == 429)
+                SetStatus(isAutoLookup && code == 404 ? $"AUTO-LOOKUP (NOT A USER ID): {userId}" : $"API ERROR: {code}", false);
+                if (!isAutoLookup)
                 {
-                    string? retryInfo = null;
-                    if (response.Headers.TryGetValues("Retry-After", out var retryVals) ||
-                        response.Headers.TryGetValues("X-RateLimit-Reset-After", out retryVals))
+                    if (code == 429)
                     {
-                        retryInfo = retryVals.FirstOrDefault();
+                        string? retryInfo = null;
+                        if (response.Headers.TryGetValues("Retry-After", out var retryVals) ||
+                            response.Headers.TryGetValues("X-RateLimit-Reset-After", out retryVals))
+                        {
+                            retryInfo = retryVals.FirstOrDefault();
+                        }
+                        var waitMsg = !string.IsNullOrWhiteSpace(retryInfo)
+                            ? $"約 {retryInfo} 秒待ってから再試行してください。"
+                            : "数秒待ってから再試行してください。";
+                        MessageBox.Show($"Discord API のレート制限 (429 Too Many Requests) に達しました。\n{waitMsg}", "レート制限", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
-                    var waitMsg = !string.IsNullOrWhiteSpace(retryInfo)
-                        ? $"約 {retryInfo} 秒待ってから再試行してください。"
-                        : "数秒待ってから再試行してください。";
-                    MessageBox.Show($"Discord API のレート制限 (429 Too Many Requests) に達しました。\n{waitMsg}", "レート制限", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-                else if (code == 404)
-                {
-                    MessageBox.Show("指定されたユーザーIDは見つかりませんでした。", "検索結果なし (404)", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else if (code == 401 || code == 403)
-                {
-                    MessageBox.Show($"Bot トークンが無効またはアクセス権限が不足しています ({code})。\nSettings のトークン設定を確認してください。", "認証エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                else
-                {
-                    var truncated = content.Length > 300 ? content.Substring(0, 300) + "..." : content;
-                    MessageBox.Show($"Discord API エラー:\n{code} {response.ReasonPhrase}\n\n{truncated}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    else if (code == 404)
+                    {
+                        MessageBox.Show("指定されたユーザーIDは見つかりませんでした。", "検索結果なし (404)", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else if (code == 401 || code == 403)
+                    {
+                        MessageBox.Show($"Bot トークンが無効またはアクセス権限が不足しています ({code})。\nSettings のトークン設定を確認してください。", "認証エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    else
+                    {
+                        var truncated = content.Length > 300 ? content.Substring(0, 300) + "..." : content;
+                        MessageBox.Show($"Discord API エラー:\n{code} {response.ReasonPhrase}\n\n{truncated}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
                 return;
             }
@@ -1017,16 +1186,19 @@ public partial class MainWindow : Window
             if (user == null)
             {
                 SetStatus("PARSE ERROR", false);
-                var msg = string.IsNullOrEmpty(parseError)
-                    ? "ユーザーデータの解析に失敗しました（空のレスポンスまたは無効なデータ）。"
-                    : $"ユーザーデータの解析に失敗しました:\n{parseError}";
-                MessageBox.Show(msg, "パースエラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!isAutoLookup)
+                {
+                    var msg = string.IsNullOrEmpty(parseError)
+                        ? "ユーザーデータの解析に失敗しました（空のレスポンスまたは無効なデータ）。"
+                        : $"ユーザーデータの解析に失敗しました:\n{parseError}";
+                    MessageBox.Show(msg, "パースエラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 return;
             }
 
             user.Id = userId.ToString();
             DisplayUser(user, userId, ct);
-            SetStatus("USER LOADED SUCCESSFULLY", true);
+            SetStatus(isAutoLookup ? $"AUTO-LOOKUP SUCCESS: {user.DisplayUsername}" : "USER LOADED SUCCESSFULLY", true);
         }
         catch (OperationCanceledException)
         {
@@ -1035,19 +1207,29 @@ public partial class MainWindow : Window
                 return;
             }
             SetStatus("REQUEST TIMEOUT", false);
-            MessageBox.Show("Discord API への接続がタイムアウトしました（10秒）。\n時間をおいて再試行してください。", "タイムアウト", MessageBoxButton.OK, MessageBoxImage.Warning);
+            if (!isAutoLookup)
+            {
+                MessageBox.Show("Discord API への接続がタイムアウトしました（10秒）。\n時間をおいて再試行してください。", "タイムアウト", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
         catch (HttpRequestException ex)
         {
             if (myVersion != _lookupVersion) return;
             SetStatus("NETWORK ERROR", false);
-            MessageBox.Show($"ネットワーク接続エラーが発生しました:\n{ex.Message}", "通信エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (!isAutoLookup)
+            {
+                MessageBox.Show($"ネットワーク接続エラーが発生しました:\n{ex.Message}", "通信エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         catch (Exception ex)
         {
             if (myVersion != _lookupVersion) return;
+            App.LogException("ExecuteLookupAsync", ex);
             SetStatus("ERROR OCCURRED", false);
-            MessageBox.Show($"エラーが発生しました:\n{ex.Message}", "例外エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (!isAutoLookup)
+            {
+                MessageBox.Show($"エラーが発生しました:\n{ex.Message}", "例外エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         finally
         {
@@ -1065,7 +1247,7 @@ public partial class MainWindow : Window
         _currentUser = user;
 
         // 検索成功したユーザーを検索履歴 (Recent Lookups) に追加
-        RecentLookupsStorage.AddOrUpdate(user.Id, user.Username, user.GlobalName, user.AvatarUrl);
+        RecentLookupsStorage.AddOrUpdate(user.Id, user.Username, user.DisplayUsername, user.GlobalName, user.AvatarUrl);
 
         // 検索結果表示に切り替え & 上品なフェードイン＋スライド演出 (0.5秒 / 500ms)
         EmptyStateView.Visibility = Visibility.Collapsed;
@@ -1273,17 +1455,35 @@ public partial class MainWindow : Window
         if (!string.IsNullOrEmpty(_currentBannerUrl))
         {
             // バナー画像がある場合: 画像ロード前にアクセントカラーを適用すると一瞬チラつくため、
-            // デフォルト背景のままバナー画像を先にロードし、画像ロード完了後に裏のアクセントカラーを適用する
+            // デフォルト背景のままバナー画像を先にロードし、画像描画後に裏のアクセントカラーを適用する
             BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
             BannerImage.Visibility = Visibility.Visible;
 
-            _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct, onLoaded: () =>
+            _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct, onCompleted: loaded =>
             {
+                if (_isClosed || ct.IsCancellationRequested || _currentUser != user) return;
+
+                if (!loaded)
+                {
+                    BannerImage.Visibility = Visibility.Collapsed;
+                    if (resolvedAccentColor.HasValue)
+                    {
+                        var brush = new SolidColorBrush(resolvedAccentColor.Value);
+                        brush.Freeze();
+                        BannerContainer.Background = brush;
+                    }
+                    return;
+                }
+
                 if (resolvedAccentColor.HasValue)
                 {
-                    var brush = new SolidColorBrush(resolvedAccentColor.Value);
-                    brush.Freeze();
-                    BannerContainer.Background = brush;
+                    Dispatcher.InvokeAsync(() =>
+                    {
+                        if (_isClosed || ct.IsCancellationRequested || _currentUser != user) return;
+                        var brush = new SolidColorBrush(resolvedAccentColor.Value);
+                        brush.Freeze();
+                        BannerContainer.Background = brush;
+                    }, System.Windows.Threading.DispatcherPriority.Render);
                 }
             });
         }
@@ -1546,7 +1746,7 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default, Action? onLoaded = null)
+    private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default, Action<bool>? onCompleted = null)
     {
         var targetsAll = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
         int token = AdvanceImageToken(targetsAll);
@@ -1595,7 +1795,7 @@ public partial class MainWindow : Window
                     _currentApngController = new ApngAnimationController(targetsAll, frames);
                     _currentApngController.Start();
                     UpdateApngAnimationsPlayback();
-                    onLoaded?.Invoke();
+                    onCompleted?.Invoke(true);
                     return;
                 }
 
@@ -1614,7 +1814,7 @@ public partial class MainWindow : Window
                 {
                     t.Source = bitmap;
                 }
-                onLoaded?.Invoke();
+                onCompleted?.Invoke(true);
                 return;
             }
 
@@ -1632,7 +1832,7 @@ public partial class MainWindow : Window
                     ClearImageControl(t);
                     XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, new MemoryStream(data));
                 }
-                onLoaded?.Invoke();
+                onCompleted?.Invoke(true);
             }
             else
             {
@@ -1650,7 +1850,7 @@ public partial class MainWindow : Window
                     ClearImageControl(t);
                     t.Source = bmp;
                 }
-                onLoaded?.Invoke();
+                onCompleted?.Invoke(true);
             }
         }
         catch (OperationCanceledException)
@@ -1665,6 +1865,7 @@ public partial class MainWindow : Window
                 {
                     try { ClearImageControl(t); } catch { }
                 }
+                onCompleted?.Invoke(false);
             }
         }
     }
@@ -1749,13 +1950,15 @@ public partial class MainWindow : Window
         {
             try
             {
-                _suppressClipboardEvents = 1;
+                _suppressClipboardEvents = _isAutoLookupEnabled ? 1 : 0;
+                _lastSuppressedClipboardText = text;
                 Clipboard.SetDataObject(text, true);
                 SetStatus($"COPIED: {description}", true);
                 return;
             }
             catch
             {
+                _suppressClipboardEvents = 0;
                 if (attempt < 2)
                 {
                     Thread.Sleep(20);
@@ -1859,7 +2062,10 @@ public partial class MainWindow : Window
     {
         if (msg == WM_CLIPBOARDUPDATE)
         {
-            OnClipboardChanged();
+            if (!_isClosing && !_isClosed && _isAutoLookupEnabled)
+            {
+                Dispatcher.BeginInvoke(OnClipboardChanged);
+            }
             handled = true;
         }
         return IntPtr.Zero;
@@ -1867,65 +2073,72 @@ public partial class MainWindow : Window
 
     private void MainWindow_Activated(object? sender, EventArgs e)
     {
-        if (_isAutoLookupEnabled)
+        if (!_isClosing && !_isClosed && _isAutoLookupEnabled)
         {
-            CheckClipboardForDiscordId();
+            _ = CheckClipboardForDiscordIdAsync();
         }
     }
 
     private void OnClipboardChanged()
     {
-        if (!_isAutoLookupEnabled) return;
+        if (_isClosing || _isClosed || !_isAutoLookupEnabled) return;
         if (_suppressClipboardEvents > 0)
         {
             _suppressClipboardEvents--;
             return;
         }
-        CheckClipboardForDiscordId();
+        _ = CheckClipboardForDiscordIdAsync();
     }
 
-    private void CheckClipboardForDiscordId()
+    private async Task CheckClipboardForDiscordIdAsync()
     {
-        if (!_isAutoLookupEnabled) return;
+        if (_isClosing || _isClosed || !_isAutoLookupEnabled) return;
+        if (MainContentContainer != null && !MainContentContainer.IsEnabled) return;
 
-        string? text = null;
-        for (int attempt = 0; attempt < 3; attempt++)
+        int myCheckVersion = ++_clipboardCheckVersion;
+
+        try
         {
-            try
+            string? text = null;
+            for (int attempt = 0; attempt < 3; attempt++)
             {
-                if (Clipboard.ContainsText())
+                if (_isClosing || _isClosed || !_isAutoLookupEnabled || _clipboardCheckVersion != myCheckVersion) return;
+
+                try
                 {
-                    text = Clipboard.GetText();
-                    break;
+                    if (Clipboard.ContainsText())
+                    {
+                        text = Clipboard.GetText();
+                        break;
+                    }
+                    return;
                 }
+                catch
+                {
+                    if (attempt >= 2) return;
+                }
+
+                await Task.Delay(35);
+            }
+
+            if (_isClosing || _isClosed || !_isAutoLookupEnabled || _clipboardCheckVersion != myCheckVersion) return;
+            if (string.IsNullOrWhiteSpace(text)) return;
+            if (string.Equals(text, _lastSuppressedClipboardText, StringComparison.Ordinal)) return;
+            if (string.Equals(text, _lastClipboardText, StringComparison.Ordinal)) return;
+
+            _lastClipboardText = text;
+
+            if (!TryExtractUserId(text, out var extractedId, strictForClipboard: true)) return;
+
+            // 同一IDの連続自動検索、または既に表示中ユーザーと完全一致する場合はスキップ
+            if (extractedId == _lastAutoLookupId) return;
+            if (UserIdInput.Text.Trim() == extractedId && _currentUser != null && _currentUser.Id == extractedId)
+            {
                 return;
             }
-            catch
-            {
-                Thread.Sleep(30);
-            }
-        }
 
-        if (string.IsNullOrWhiteSpace(text)) return;
+            _lastAutoLookupId = extractedId;
 
-        var extractedId = ExtractUserId(text);
-        if (string.IsNullOrEmpty(extractedId)) return;
-        if (!ulong.TryParse(extractedId, out _)) return;
-
-        // 同一IDの連続自動検索を抑制
-        if (extractedId == _lastAutoLookupId) return;
-
-        // すでに対象IDのユーザーが表示中かつ入力欄に同一IDが入っている場合はスキップ
-        if (UserIdInput.Text.Trim() == extractedId && _currentUser != null && _currentUser.Id.ToString() == extractedId)
-        {
-            return;
-        }
-
-        _lastAutoLookupId = extractedId;
-
-        Dispatcher.InvokeAsync(async () =>
-        {
-            // 他のタブが開かれていた場合はMainタブに切り替えて結果を見せる
             if (TabMain.IsChecked != true)
             {
                 TabMain.IsChecked = true;
@@ -1934,8 +2147,12 @@ public partial class MainWindow : Window
             UserIdInput.Text = extractedId;
             UserIdInput.CaretIndex = extractedId.Length;
             SetStatus($"AUTO-LOOKUP (CLIPBOARD): {extractedId}", true);
-            await ExecuteLookupAsync();
-        });
+            await ExecuteLookupAsync(isAutoLookup: true);
+        }
+        catch (Exception ex)
+        {
+            App.LogException("CheckClipboardForDiscordIdAsync", ex);
+        }
     }
 
     private void RegisterClipboardListener()
@@ -1975,17 +2192,26 @@ public partial class MainWindow : Window
 
     private void ToggleAutoLookup_Checked(object sender, RoutedEventArgs e)
     {
+        if (_isInitializingAutoLookup) return;
+
         _isAutoLookupEnabled = true;
+        _suppressClipboardEvents = 0;
         UpdateAutoLookupUi(true);
         RegisterClipboardListener();
         AppSettingsStorage.SaveConfig(new AppConfig { AutoLookupEnabled = true });
         SetStatus("CLIPBOARD AUTO-LOOKUP: ACTIVATED", true);
-        CheckClipboardForDiscordId();
+        _ = CheckClipboardForDiscordIdAsync();
     }
 
     private void ToggleAutoLookup_Unchecked(object sender, RoutedEventArgs e)
     {
+        if (_isInitializingAutoLookup) return;
+
         _isAutoLookupEnabled = false;
+        _suppressClipboardEvents = 0;
+        _lastAutoLookupId = string.Empty;
+        _lastClipboardText = string.Empty;
+        ++_clipboardCheckVersion;
         UpdateAutoLookupUi(false);
         UnregisterClipboardListener();
         AppSettingsStorage.SaveConfig(new AppConfig { AutoLookupEnabled = false });
@@ -2030,9 +2256,45 @@ public partial class MainWindow : Window
         }
     }
 
+    private async Task LoadHistoryAvatarAsync(string url, Ellipse avatarCircle, TextBlock fallbackText, int menuVersion)
+    {
+        try
+        {
+            if (_isClosed || _recentMenuVersion != menuVersion) return;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return;
+
+            var data = await _imageClient.GetByteArrayAsync(uri);
+            if (_isClosed || _recentMenuVersion != menuVersion) return;
+
+            var bmp = new BitmapImage();
+            using (var ms = new MemoryStream(data))
+            {
+                bmp.BeginInit();
+                bmp.StreamSource = ms;
+                bmp.DecodePixelWidth = 52;
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+            }
+            bmp.Freeze();
+
+            AddHistoryAvatarCache(url, bmp);
+
+            if (!_isClosed && _recentMenuVersion == menuVersion)
+            {
+                avatarCircle.Fill = new ImageBrush(bmp) { Stretch = Stretch.UniformToFill };
+                fallbackText.Visibility = Visibility.Collapsed;
+            }
+        }
+        catch
+        {
+            // 読み込み失敗・404時はプレースホルダー(👤)を維持
+        }
+    }
+
     private void PopulateRecentLookupsMenu()
     {
         if (MenuRecentLookups == null) return;
+        int menuVersion = ++_recentMenuVersion;
         MenuRecentLookups.Items.Clear();
 
         var list = RecentLookupsStorage.Load();
@@ -2049,11 +2311,13 @@ public partial class MainWindow : Window
             return;
         }
 
-        // ヘッダーラベル
+        // ヘッダーラベル (フォーカス不可・非インタラクティブ)
         var headerBorder = new Border
         {
             Padding = new Thickness(12, 6, 12, 6),
-            BorderThickness = new Thickness(0, 0, 0, 1)
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Focusable = false,
+            IsHitTestVisible = false
         };
         headerBorder.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
         var headerText = new TextBlock
@@ -2080,7 +2344,7 @@ public partial class MainWindow : Window
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            // 1. 真円アバター画像 (Ellipse + ImageBrush)
+            // 1. 真円アバター画像 (LRUキャッシュ + 非同期ロード + 👤フォールバック)
             var avatarContainer = new Grid
             {
                 Width = 26,
@@ -2099,38 +2363,28 @@ public partial class MainWindow : Window
             avatarCircle.SetResourceReference(Shape.FillProperty, "AccentGlowMidBrush");
             avatarContainer.Children.Add(avatarCircle);
 
-            bool imageLoaded = false;
+            var fallbackText = new TextBlock
+            {
+                Text = "👤",
+                FontSize = 12,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            avatarContainer.Children.Add(fallbackText);
+
             if (!string.IsNullOrWhiteSpace(item.AvatarUrl))
             {
-                try
+                if (TryGetHistoryAvatarCache(item.AvatarUrl, out var cachedBmp) && cachedBmp != null)
                 {
-                    var bmp = new BitmapImage();
-                    bmp.BeginInit();
-                    bmp.UriSource = new Uri(item.AvatarUrl);
-                    bmp.DecodePixelWidth = 52;
-                    bmp.CacheOption = BitmapCacheOption.OnLoad;
-                    bmp.EndInit();
-
-                    avatarCircle.Fill = new ImageBrush(bmp) { Stretch = Stretch.UniformToFill };
-                    imageLoaded = true;
+                    avatarCircle.Fill = new ImageBrush(cachedBmp) { Stretch = Stretch.UniformToFill };
+                    fallbackText.Visibility = Visibility.Collapsed;
                 }
-                catch
+                else
                 {
-                    // 読み込み失敗時はフォールバック
+                    _ = LoadHistoryAvatarAsync(item.AvatarUrl, avatarCircle, fallbackText, menuVersion);
                 }
             }
 
-            if (!imageLoaded)
-            {
-                var fallbackText = new TextBlock
-                {
-                    Text = "👤",
-                    FontSize = 12,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                avatarContainer.Children.Add(fallbackText);
-            }
             Grid.SetColumn(avatarContainer, 0);
             grid.Children.Add(avatarContainer);
 
@@ -2147,9 +2401,12 @@ public partial class MainWindow : Window
             };
             nameBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
 
+            var userHandle = !string.IsNullOrWhiteSpace(item.DisplayUsername)
+                ? item.DisplayUsername
+                : $"@{item.Username}";
             var subBlock = new TextBlock
             {
-                Text = $"@{item.Username} • {item.UserId}",
+                Text = $"{userHandle} • {item.UserId}",
                 FontSize = 10,
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 MaxWidth = 135
@@ -2179,14 +2436,22 @@ public partial class MainWindow : Window
             var targetUserId = item.UserId;
             menuItem.Click += async (s, ev) =>
             {
-                if (TabMain.IsChecked != true)
+                try
                 {
-                    TabMain.IsChecked = true;
+                    if (_isClosing || _isClosed) return;
+                    if (TabMain.IsChecked != true)
+                    {
+                        TabMain.IsChecked = true;
+                    }
+                    UserIdInput.Text = targetUserId;
+                    UserIdInput.CaretIndex = targetUserId.Length;
+                    SetStatus($"LOOKUP FROM HISTORY: {targetUserId}", true);
+                    await ExecuteLookupAsync();
                 }
-                UserIdInput.Text = targetUserId;
-                UserIdInput.CaretIndex = targetUserId.Length;
-                SetStatus($"LOOKUP FROM HISTORY: {targetUserId}", true);
-                await ExecuteLookupAsync();
+                catch (Exception ex)
+                {
+                    App.LogException("RecentLookupItem_Click", ex);
+                }
             };
 
             MenuRecentLookups.Items.Add(menuItem);

@@ -9,6 +9,7 @@ public sealed class RecentLookupItem
 {
     public string UserId { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
+    public string? DisplayUsername { get; set; }
     public string? GlobalName { get; set; }
     public string? AvatarUrl { get; set; }
     public DateTime LookedUpAt { get; set; } = DateTime.UtcNow;

@@ -19,7 +19,7 @@ public class DiscordApiService : IDisposable
         {
             Timeout = TimeSpan.FromSeconds(10)
         };
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd("DiscordLookupGUI/2.4");
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd("DiscordLookupGUI/2.5");
     }
 
     /// <summary>Bot トークンを設定する</summary>
