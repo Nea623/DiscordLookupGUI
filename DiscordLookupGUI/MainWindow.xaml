@@ -200,6 +200,33 @@
                     <Border Background="{DynamicResource WindowOverlayBrush}" CornerRadius="17" />
                 </Grid>
 
+                <!-- ══════════════════════════════════════════
+                     Stargazer 動く星空GIF背景レイヤー (ガラス越しに星空が瞬くアニメーション)
+                     ══════════════════════════════════════════ -->
+                <Grid x:Name="StargazerBackgroundContainer"
+                      Visibility="{DynamicResource StargazerAnimationVisibility}"
+                      ClipToBounds="True" IsHitTestVisible="False">
+                    <!-- 下地ベースカラー -->
+                    <Border CornerRadius="17" Background="#FF0D071E" />
+
+                    <!-- GIFアニメーション再生Image (XamlAnimatedGif制御 + スムースブラー) -->
+                    <Image x:Name="StargazerGifImage"
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.05" ScaleY="1.05" />
+                        </Image.RenderTransform>
+                        <Image.Effect>
+                            <BlurEffect Radius="8" RenderingBias="Performance" />
+                        </Image.Effect>
+                    </Image>
+
+                    <!-- コズミックパープル微光オーバーレイティント -->
+                    <Border CornerRadius="17" Background="#26100826" />
+                </Grid>
+
             <!-- ══════════════════════════════════════════
                  ウィンドウ枠線のキラリ星オーナメント (ユーザー考案 + 対称アクセント)
                  ══════════════════════════════════════════ -->

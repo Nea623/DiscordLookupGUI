@@ -20,7 +20,7 @@
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
     <Resource Include="Assets\sunset_bg.jpg" />
-    <Resource Include="Assets\stargazer_bg.jpg" />
+    <Resource Include="Assets\stargazer_bg.gif" />
     <Resource Include="Assets\StarryNight\*.png" />
     <Resource Include="Assets\Badges\*.png" />
     <Resource Include="Assets\Fonts\*.ttf" />

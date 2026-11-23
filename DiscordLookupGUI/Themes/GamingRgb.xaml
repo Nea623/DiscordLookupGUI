@@ -65,6 +65,7 @@
     <!-- 星空装飾は非表示、Gaming RGB エフェクトを表示 -->
     <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
     <Visibility x:Key="GamingRgbVisibility">Visible</Visibility>
+    <Visibility x:Key="StargazerAnimationVisibility">Collapsed</Visibility>
 
     <!-- 背景画像 & すりガラスオーバーレイ (GamingRGBは完全漆黒) -->
     <x:Null x:Key="ThemeBackgroundImage" />

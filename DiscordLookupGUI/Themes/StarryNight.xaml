@@ -65,6 +65,7 @@
     <SolidColorBrush x:Key="InputPlaceholderBrush" Color="#FFB8AADC" />
     <Visibility x:Key="StarryDecorationVisibility">Visible</Visibility>
     <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
+    <Visibility x:Key="StargazerAnimationVisibility">Collapsed</Visibility>
 
     <!-- 背景画像 & すりガラスオーバーレイ (StarryNightはピュアグラデーション) -->
     <x:Null x:Key="ThemeBackgroundImage" />

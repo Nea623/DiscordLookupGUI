@@ -50,6 +50,7 @@ public partial class MainWindow : Window
     private System.Windows.Media.Animation.Storyboard? _rgbSearchIconStoryboard;
     private bool _isRgbBorderRunning;
     private bool _isRgbSearchIconRunning;
+    private bool _isStargazerRunning;
     private bool _isClosing;
     private bool _isClosed;
 
@@ -147,6 +148,7 @@ public partial class MainWindow : Window
         ThemeManager.Initialize();
         UpdateThemeUi(ThemeManager.CurrentTheme);
         UpdateGamingRgbAnimations();
+        UpdateStargazerAnimations();
 
         // トークン設定の読み込み (DPAPI暗号化カスタム保存 ➔ 環境変数 ➔ デフォルト共有)
         var savedToken = TokenStorage.LoadToken();
@@ -338,11 +340,13 @@ public partial class MainWindow : Window
     {
         UpdateThemeUi(theme);
         UpdateGamingRgbAnimations();
+        UpdateStargazerAnimations();
     }
 
     private void MainWindow_StateChanged(object? sender, EventArgs e)
     {
         UpdateGamingRgbAnimations();
+        UpdateStargazerAnimations();
         UpdateApngAnimationsPlayback();
     }
 
@@ -434,6 +438,42 @@ public partial class MainWindow : Window
             _rgbSearchIconStoryboard.Stop(this);
             _rgbSearchIconStoryboard.Remove(this);
             _isRgbSearchIconRunning = false;
+        }
+    }
+
+    private void UpdateStargazerAnimations()
+    {
+        bool allowStargazer = ThemeManager.CurrentTheme == AppTheme.Stargazer && WindowState != WindowState.Minimized;
+
+        if (StargazerBackgroundContainer != null)
+        {
+            StargazerBackgroundContainer.Visibility = allowStargazer ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (allowStargazer)
+        {
+            if (!_isStargazerRunning && StargazerGifImage != null)
+            {
+                try
+                {
+                    var uri = new Uri("pack://application:,,,/DiscordLookupGUI;component/Assets/stargazer_bg.gif");
+                    XamlAnimatedGif.AnimationBehavior.SetSourceUri(StargazerGifImage, uri);
+                    _isStargazerRunning = true;
+                }
+                catch
+                {
+                    // フォールバック
+                }
+            }
+        }
+        else if (_isStargazerRunning && StargazerGifImage != null)
+        {
+            try
+            {
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(StargazerGifImage, null);
+            }
+            catch { }
+            _isStargazerRunning = false;
         }
     }
 
