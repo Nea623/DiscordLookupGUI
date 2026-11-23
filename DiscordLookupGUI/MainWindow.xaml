@@ -338,14 +338,11 @@
                                    Foreground="{DynamicResource InputPlaceholderBrush}" FontSize="13" VerticalAlignment="Center" Margin="14,0,0,0" IsHitTestVisible="False" />
                     </Grid>
 
-                    <!-- 🔄 履歴ドロップダウンボタン -->
+                    <!-- 🕒 履歴ドロップダウンボタン -->
                     <Button Grid.Column="1" x:Name="BtnRecentLookups" Style="{StaticResource GlowButton}"
                             Click="BtnRecentLookups_Click" ToolTip="検索履歴 (Recent Lookups)"
-                            Padding="12,8" Margin="0,0,10,0">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="🔄" FontSize="13" VerticalAlignment="Center" />
-                            <TextBlock Text=" ▾" FontSize="10" Foreground="{DynamicResource AccentCyanBrush}" VerticalAlignment="Center" Margin="2,0,0,0" />
-                        </StackPanel>
+                            Padding="10,8" Margin="0,0,10,0">
+                        <TextBlock Text="🕒" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center" />
                         <Button.ContextMenu>
                             <ContextMenu x:Name="MenuRecentLookups" Style="{StaticResource CyberContextMenu}" />
                         </Button.ContextMenu>
