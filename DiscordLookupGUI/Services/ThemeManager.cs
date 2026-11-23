@@ -123,17 +123,18 @@ public static class ThemeManager
             return;
         }
 
-        if (existingIndices.Count > 0)
+        int targetIndex = existingIndices.Count > 0 ? existingIndices[0] : 0;
+        for (int i = existingIndices.Count - 1; i >= 0; i--)
         {
-            merged[existingIndices[0]] = newDict;
-            for (int i = existingIndices.Count - 1; i >= 1; i--)
-            {
-                merged.RemoveAt(existingIndices[i]);
-            }
+            merged.RemoveAt(existingIndices[i]);
+        }
+        if (targetIndex >= merged.Count)
+        {
+            merged.Add(newDict);
         }
         else
         {
-            merged.Insert(0, newDict);
+            merged.Insert(targetIndex, newDict);
         }
 
         CurrentTheme = theme;

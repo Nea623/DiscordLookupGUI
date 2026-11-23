@@ -380,7 +380,7 @@
                                 </Border>
 
                                 <!-- ② 🎮 Gaming RGB テーマ専用オーバーレイ (Gaming RGB 選択時のみ前面に表示: 強烈レインボー回転ボーダー & 鮮烈緑ネオングロー) -->
-                                <Grid Visibility="{DynamicResource GamingRgbVisibility}">
+                                <Grid x:Name="GamingRgbSearchIconOverlay" Visibility="{DynamicResource GamingRgbVisibility}">
                                     <!-- 虫眼鏡がくっきり浮き出るスレートブラック円盤 + 3px太枠レインボー回転ボーダー & ネオングロー -->
                                     <Border CornerRadius="36" Background="#242832" BorderThickness="3">
                                         <Border.BorderBrush>

@@ -367,6 +367,15 @@ public partial class MainWindow : Window
     {
         bool allowRgb = ThemeManager.CurrentTheme == AppTheme.GamingRgb && WindowState != WindowState.Minimized;
 
+        if (GamingRgbBorder != null)
+        {
+            GamingRgbBorder.Visibility = allowRgb ? Visibility.Visible : Visibility.Collapsed;
+        }
+        if (GamingRgbSearchIconOverlay != null)
+        {
+            GamingRgbSearchIconOverlay.Visibility = allowRgb ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         if (allowRgb)
         {
             if (!_isRgbBorderRunning && _rgbBorderStoryboard != null)
@@ -401,6 +410,14 @@ public partial class MainWindow : Window
 
     private void StopGamingRgbAnimations()
     {
+        if (GamingRgbBorder != null)
+        {
+            GamingRgbBorder.Visibility = Visibility.Collapsed;
+        }
+        if (GamingRgbSearchIconOverlay != null)
+        {
+            GamingRgbSearchIconOverlay.Visibility = Visibility.Collapsed;
+        }
         if (_isRgbBorderRunning && _rgbBorderStoryboard != null)
         {
             _rgbBorderStoryboard.Stop(this);
