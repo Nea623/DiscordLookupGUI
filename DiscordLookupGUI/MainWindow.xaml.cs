@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using DiscordLookup.Models;
 using DiscordLookup.Services;
 using DiscordLookup.Utils;
@@ -2051,22 +2052,28 @@ public partial class MainWindow : Window
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            // 1. アバター画像
-            var avatarBorder = new Border
+            // 1. 真円アバター画像 (Ellipse + ImageBrush)
+            var avatarContainer = new Grid
             {
                 Width = 26,
                 Height = 26,
-                CornerRadius = new CornerRadius(13),
                 Margin = new Thickness(0, 0, 10, 0),
-                BorderThickness = new Thickness(1),
-                ClipToBounds = true
+                VerticalAlignment = VerticalAlignment.Center
             };
-            avatarBorder.SetResourceReference(Border.BackgroundProperty, "AccentGlowMidBrush");
-            avatarBorder.SetResourceReference(Border.BorderBrushProperty, "AccentCyanBrush");
 
+            var avatarCircle = new Ellipse
+            {
+                Width = 26,
+                Height = 26,
+                StrokeThickness = 1
+            };
+            avatarCircle.SetResourceReference(Shape.StrokeProperty, "AccentCyanBrush");
+            avatarCircle.SetResourceReference(Shape.FillProperty, "AccentGlowMidBrush");
+            avatarContainer.Children.Add(avatarCircle);
+
+            bool imageLoaded = false;
             if (!string.IsNullOrWhiteSpace(item.AvatarUrl))
             {
-                var img = new Image { Stretch = Stretch.UniformToFill };
                 try
                 {
                     var bmp = new BitmapImage();
@@ -2075,15 +2082,17 @@ public partial class MainWindow : Window
                     bmp.DecodePixelWidth = 52;
                     bmp.CacheOption = BitmapCacheOption.OnLoad;
                     bmp.EndInit();
-                    img.Source = bmp;
+
+                    avatarCircle.Fill = new ImageBrush(bmp) { Stretch = Stretch.UniformToFill };
+                    imageLoaded = true;
                 }
                 catch
                 {
-                    // 読み込み失敗時はプレースホルダー
+                    // 読み込み失敗時はフォールバック
                 }
-                avatarBorder.Child = img;
             }
-            else
+
+            if (!imageLoaded)
             {
                 var fallbackText = new TextBlock
                 {
@@ -2092,10 +2101,10 @@ public partial class MainWindow : Window
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
-                avatarBorder.Child = fallbackText;
+                avatarContainer.Children.Add(fallbackText);
             }
-            Grid.SetColumn(avatarBorder, 0);
-            grid.Children.Add(avatarBorder);
+            Grid.SetColumn(avatarContainer, 0);
+            grid.Children.Add(avatarContainer);
 
             // 2. ユーザー名 ＆ ID
             var textStack = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
