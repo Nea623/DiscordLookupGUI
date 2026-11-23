@@ -2041,7 +2041,7 @@ public partial class MainWindow : Window
         headerBorder.SetResourceReference(Border.BorderBrushProperty, "CardBorderBrush");
         var headerText = new TextBlock
         {
-            Text = $"🕒 最近検索したユーザー ({list.Count}件)",
+            Text = $"🔄 最近検索したユーザー ({list.Count}件)",
             FontSize = 11,
             FontWeight = FontWeights.Bold
         };
