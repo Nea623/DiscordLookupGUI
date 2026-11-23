@@ -1266,28 +1266,41 @@ public partial class MainWindow : Window
             _ = LoadImageAsync(AvatarDecorationImage, string.Empty, isDecoration: true, extraTargetImage: PlateAvatarDecoImage, ct: ct);
         }
 
-        // バナー背景色・画像読み込み (アクセントカラー/バナーカラー ➔ 未設定ならテーマ色で塗りつぶし)
-        if (resolvedAccentColor.HasValue)
-        {
-            var brush = new SolidColorBrush(resolvedAccentColor.Value);
-            brush.Freeze();
-            BannerContainer.Background = brush;
-        }
-        else
-        {
-            BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
-        }
-
+        // バナー背景色・画像読み込み
         _currentBannerUrl = user.BannerUrl ?? string.Empty;
         BtnOpenBanner.IsEnabled = !string.IsNullOrEmpty(_currentBannerUrl);
 
         if (!string.IsNullOrEmpty(_currentBannerUrl))
         {
+            // バナー画像がある場合: 画像ロード前にアクセントカラーを適用すると一瞬チラつくため、
+            // デフォルト背景のままバナー画像を先にロードし、画像ロード完了後に裏のアクセントカラーを適用する
+            BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
             BannerImage.Visibility = Visibility.Visible;
-            _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct);
+
+            _ = LoadImageAsync(BannerImage, _currentBannerUrl, ct: ct, onLoaded: () =>
+            {
+                if (resolvedAccentColor.HasValue)
+                {
+                    var brush = new SolidColorBrush(resolvedAccentColor.Value);
+                    brush.Freeze();
+                    BannerContainer.Background = brush;
+                }
+            });
         }
         else
         {
+            // バナー画像がない場合: アクセントカラー (またはデフォルト色) で塗りつぶし
+            if (resolvedAccentColor.HasValue)
+            {
+                var brush = new SolidColorBrush(resolvedAccentColor.Value);
+                brush.Freeze();
+                BannerContainer.Background = brush;
+            }
+            else
+            {
+                BannerContainer.SetResourceReference(Border.BackgroundProperty, "BannerBgBrush");
+            }
+
             AdvanceImageToken(BannerImage);
             ClearImageControl(BannerImage);
             BannerImage.Visibility = Visibility.Collapsed;
@@ -1533,7 +1546,7 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default)
+    private async Task LoadImageAsync(Image targetImage, string url, bool isDecoration = false, Image? extraTargetImage = null, CancellationToken ct = default, Action? onLoaded = null)
     {
         var targetsAll = extraTargetImage != null ? new[] { targetImage, extraTargetImage } : new[] { targetImage };
         int token = AdvanceImageToken(targetsAll);
@@ -1582,6 +1595,7 @@ public partial class MainWindow : Window
                     _currentApngController = new ApngAnimationController(targetsAll, frames);
                     _currentApngController.Start();
                     UpdateApngAnimationsPlayback();
+                    onLoaded?.Invoke();
                     return;
                 }
 
@@ -1600,6 +1614,7 @@ public partial class MainWindow : Window
                 {
                     t.Source = bitmap;
                 }
+                onLoaded?.Invoke();
                 return;
             }
 
@@ -1617,6 +1632,7 @@ public partial class MainWindow : Window
                     ClearImageControl(t);
                     XamlAnimatedGif.AnimationBehavior.SetSourceStream(t, new MemoryStream(data));
                 }
+                onLoaded?.Invoke();
             }
             else
             {
@@ -1634,6 +1650,7 @@ public partial class MainWindow : Window
                     ClearImageControl(t);
                     t.Source = bmp;
                 }
+                onLoaded?.Invoke();
             }
         }
         catch (OperationCanceledException)
