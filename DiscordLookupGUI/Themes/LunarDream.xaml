@@ -1,0 +1,79 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="po">
+
+    <!-- ══════════════════════════════════════════
+         テーマ: Lunar Dream (🌙 月と星図のファンタジーインディゴ ＆ パステルラベンダー)
+         ══════════════════════════════════════════ -->
+    <Color x:Key="WindowBgColor">#FF0B0718</Color>
+    <Color x:Key="HeaderBgColor">#E6140B29</Color>
+    <Color x:Key="CardBgColor">#D920133D</Color>
+    <Color x:Key="CardInnerBgColor">#66130B29</Color>
+    <Color x:Key="CardBorderColor">#80A78BFA</Color>
+
+    <!-- メインアクセントカラー (幻想的なネオンラベンダー ＆ コズミックバイオレット) -->
+    <Color x:Key="AccentColor">#FFC4B5FD</Color>
+    <Color x:Key="AccentCyan">#FFC4B5FD</Color>
+    <Color x:Key="AccentBlue">#FF818CF8</Color>
+    <Color x:Key="AccentPurple">#FFA78BFA</Color>
+
+    <!-- テキストカラー (星空の輝きと高いコントラスト) -->
+    <Color x:Key="TextPrimary">#FFFDFCFF</Color>
+    <Color x:Key="TextSecondary">#FFDDD6FE</Color>
+    <Color x:Key="TextMuted">#FFA79BC8</Color>
+    <Color x:Key="DangerRed">#FFF43F5E</Color>
+    <Color x:Key="SuccessGreen">#FF10B981</Color>
+
+    <!-- ブラシ定義: 上から下に向けて #342567 から #8472DC へのグラデーション -->
+    <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF342567" Offset="0.0" />
+        <GradientStop Color="#FF8472DC" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
+    <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBgColor}" />
+    <SolidColorBrush x:Key="CardInnerBgBrush" Color="{StaticResource CardInnerBgColor}" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource CardBorderColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource AccentCyan}" />
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}" />
+    <SolidColorBrush x:Key="AccentPurpleBrush" Color="{StaticResource AccentPurple}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+    <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
+    <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
+
+    <!-- コントロール固有背景 ＆ ラベンダーの星光グロー配色 -->
+    <SolidColorBrush x:Key="InputBgBrush" Color="#66130B29" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#66A78BFA" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#CC120A28" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="#80A78BFA" />
+    <SolidColorBrush x:Key="TabTextBrush" Color="#FFF3EEFF" />
+    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#501D113B" />
+    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#80A78BFA" />
+    <SolidColorBrush x:Key="BannerBgBrush" Color="#1C1036" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#66100724" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#40A78BFA" />
+    <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#26A78BFA" />
+    <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4DA78BFA" />
+    <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#80C4B5FD" />
+    <Color x:Key="SearchIconGlowColor">#FFA78BFA</Color>
+    <SolidColorBrush x:Key="SearchIconBrush" Color="#FFC4B5FD" />
+    <SolidColorBrush x:Key="InputPlaceholderBrush" Color="#FFB8AADC" />
+    <Visibility x:Key="LunarDecorationVisibility">Visible</Visibility>
+    <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
+    <Visibility x:Key="StarryNightAnimationVisibility">Collapsed</Visibility>
+
+    <!-- 背景画像 & すりガラスオーバーレイ (StarryNightはピュアグラデーション) -->
+    <x:Null x:Key="ThemeBackgroundImage" />
+    <SolidColorBrush x:Key="WindowOverlayBrush" Color="#00000000" />
+
+    <!-- コントロール用 Freeze 済みグローエフェクト (テーマ動的追従・継承コンテキスト競合なし) -->
+    <DropShadowEffect x:Key="PillTabGlowEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.5" />
+    <DropShadowEffect x:Key="GlowButtonHoverEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.6" />
+    <DropShadowEffect x:Key="CyberTextBoxFocusEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.5" />
+
+</ResourceDictionary>

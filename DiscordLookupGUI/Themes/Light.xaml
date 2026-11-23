@@ -61,9 +61,9 @@
     <SolidColorBrush x:Key="InputPlaceholderBrush" Color="#FF64748B" />
     <x:Null x:Key="ThemeBackgroundImage" />
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#FFF0F4F8" />
-    <Visibility x:Key="StarryDecorationVisibility">Collapsed</Visibility>
+    <Visibility x:Key="LunarDecorationVisibility">Collapsed</Visibility>
     <Visibility x:Key="GamingRgbVisibility">Collapsed</Visibility>
-    <Visibility x:Key="StargazerAnimationVisibility">Collapsed</Visibility>
+    <Visibility x:Key="StarryNightAnimationVisibility">Collapsed</Visibility>
 
     <!-- コントロール用 Freeze 済みグローエフェクト (テーマ動的追従・継承コンテキスト競合なし) -->
     <DropShadowEffect x:Key="PillTabGlowEffect" po:Freeze="True" Color="{StaticResource AccentColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.5" />

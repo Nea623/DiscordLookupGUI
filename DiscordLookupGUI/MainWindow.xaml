@@ -203,14 +203,14 @@
                 <!-- ══════════════════════════════════════════
                      Stargazer 動く星空GIF背景レイヤー (ガラス越しに星空が瞬くアニメーション)
                      ══════════════════════════════════════════ -->
-                <Grid x:Name="StargazerBackgroundContainer"
-                      Visibility="{DynamicResource StargazerAnimationVisibility}"
+                <Grid x:Name="StarryNightBackgroundContainer"
+                      Visibility="{DynamicResource StarryNightAnimationVisibility}"
                       ClipToBounds="True" IsHitTestVisible="False">
                     <!-- 下地ベースカラー -->
                     <Border CornerRadius="17" Background="#FF0D071E" />
 
                     <!-- GIFアニメーション再生Image (XamlAnimatedGif制御 + スムースブラー) -->
-                    <Image x:Name="StargazerGifImage"
+                    <Image x:Name="StarryNightGifImage"
                            Stretch="UniformToFill"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -230,7 +230,7 @@
             <!-- ══════════════════════════════════════════
                  ウィンドウ枠線のキラリ星オーナメント (ユーザー考案 + 対称アクセント)
                  ══════════════════════════════════════════ -->
-            <Canvas IsHitTestVisible="False" Visibility="{DynamicResource StarryDecorationVisibility}">
+            <Canvas IsHitTestVisible="False" Visibility="{DynamicResource LunarDecorationVisibility}">
                 <!-- 左枠線上: きらめく四芒星 (モックアップ通り) -->
                 <Image Canvas.Left="-11" Canvas.Top="145" Source="Assets/StarryNight/star_sparkle_large.png"
                        Width="24" Height="24" Stretch="Uniform">
@@ -301,7 +301,7 @@
 
                     <!-- タイトルバー左側装飾: ロゴとピルタブの間の星座アート (ユーザー考案) -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                Margin="16,0,0,0" Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                                Margin="16,0,0,0" Visibility="{DynamicResource LunarDecorationVisibility}" IsHitTestVisible="False">
                         <Image Source="Assets/StarryNight/constellation_swan.png" Height="26" Stretch="Uniform" Opacity="0.85" VerticalAlignment="Center" />
                         <Image Source="Assets/StarryNight/star_sparkle_large.png" Height="14" Stretch="Uniform" Margin="6,-6,0,0" Opacity="0.85">
                             <Image.Effect>
@@ -312,7 +312,7 @@
 
                     <!-- タイトルバー右側装飾: ピルタブと操作ボタンの間の流れ星 (ユーザー考案) -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" 
-                                Margin="0,0,16,0" Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                                Margin="0,0,16,0" Visibility="{DynamicResource LunarDecorationVisibility}" IsHitTestVisible="False">
                         <Image Source="Assets/StarryNight/shooting_star.png" Width="72" Height="44" Stretch="Uniform" Opacity="0.95" VerticalAlignment="Center">
                             <Image.Effect>
                                 <DropShadowEffect Color="#C4B5FD" BlurRadius="14" ShadowDepth="0" Opacity="0.85" />
@@ -328,11 +328,11 @@
                             <Button.ContextMenu>
                                 <ContextMenu Style="{StaticResource CyberContextMenu}">
                                     <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
-                                    <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌑  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
-                                    <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌙  Lunar Dream Theme" Click="SelectThemeLunarDream_Click" Style="{StaticResource CyberMenuItem}" />
                                     <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
-                                    <MenuItem Header="🌌  Stargazer Theme" Click="SelectThemeStargazer_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -474,7 +474,7 @@
                                     </StackPanel>
                                     <!-- 追加アクセント: ヘッダー右端の星座ライン -->
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.75" IsHitTestVisible="False">
+                                                Visibility="{DynamicResource LunarDecorationVisibility}" Opacity="0.75" IsHitTestVisible="False">
                                         <Image Source="Assets/StarryNight/constellation_small.png" Height="18" Stretch="Uniform" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Grid>
@@ -541,7 +541,7 @@
                                         </StackPanel>
 
                                         <!-- 🌟 ユーザー考案: バナー右下のリング付き三日月 ＋ きらめき星屑 🌟 -->
-                                        <Grid Grid.Column="1" Margin="0,-16,10,0" VerticalAlignment="Center" Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                                        <Grid Grid.Column="1" Margin="0,-16,10,0" VerticalAlignment="Center" Visibility="{DynamicResource LunarDecorationVisibility}" IsHitTestVisible="False">
                                             <Image Source="Assets/StarryNight/moon_with_ring.png" Width="96" Height="68" Stretch="Uniform">
                                                 <Image.Effect>
                                                     <DropShadowEffect Color="#C4B5FD" BlurRadius="18" ShadowDepth="0" Opacity="0.9" />
@@ -772,7 +772,7 @@
                                 </StackPanel>
                                 <!-- 追加アクセント: ヘッダー右端の星座ライン -->
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Visibility="{DynamicResource StarryDecorationVisibility}" Opacity="0.75" IsHitTestVisible="False">
+                                            Visibility="{DynamicResource LunarDecorationVisibility}" Opacity="0.75" IsHitTestVisible="False">
                                     <Image Source="Assets/StarryNight/constellation_cassiopeia.png" Height="18" Stretch="Uniform" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Grid>
@@ -862,7 +862,7 @@
                             <!-- 🌟 ユーザー考案: 右下の優美な三日月 ＋ 星ガーランド (追加アクセント) 🌟 -->
                             <StackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                         Margin="0,0,16,14" Orientation="Horizontal"
-                                        Visibility="{DynamicResource StarryDecorationVisibility}" IsHitTestVisible="False">
+                                        Visibility="{DynamicResource LunarDecorationVisibility}" IsHitTestVisible="False">
                                 <!-- 吊り下げ星の可愛いオーナメント (追加アクセント) -->
                                 <Image Source="Assets/StarryNight/hanging_star_mid.png" Height="44" Stretch="Uniform" Opacity="0.8" Margin="0,0,8,4" VerticalAlignment="Bottom" />
                                 <!-- ユーザー考案の優美な三日月 -->
@@ -962,11 +962,11 @@
                                     <Button.ContextMenu>
                                         <ContextMenu Style="{StaticResource CyberContextMenu}">
                                             <MenuItem Header="☀️  Light Theme" Click="SelectThemeLight_Click" Style="{StaticResource CyberMenuItem}" />
-                                            <MenuItem Header="🌙  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
-                                            <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
-                                            <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
-                                            <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
-                                            <MenuItem Header="🌌  Stargazer Theme" Click="SelectThemeStargazer_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌑  Dark Theme" Click="SelectThemeDark_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌆  Sunset Theme" Click="SelectThemeSunset_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌙  Lunar Dream Theme" Click="SelectThemeLunarDream_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🎮  Gaming RGB Theme" Click="SelectThemeGamingRgb_Click" Style="{StaticResource CyberMenuItem}" />
+                                    <MenuItem Header="🌠  Starry Night Theme" Click="SelectThemeStarryNight_Click" Style="{StaticResource CyberMenuItem}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>

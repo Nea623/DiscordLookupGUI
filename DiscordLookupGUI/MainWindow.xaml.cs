@@ -50,7 +50,7 @@ public partial class MainWindow : Window
     private System.Windows.Media.Animation.Storyboard? _rgbSearchIconStoryboard;
     private bool _isRgbBorderRunning;
     private bool _isRgbSearchIconRunning;
-    private bool _isStargazerRunning;
+    private bool _isStarryNightRunning;
     private bool _isClosing;
     private bool _isClosed;
 
@@ -148,7 +148,7 @@ public partial class MainWindow : Window
         ThemeManager.Initialize();
         UpdateThemeUi(ThemeManager.CurrentTheme);
         UpdateGamingRgbAnimations();
-        UpdateStargazerAnimations();
+        UpdateStarryNightAnimations();
 
         // トークン設定の読み込み (DPAPI暗号化カスタム保存 ➔ 環境変数 ➔ デフォルト共有)
         var savedToken = TokenStorage.LoadToken();
@@ -321,9 +321,9 @@ public partial class MainWindow : Window
         ThemeManager.ApplyTheme(AppTheme.Sunset);
     }
 
-    private void SelectThemeStarryNight_Click(object sender, RoutedEventArgs e)
+    private void SelectThemeLunarDream_Click(object sender, RoutedEventArgs e)
     {
-        ThemeManager.ApplyTheme(AppTheme.StarryNight);
+        ThemeManager.ApplyTheme(AppTheme.LunarDream);
     }
 
     private void SelectThemeGamingRgb_Click(object sender, RoutedEventArgs e)
@@ -331,22 +331,22 @@ public partial class MainWindow : Window
         ThemeManager.ApplyTheme(AppTheme.GamingRgb);
     }
 
-    private void SelectThemeStargazer_Click(object sender, RoutedEventArgs e)
+    private void SelectThemeStarryNight_Click(object sender, RoutedEventArgs e)
     {
-        ThemeManager.ApplyTheme(AppTheme.Stargazer);
+        ThemeManager.ApplyTheme(AppTheme.StarryNight);
     }
 
     private void OnThemeChanged(AppTheme theme)
     {
         UpdateThemeUi(theme);
         UpdateGamingRgbAnimations();
-        UpdateStargazerAnimations();
+        UpdateStarryNightAnimations();
     }
 
     private void MainWindow_StateChanged(object? sender, EventArgs e)
     {
         UpdateGamingRgbAnimations();
-        UpdateStargazerAnimations();
+        UpdateStarryNightAnimations();
         UpdateApngAnimationsPlayback();
     }
 
@@ -441,24 +441,24 @@ public partial class MainWindow : Window
         }
     }
 
-    private void UpdateStargazerAnimations()
+    private void UpdateStarryNightAnimations()
     {
-        bool allowStargazer = ThemeManager.CurrentTheme == AppTheme.Stargazer && WindowState != WindowState.Minimized;
+        bool allowStarryNight = ThemeManager.CurrentTheme == AppTheme.StarryNight && WindowState != WindowState.Minimized;
 
-        if (StargazerBackgroundContainer != null)
+        if (StarryNightBackgroundContainer != null)
         {
-            StargazerBackgroundContainer.Visibility = allowStargazer ? Visibility.Visible : Visibility.Collapsed;
+            StarryNightBackgroundContainer.Visibility = allowStarryNight ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        if (allowStargazer)
+        if (allowStarryNight)
         {
-            if (!_isStargazerRunning && StargazerGifImage != null)
+            if (!_isStarryNightRunning && StarryNightGifImage != null)
             {
                 try
                 {
-                    var uri = new Uri("pack://application:,,,/DiscordLookupGUI;component/Assets/stargazer_bg.gif");
-                    XamlAnimatedGif.AnimationBehavior.SetSourceUri(StargazerGifImage, uri);
-                    _isStargazerRunning = true;
+                    var uri = new Uri("pack://application:,,,/DiscordLookupGUI;component/Assets/starrynight_bg.gif");
+                    XamlAnimatedGif.AnimationBehavior.SetSourceUri(StarryNightGifImage, uri);
+                    _isStarryNightRunning = true;
                 }
                 catch
                 {
@@ -466,14 +466,14 @@ public partial class MainWindow : Window
                 }
             }
         }
-        else if (_isStargazerRunning && StargazerGifImage != null)
+        else if (_isStarryNightRunning && StarryNightGifImage != null)
         {
             try
             {
-                XamlAnimatedGif.AnimationBehavior.SetSourceUri(StargazerGifImage, null);
+                XamlAnimatedGif.AnimationBehavior.SetSourceUri(StarryNightGifImage, null);
             }
             catch { }
-            _isStargazerRunning = false;
+            _isStarryNightRunning = false;
         }
     }
 
@@ -485,10 +485,10 @@ public partial class MainWindow : Window
             {
                 AppTheme.Light => "☀️",
                 AppTheme.Sunset => "🌆",
-                AppTheme.StarryNight => "🌠",
+                AppTheme.LunarDream => "🌙",
                 AppTheme.GamingRgb => "🎮",
-                AppTheme.Stargazer => "🌌",
-                _ => "🌙"
+                AppTheme.StarryNight => "🌠",
+                _ => "🌑"
             };
         }
         if (TxtSettingsThemeCurrent != null)
@@ -497,10 +497,10 @@ public partial class MainWindow : Window
             {
                 AppTheme.Light => "☀️  Light Theme",
                 AppTheme.Sunset => "🌆  Sunset Theme",
-                AppTheme.StarryNight => "🌠  Starry Night Theme",
+                AppTheme.LunarDream => "🌙  Lunar Dream Theme",
                 AppTheme.GamingRgb => "🎮  Gaming RGB Theme",
-                AppTheme.Stargazer => "🌌  Stargazer Theme",
-                _ => "🌙  Dark Theme"
+                AppTheme.StarryNight => "🌠  Starry Night Theme",
+                _ => "🌑  Dark Theme"
             };
         }
     }

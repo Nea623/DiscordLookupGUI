@@ -10,9 +10,9 @@ public enum AppTheme
     Dark,
     Light,
     Sunset,
-    StarryNight,
+    LunarDream,
     GamingRgb,
-    Stargazer
+    StarryNight
 }
 
 /// <summary>
@@ -71,9 +71,9 @@ public static class ThemeManager
         return source.Contains("Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
                source.Contains("Light.xaml", StringComparison.OrdinalIgnoreCase) ||
                source.Contains("Sunset.xaml", StringComparison.OrdinalIgnoreCase) ||
-               source.Contains("StarryNight.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.Contains("LunarDream.xaml", StringComparison.OrdinalIgnoreCase) ||
                source.Contains("GamingRgb.xaml", StringComparison.OrdinalIgnoreCase) ||
-               source.Contains("Stargazer.xaml", StringComparison.OrdinalIgnoreCase);
+               source.Contains("StarryNight.xaml", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -88,9 +88,9 @@ public static class ThemeManager
         {
             AppTheme.Light => new Uri("Themes/Light.xaml", UriKind.Relative),
             AppTheme.Sunset => new Uri("Themes/Sunset.xaml", UriKind.Relative),
-            AppTheme.StarryNight => new Uri("Themes/StarryNight.xaml", UriKind.Relative),
+            AppTheme.LunarDream => new Uri("Themes/LunarDream.xaml", UriKind.Relative),
             AppTheme.GamingRgb => new Uri("Themes/GamingRgb.xaml", UriKind.Relative),
-            AppTheme.Stargazer => new Uri("Themes/Stargazer.xaml", UriKind.Relative),
+            AppTheme.StarryNight => new Uri("Themes/StarryNight.xaml", UriKind.Relative),
             _ => new Uri("Themes/Dark.xaml", UriKind.Relative)
         };
 
