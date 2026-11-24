@@ -6,13 +6,13 @@
 
     <!-- ══════════════════════════════════════════
          テーマ: Starry Night (🌠 満天の星降る夜 ＆ 動く星空GIFすりガラス)
-         満天のバイオレット銀河アニメーションGIFと、透明感あふれる氷結すりガラス
+         満天のバイオレット銀河アニメーションGIFと、視認性抜群の深紫フロストガラス
          ══════════════════════════════════════════ -->
     <Color x:Key="WindowBgColor">#FF0D071E</Color>
-    <Color x:Key="HeaderBgColor">#2AFFFFFF</Color>
-    <Color x:Key="CardBgColor">#20FFFFFF</Color>
-    <Color x:Key="CardInnerBgColor">#18000000</Color>
-    <Color x:Key="CardBorderColor">#66FFFFFF</Color>
+    <Color x:Key="HeaderBgColor">#E0100726</Color>
+    <Color x:Key="CardBgColor">#CC14082C</Color>
+    <Color x:Key="CardInnerBgColor">#660A0418</Color>
+    <Color x:Key="CardBorderColor">#80FFFFFF</Color>
 
     <!-- メインアクセントカラー (ネブラバイオレット ＆ スターダストラベンダー) -->
     <Color x:Key="AccentColor">#FFA855F7</Color>
@@ -22,7 +22,7 @@
 
     <!-- テキストカラー (クリアフロストハイコントラスト) -->
     <Color x:Key="TextPrimary">#FFFFFFFF</Color>
-    <Color x:Key="TextSecondary">#FFE9D5FF</Color>
+    <Color x:Key="TextSecondary">#FFF3E8FF</Color>
     <Color x:Key="TextMuted">#FFC4B5FD</Color>
     <Color x:Key="DangerRed">#FFF43F5E</Color>
     <Color x:Key="SuccessGreen">#FF34D399</Color>
@@ -32,16 +32,16 @@
     <x:Null x:Key="ThemeBackgroundImage" />
     <SolidColorBrush x:Key="WindowOverlayBrush" Color="#00000000" />
 
-    <!-- すりガラス板 (純白半透明レイヤーで背後の星空アニメーションGIFをダイレクトに透過) -->
+    <!-- すりガラス板 (深紫フロストガラスレイヤーで背後の星空を透かしつつ文字の視認性を極大化) -->
     <SolidColorBrush x:Key="HeaderBgBrush" Color="{StaticResource HeaderBgColor}" />
     <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBgColor}" />
     <SolidColorBrush x:Key="CardInnerBgBrush" Color="{StaticResource CardInnerBgColor}" />
 
     <!-- ガラスエッジ: 上部から光が当たるクリスタル反射グラデーション境界線 -->
     <LinearGradientBrush x:Key="CardBorderBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#80FFFFFF" Offset="0.0" />
-        <GradientStop Color="#4DC084FC" Offset="0.5" />
-        <GradientStop Color="#25FFFFFF" Offset="1.0" />
+        <GradientStop Color="#99FFFFFF" Offset="0.0" />
+        <GradientStop Color="#66C084FC" Offset="0.5" />
+        <GradientStop Color="#33FFFFFF" Offset="1.0" />
     </LinearGradientBrush>
 
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
@@ -54,17 +54,17 @@
     <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRed}" />
     <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}" />
 
-    <!-- コントロール固有背景 ＆ すりガラスレイヤー配色 -->
-    <SolidColorBrush x:Key="InputBgBrush" Color="#22FFFFFF" />
-    <SolidColorBrush x:Key="ControlBorderBrush" Color="#40FFFFFF" />
-    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#25000000" />
-    <SolidColorBrush x:Key="TabBorderBrush" Color="#40FFFFFF" />
-    <SolidColorBrush x:Key="TabTextBrush" Color="#FFF5EEFF" />
-    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#22FFFFFF" />
-    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#50FFFFFF" />
-    <SolidColorBrush x:Key="BannerBgBrush" Color="#26100832" />
-    <SolidColorBrush x:Key="FooterBgBrush" Color="#330D071E" />
-    <SolidColorBrush x:Key="FooterBorderBrush" Color="#40A855F7" />
+    <!-- コントロール固有背景 ＆ 深紫フロストレイヤー配色 -->
+    <SolidColorBrush x:Key="InputBgBrush" Color="#4D0A0418" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="#66C084FC" />
+    <SolidColorBrush x:Key="TabContainerBgBrush" Color="#660D0524" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="#66C084FC" />
+    <SolidColorBrush x:Key="TabTextBrush" Color="#FFF3E8FF" />
+    <SolidColorBrush x:Key="SearchContainerBgBrush" Color="#B314082C" />
+    <SolidColorBrush x:Key="SearchContainerBorderBrush" Color="#80C084FC" />
+    <SolidColorBrush x:Key="BannerBgBrush" Color="#4D100832" />
+    <SolidColorBrush x:Key="FooterBgBrush" Color="#800D071E" />
+    <SolidColorBrush x:Key="FooterBorderBrush" Color="#66A855F7" />
     <SolidColorBrush x:Key="AccentGlowLowBrush" Color="#26A855F7" />
     <SolidColorBrush x:Key="AccentGlowMidBrush" Color="#4DA855F7" />
     <SolidColorBrush x:Key="AccentGlowHighBrush" Color="#80A855F7" />
