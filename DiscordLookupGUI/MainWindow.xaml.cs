@@ -1173,7 +1173,7 @@ public partial class MainWindow : Window
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", token);
             if (!request.Headers.UserAgent.Any())
             {
-                request.Headers.UserAgent.ParseAdd("DiscordLookupGUI/2.5");
+                request.Headers.UserAgent.ParseAdd("DiscordLookupGUI/2.6");
             }
 
             using var response = await _discordApiClient.SendAsync(request, ct);
